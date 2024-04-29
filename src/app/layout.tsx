@@ -1,6 +1,7 @@
 import './styles/globals.css';
 import localFont from 'next/font/local';
 import { cookies } from 'next/headers';
+import ExplorerNav from './_components/ExplorerNav';
 import type { Metadata } from 'next';
 import ActivityNav from '@/app/_components/ActivityNav';
 
@@ -29,7 +30,10 @@ export default function RootLayout({
     >
       <body className={`${consola.className} flex h-dvh w-screen`}>
         <ActivityNav />
-        {children}
+        <ExplorerNav />
+        <main className="dark:bg-dark-100 h-full w-full bg-white">
+          {children}
+        </main>
       </body>
     </html>
   );
