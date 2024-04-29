@@ -1,9 +1,5 @@
-import ThemeButton from '@/components/ThemeButton';
+import ThemeButton from '@/app/_components/ThemeButton';
 
 export default function Home() {
-  return (
-    <main className="h-full w-full bg-white dark:bg-black">
-      <ThemeButton />
-    </main>
-  );
+  return <main className="dark:bg-dark-100 h-full w-full bg-white"></main>;
 }

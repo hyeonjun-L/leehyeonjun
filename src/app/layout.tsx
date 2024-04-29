@@ -2,6 +2,7 @@ import './styles/globals.css';
 import localFont from 'next/font/local';
 import { cookies } from 'next/headers';
 import type { Metadata } from 'next';
+import ActivityNav from '@/app/_components/ActivityNav';
 
 const consola = localFont({
   src: './fonts/CONSOLA.ttf',
@@ -26,7 +27,10 @@ export default function RootLayout({
       lang="kr"
       className={!theme || theme === 'dark' ? 'dark text-white' : ''}
     >
-      <body className={`${consola.className} h-dvh w-screen`}>{children}</body>
+      <body className={`${consola.className} flex h-dvh w-screen`}>
+        <ActivityNav />
+        {children}
+      </body>
     </html>
   );
 }
