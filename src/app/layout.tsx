@@ -1,7 +1,7 @@
 import './styles/globals.css';
 import localFont from 'next/font/local';
 import { cookies } from 'next/headers';
-import ExplorerNav from './_components/ExplorerNav';
+import AnchorNav from './_components/AnchorNav';
 import type { Metadata } from 'next';
 import ActivityNav from '@/app/_components/ActivityNav';
 
@@ -28,10 +28,10 @@ export default function RootLayout({
       lang="kr"
       className={!theme || theme === 'dark' ? 'dark text-white' : ''}
     >
-      <body className={`${consola.className} flex h-dvh w-screen`}>
+      <body className={`${consola.className} flex h-dvh`}>
         <ActivityNav />
-        <ExplorerNav />
-        <main className="dark:bg-dark-100 h-full w-full bg-white">
+        <AnchorNav />
+        <main className="dark:bg-dark-100 h-full w-full flex-grow bg-white">
           {children}
         </main>
       </body>

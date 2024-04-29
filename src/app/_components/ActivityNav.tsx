@@ -4,16 +4,23 @@ import Image, { StaticImageData } from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import React from 'react';
-import { BlogSVG, GithubSVG, PortfolioSVG, SettingSVG } from '@/icons/index';
-import myImage from '@/images/이현준.jpg';
 import { NavItem } from '@/types/types';
+import {
+  BlogSVG,
+  GithubSVG,
+  HomeSVG,
+  PortfolioSVG,
+  SettingSVG,
+} from '@/icons/index';
+import myImage from '@/images/이현준.jpg';
 
 const activityNavList = [
+  { href: '/', SVGComponent: HomeSVG, ariaLabel: 'Hoom' },
   {
-    href: '/',
+    href: '/profile',
     component: myImage,
     alt: '이현준',
-    ariaLabel: '이현준 이력서',
+    ariaLabel: '이현준 Profile',
   },
   {
     href: '/portfolio',
@@ -58,7 +65,7 @@ const ActivityNav = () => {
         >
           {SVGComponent && (
             <SVGComponent
-              className={`${isSelected ? 'fill-white' : 'fill-dark-400 group-hover:fill-white'}`}
+              className={`${isSelected ? 'fill-white' : 'fill-dark-600 group-hover:fill-white'}`}
             />
           )}
           {component && (
@@ -70,7 +77,7 @@ const ActivityNav = () => {
                 priority={true}
               />
               <div
-                className={`${isSelected ? 'hidden' : 'group-hover:hidden'} bg-dark-400/30 absolute top-0 size-full rounded-md backdrop-grayscale`}
+                className={`${isSelected ? 'hidden' : 'group-hover:hidden'} bg-dark-600/30 absolute top-0 size-full rounded-md backdrop-grayscale`}
               />
             </div>
           )}
@@ -84,7 +91,7 @@ const ActivityNav = () => {
           className="group ml-0.5 flex p-4 md:size-20"
         >
           {SVGComponent && (
-            <SVGComponent className="fill-dark-400 group-hover:fill-white" />
+            <SVGComponent className="fill-dark-600 group-hover:fill-white" />
           )}
         </button>
       );

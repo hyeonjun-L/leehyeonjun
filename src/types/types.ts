@@ -7,3 +7,8 @@ export interface NavItem {
   component?: StaticImageData;
   alt?: string;
 }
+
+export interface Headings {
+  level: number;
+  text: string;
+}
