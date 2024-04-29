@@ -1,3 +1,9 @@
+import ThemeButton from '@/components/ThemeButton';
+
 export default function Home() {
-  return <main className="font-bold">안녕하세요</main>;
+  return (
+    <main className="h-full w-full bg-white dark:bg-black">
+      <ThemeButton />
+    </main>
+  );
 }
