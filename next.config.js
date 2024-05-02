@@ -1,14 +1,12 @@
 /** @type {import('next').NextConfig} */
 
-// {
-//   extension: /\.mdx?$/,
-//   options: {
-//     remarkPlugins: [],
-//     rehypePlugins: [],
-//   },
-// }
-
-const withMDX = require('@next/mdx')();
+const withMDX = require('@next/mdx')({
+  extension: /\.mdx?$/,
+  options: {
+    remarkPlugins: [require('remark-prism')],
+    rehypePlugins: [],
+  },
+});
 
 const nextConfig = {
   pageExtensions: ['js', 'jsx', 'md', 'mdx', 'ts', 'tsx'],

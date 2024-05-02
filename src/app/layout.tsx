@@ -28,6 +28,12 @@ export default function RootLayout({
       lang="kr"
       className={!theme || theme === 'dark' ? 'dark text-white' : ''}
     >
+      <head>
+        <link
+          rel="stylesheet"
+          href="https://unpkg.com/dracula-prism/dist/css/dracula-prism.css"
+        />
+      </head>
       <body
         className={`${consola.className} flex h-dvh bg-white dark:bg-dark-100`}
       >

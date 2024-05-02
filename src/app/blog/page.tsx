@@ -1,21 +1,29 @@
+import Link from 'next/link';
 import { getPosts } from '@/posts';
-import fs from 'node:fs';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
-
-export async function generateStaticParams() {
-  const posts = await getPosts();
-
-  return posts.map((post) => ({
-    slug: post.title,
-  }));
-}
 
 const page = async ({ params }: { params: { slug: string } }) => {
-  console.log(params);
   const posts = await getPosts();
 
-  return <main className="flex flex-col"></main>;
+  return (
+    <main>
+      <h1>Next.js MDX Blog</h1>
+      <ol>
+        {posts.map(({ slug, title, publishDate, categories }) => (
+          <li key={slug}>
+            <h2>
+              <Link href={`blog/${slug}`}>{title}</Link>
+            </h2>
+            <p>
+              <strong>Published:</strong>
+              {new Date(publishDate).toLocaleDateString()}
+              <strong>Categories:</strong>
+              {categories.map((cat, i) => `${i ? ', ' : ''}${cat}`)}
+            </p>
+          </li>
+        ))}
+      </ol>
+    </main>
+  );
 };
 
 export default page;
