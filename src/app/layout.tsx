@@ -28,10 +28,12 @@ export default function RootLayout({
       lang="kr"
       className={!theme || theme === 'dark' ? 'dark text-white' : ''}
     >
-      <body className={`${consola.className} flex h-dvh`}>
+      <body
+        className={`${consola.className} flex h-dvh bg-white dark:bg-dark-100`}
+      >
         <ActivityNav />
         <AnchorNav />
-        <main className="dark:bg-dark-100 h-full w-full flex-grow bg-white">
+        <main className="flex size-full flex-grow flex-col overflow-auto p-8">
           {children}
         </main>
       </body>

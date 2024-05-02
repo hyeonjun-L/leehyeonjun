@@ -36,8 +36,8 @@ const AnchorNav = () => {
   };
 
   return (
-    <aside className="bg-dark-200 hidden h-full w-72 flex-shrink-0 px-6 py-5 lg:block ">
-      <section className="text-dark-600 flex w-full flex-col gap-1 border-l border-solid border-white">
+    <aside className="bg-dark-200 hidden h-full w-72 flex-shrink-0 overflow-y-auto px-6 py-5 text-sm lg:block">
+      <section className="text-dark-600 flex max-h-full w-full flex-col gap-1 border-l border-solid border-white">
         {headings.map(({ level, text }, index) => {
           const beforeLevel = index > 0 ? headings[index - 1].level : level;
 
@@ -53,7 +53,7 @@ const AnchorNav = () => {
             >
               <Link
                 href={`#${text}`}
-                className="max-w-full truncate hover:text-white"
+                className="line-clamp-2 max-w-full break-words hover:text-white"
                 replace
               >
                 {text}
