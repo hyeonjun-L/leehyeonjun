@@ -1,6 +1,5 @@
 import { readdir } from 'fs/promises';
-
-const categories = ['dog', 'cat', 'rock'];
+import { categories } from './constants/constants';
 
 type Category = (typeof categories)[number];
 

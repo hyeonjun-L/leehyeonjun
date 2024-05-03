@@ -1,9 +1,10 @@
 'use client';
 
-import { Headings } from '@/types/types';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
+import { Headings } from '@/types/types';
+import { HIDE_PATH } from '@/constants/constants';
 
 const AnchorNav = () => {
   const [headings, setHeadings] = useState<Headings[]>([]);
@@ -36,33 +37,35 @@ const AnchorNav = () => {
   };
 
   return (
-    <aside className="bg-dark-200 hidden h-full w-72 flex-shrink-0 overflow-y-auto px-6 py-5 text-sm lg:block">
-      <section className="text-dark-600 flex max-h-full w-full flex-col gap-1 border-l border-solid border-white">
-        {headings.map(({ level, text }, index) => {
-          const beforeLevel = index > 0 ? headings[index - 1].level : level;
+    !HIDE_PATH.includes(pathname) && (
+      <aside className="hidden h-full w-72 flex-shrink-0 overflow-y-auto bg-dark-200 px-6 py-5 text-sm lg:block">
+        <section className="flex max-h-full w-full flex-col gap-1 border-l border-solid border-white text-dark-600">
+          {headings.map(({ level, text }, index) => {
+            const beforeLevel = index > 0 ? headings[index - 1].level : level;
 
-          calculateMargin(beforeLevel, level);
+            calculateMargin(beforeLevel, level);
 
-          const mlStyle = { paddingLeft: `${marginRef.current}px` };
+            const mlStyle = { paddingLeft: `${marginRef.current}px` };
 
-          return (
-            <div
-              style={mlStyle}
-              key={index}
-              className="has-[:hover]:bg-dark-400 flex w-full "
-            >
-              <Link
-                href={`#${text}`}
-                className="line-clamp-2 max-w-full break-words hover:text-white"
-                replace
+            return (
+              <div
+                style={mlStyle}
+                key={index}
+                className="flex w-full has-[:hover]:bg-dark-400"
               >
-                {text}
-              </Link>
-            </div>
-          );
-        })}
-      </section>
-    </aside>
+                <Link
+                  href={`#${text}`}
+                  className="line-clamp-2 max-w-full break-words hover:text-white"
+                  replace
+                >
+                  {text}
+                </Link>
+              </div>
+            );
+          })}
+        </section>
+      </aside>
+    )
   );
 };
 
