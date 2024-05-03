@@ -1,5 +1,5 @@
 'use client';
-
+import { motion } from 'framer-motion';
 import Image, { StaticImageData } from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -50,7 +50,8 @@ const ActivityNav = () => {
     { href, SVGComponent, ariaLabel, component, alt }: NavItem,
     index: number,
   ) => {
-    const isSelected = pathname === href;
+    const isSelected =
+      href === '/' ? pathname === href : pathname.startsWith(href ?? '');
 
     if (href) {
       return (
@@ -58,11 +59,15 @@ const ActivityNav = () => {
           key={href || index}
           href={href}
           aria-label={ariaLabel}
-          className={`group flex border-l-2 border-solid p-4 md:size-20 ${
-            isSelected ? 'border-white' : 'border-dark-300'
-          }`}
+          className="group relative ml-0.5 flex p-4 md:size-20"
           target={!href.startsWith('/') ? '_blank' : undefined}
         >
+          {isSelected && (
+            <motion.div
+              layoutId="selected"
+              className="absolute left-0 top-0 h-full w-0.5 bg-white"
+            />
+          )}
           {SVGComponent && (
             <SVGComponent
               className={`${isSelected ? 'fill-white' : 'fill-dark-600 group-hover:fill-white'}`}
@@ -77,7 +82,7 @@ const ActivityNav = () => {
                 priority={true}
               />
               <div
-                className={`${isSelected ? 'hidden' : 'group-hover:hidden'} bg-dark-600/30 absolute top-0 size-full rounded-md backdrop-grayscale`}
+                className={`${isSelected ? 'hidden' : 'group-hover:hidden'} absolute top-0 size-full rounded-md bg-dark-600/30 backdrop-grayscale`}
               />
             </div>
           )}
@@ -99,7 +104,7 @@ const ActivityNav = () => {
   };
 
   return (
-    <aside className="dark:bg-dark-300 md:h-full">
+    <aside className="md:h-full dark:bg-dark-300">
       <section className="flex h-full flex-col justify-between">
         <nav>{activityNavList.map(renderNavItem)}</nav>
         <nav>{etcList.map(renderNavItem)}</nav>
