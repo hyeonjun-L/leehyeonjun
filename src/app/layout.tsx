@@ -35,7 +35,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${consola.className} flex h-dvh bg-white dark:bg-dark-100`}
+        className={`${consola.className} dark:bg-dark-body flex h-dvh bg-white`}
       >
         <ActivityNav />
         <AnchorNav />

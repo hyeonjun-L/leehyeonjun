@@ -59,7 +59,7 @@ const ActivityNav = () => {
           key={href || index}
           href={href}
           aria-label={ariaLabel}
-          className="group relative ml-0.5 flex p-4 md:size-20"
+          className="group relative flex p-4 md:size-20"
           target={!href.startsWith('/') ? '_blank' : undefined}
         >
           {isSelected && (
@@ -70,7 +70,7 @@ const ActivityNav = () => {
           )}
           {SVGComponent && (
             <SVGComponent
-              className={`${isSelected ? 'fill-white' : 'fill-dark-600 group-hover:fill-white'}`}
+              className={`${isSelected ? 'fill-white' : 'fill-dark-disabled group-hover:fill-white'}`}
             />
           )}
           {component && (
@@ -82,7 +82,7 @@ const ActivityNav = () => {
                 priority={true}
               />
               <div
-                className={`${isSelected ? 'hidden' : 'group-hover:hidden'} absolute top-0 size-full rounded-md bg-dark-600/30 backdrop-grayscale`}
+                className={`${isSelected ? 'hidden' : 'group-hover:hidden'} bg-dark-disabled/30 absolute top-0 size-full rounded-md backdrop-grayscale`}
               />
             </div>
           )}
@@ -96,7 +96,7 @@ const ActivityNav = () => {
           className="group ml-0.5 flex p-4 md:size-20"
         >
           {SVGComponent && (
-            <SVGComponent className="fill-dark-600 group-hover:fill-white" />
+            <SVGComponent className="fill-dark-disabled group-hover:fill-white" />
           )}
         </button>
       );
@@ -104,7 +104,7 @@ const ActivityNav = () => {
   };
 
   return (
-    <aside className="md:h-full dark:bg-dark-300">
+    <aside className="dark:bg-dark-activity md:h-full">
       <section className="flex h-full flex-col justify-between">
         <nav>{activityNavList.map(renderNavItem)}</nav>
         <nav>{etcList.map(renderNavItem)}</nav>

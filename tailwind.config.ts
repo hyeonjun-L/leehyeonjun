@@ -7,12 +7,23 @@ const config: Config = {
     extend: {
       colors: {
         dark: {
-          100: '#1e1e1e',
-          200: '#252526',
-          300: '#2c2c2c',
-          400: '#2a2d2e',
-          500: '#37373d',
-          600: '#858585',
+          body: '#1e1e1e',
+          activity: '#2c2c2c',
+          anchor: {
+            bg: '#252526',
+            hover: '#2a2d2e',
+            active: '#37373d',
+          },
+          disabled: '#858585',
+          menu: '#3c3c3c',
+        },
+        White: {
+          menu: { bg: '#dddddd', hover: '#d2d2d2' },
+          selectFile: '#ececec',
+          myVScodeText: '#4389ba',
+        },
+        cursor: {
+          dark: '#aeafad',
         },
       },
     },
