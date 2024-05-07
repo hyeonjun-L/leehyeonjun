@@ -13,12 +13,16 @@ const cursorVariants = {
   },
 };
 
-export default function CursorBlinker() {
+export default function CursorBlinker({
+  isBlack = true,
+}: {
+  isBlack?: boolean;
+}) {
   return (
     <motion.div
       variants={cursorVariants}
       animate="blinking"
-      className="inline-block h-5 w-[1px] translate-y-1 bg-slate-900"
+      className={`inline-block h-5 w-[1px] translate-y-1 ${isBlack ? 'bg-slate-900 ' : 'bg-slate-100'}`}
     />
   );
 }

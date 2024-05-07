@@ -4,7 +4,7 @@ export const HIDE_PATH = ['/', '/blog'];
 
 export const MENU = ['File', 'Edit', 'View', 'Terminal', 'Help'] as const;
 
-export const BASE_TEXT = '고민 된다...' as const;
+export const BASE_TEXT = '음...' as const;
 
 export const TEXTS = [
   '이 코드를 더 간결하게 만들 수는 없을까?',
@@ -24,5 +24,11 @@ export const TEXTS = [
   '테스트 커버리지를 어떻게 더 향상시킬 수 있을까?',
   '사용자의 데이터 사용량을 줄이기 위해 이 이미지나 자원을 최적화할 수 있을까?',
   '사용자가 이 페이지를 더 빨리 로드할 수 있는 방법은 무엇일까?',
-  '개발 팀과의 커뮤니케이션을 어떻게 더 원활하게 할 수 있을까?',
+  '커뮤니케이션을 어떻게 더 원활하게 할 수 있을까?',
+] as const;
+
+export const HOME_MENU_LIST = [
+  { title: '프로필', href: '/profile', text: '프로필프로필' },
+  { title: '포트폴리오', href: '/portfolio', text: '포트폴리오포트폴리오' },
+  { title: '블로그', href: '/blog', text: '블로그블로그' },
 ] as const;
