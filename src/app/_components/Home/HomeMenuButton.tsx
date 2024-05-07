@@ -27,14 +27,16 @@ const HomeMenuButton = ({ title, href, textList }: HomeMenuButtonProps) => {
       <Link
         onMouseOver={startAnimate}
         onMouseLeave={stopAnimate}
+        onTouchStart={startAnimate}
+        onTouchEnd={stopAnimate}
         href={href}
-        className="flex h-10  w-[45%] items-center justify-center rounded-md bg-dark-menu hover:bg-dark-activity"
+        className="flex h-10 w-[45%] items-center justify-center rounded-md bg-dark-menu hover:bg-dark-activity"
       >
         {title}
       </Link>
-      <div className={`${isAnimateStart ? 'flex' : 'h-5'}`}>
+      <div className={` ${isAnimateStart ? 'flex' : 'h-5'}`}>
         {textList.map((text, index) => (
-          <span className={`${HOME_TEXT_COLOR[index]} `} key={text}>
+          <span style={{ color: `${HOME_TEXT_COLOR[index]}` }} key={text}>
             <HomeMenuAnimateText
               isAnimateStart={isAnimateStart}
               text={text}

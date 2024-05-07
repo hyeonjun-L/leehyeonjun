@@ -28,10 +28,10 @@ export const TEXTS = [
 ] as const;
 
 export const HOME_TEXT_COLOR = [
-  'text-dark-home-from',
-  'text-dark-home-variable',
-  'text-dark-home-from',
-  'text-dark-home-route',
+  '#c586c0',
+  '#67cdfe',
+  '#c586c0',
+  '#ce8349',
   '',
 ] as const;
 

@@ -47,10 +47,15 @@ const HomeMenuAnimateText = ({
       setIsSpacing(false);
       setAnimateControls(null);
     }
+
+    return animateControls?.stop;
   }, [isAnimateStart]);
 
   return (
-    <motion.span className={`${isSpacing ? 'pr-2' : ''}`}>
+    <motion.span
+      style={{ color: 'var(--from)' }}
+      className={`${isSpacing ? 'pr-2' : ''}`}
+    >
       {displayText}
     </motion.span>
   );
