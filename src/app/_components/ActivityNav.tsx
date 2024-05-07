@@ -40,67 +40,63 @@ const etcList = [
     SVGComponent: GithubSVG,
     ariaLabel: '이현준 Github',
   },
-  { SVGComponent: SettingSVG, ariaLabel: '해당 페이지 세팅' },
+  {
+    href: '/setting',
+    SVGComponent: SettingSVG,
+    ariaLabel: '해당 페이지 세팅',
+    scroll: false,
+  },
 ];
 
 const ActivityNav = () => {
   const pathname = usePathname();
 
-  const renderNavItem = (
-    { href, SVGComponent, ariaLabel, component, alt }: NavItem,
-    index: number,
-  ) => {
+  const renderNavItem = ({
+    href,
+    SVGComponent,
+    ariaLabel,
+    component,
+    alt,
+    scroll = true,
+  }: NavItem) => {
     const isSelected =
       href === '/' ? pathname === href : pathname.startsWith(href ?? '');
 
-    if (href) {
-      return (
-        <Link
-          key={href || index}
-          href={href}
-          aria-label={ariaLabel}
-          className="group relative flex size-16 p-4 md:size-20"
-          target={!href.startsWith('/') ? '_blank' : undefined}
-        >
-          {isSelected && (
-            <motion.div
-              layoutId="selected"
-              className="absolute bottom-0 left-0 h-0.5 w-full bg-white sm:top-0 sm:h-full sm:w-0.5"
+    return (
+      <Link
+        key={href}
+        href={href}
+        scroll={scroll}
+        aria-label={ariaLabel}
+        className="group relative flex size-16 p-4 md:size-20"
+        target={!href.startsWith('/') ? '_blank' : undefined}
+      >
+        {isSelected && (
+          <motion.div
+            layoutId="selected"
+            className="absolute bottom-0 left-0 h-0.5 w-full bg-white sm:top-0 sm:h-full sm:w-0.5"
+          />
+        )}
+        {SVGComponent && (
+          <SVGComponent
+            className={`${isSelected ? 'fill-white' : 'fill-dark-disabled group-hover:fill-white'}`}
+          />
+        )}
+        {component && (
+          <div className="relative size-full">
+            <Image
+              src={component as StaticImageData}
+              alt={alt as string}
+              className="size-full rounded-md"
+              priority={true}
             />
-          )}
-          {SVGComponent && (
-            <SVGComponent
-              className={`${isSelected ? 'fill-white' : 'fill-dark-disabled group-hover:fill-white'}`}
+            <div
+              className={`${isSelected ? 'hidden' : 'group-hover:hidden'} absolute top-0 size-full rounded-md bg-dark-disabled/30 backdrop-grayscale`}
             />
-          )}
-          {component && (
-            <div className="relative size-full">
-              <Image
-                src={component as StaticImageData}
-                alt={alt as string}
-                className="size-full rounded-md"
-                priority={true}
-              />
-              <div
-                className={`${isSelected ? 'hidden' : 'group-hover:hidden'} absolute top-0 size-full rounded-md bg-dark-disabled/30 backdrop-grayscale`}
-              />
-            </div>
-          )}
-        </Link>
-      );
-    } else {
-      return (
-        <button
-          aria-label={ariaLabel}
-          key={index}
-          className="group ml-0.5 flex size-16 p-4 md:size-20"
-        >
-          {SVGComponent && (
-            <SVGComponent className="fill-dark-disabled group-hover:fill-white" />
-          )}
-        </button>
-      );
-    }
+          </div>
+        )}
+      </Link>
+    );
   };
 
   return (

@@ -1,11 +1,12 @@
 import { StaticImageData } from 'next/image';
 
 export interface NavItem {
-  href?: string;
+  href: string;
   SVGComponent?: React.ElementType;
   ariaLabel: string;
   component?: StaticImageData;
   alt?: string;
+  scroll?: boolean;
 }
 
 export interface Headings {

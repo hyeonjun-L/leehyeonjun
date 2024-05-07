@@ -17,8 +17,10 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
+  settingModal,
 }: {
   children: React.ReactNode;
+  settingModal: React.ReactNode;
 }) {
   const cookieStore = cookies();
   const theme = cookieStore.get('theme')?.value;
@@ -41,6 +43,7 @@ export default function RootLayout({
         <AnchorNav />
         <main className="flex size-full flex-grow flex-col overflow-auto p-4 sm:p-8">
           {children}
+          {settingModal}
         </main>
       </body>
     </html>
