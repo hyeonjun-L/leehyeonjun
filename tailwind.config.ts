@@ -16,6 +16,11 @@ const config: Config = {
           },
           disabled: '#858585',
           menu: '#3c3c3c',
+          home: {
+            from: '#c586c0',
+            variable: '#67cdfe',
+            route: '#ce8349',
+          },
         },
         White: {
           menu: { bg: '#dddddd', hover: '#d2d2d2' },

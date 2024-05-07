@@ -27,8 +27,28 @@ export const TEXTS = [
   '커뮤니케이션을 어떻게 더 원활하게 할 수 있을까?',
 ] as const;
 
-export const HOME_MENU_LIST = [
-  { title: '프로필', href: '/profile', text: '프로필프로필' },
-  { title: '포트폴리오', href: '/portfolio', text: '포트폴리오포트폴리오' },
-  { title: '블로그', href: '/blog', text: '블로그블로그' },
+export const HOME_TEXT_COLOR = [
+  'text-dark-home-from',
+  'text-dark-home-variable',
+  'text-dark-home-from',
+  'text-dark-home-route',
+  '',
 ] as const;
+
+export const HOME_MENU_LIST = [
+  {
+    title: '프로필',
+    href: '/profile',
+    textList: ['import ', '프로필 ', 'from ', "'이현준'", ';'],
+  },
+  {
+    title: '포트폴리오',
+    href: '/portfolio',
+    textList: ['import ', '포트폴리오 ', 'from ', "'이현준'", ';'],
+  },
+  {
+    title: '블로그',
+    href: '/blog',
+    textList: ['import ', '블로그 ', 'from ', "'이현준'", ';'],
+  },
+];

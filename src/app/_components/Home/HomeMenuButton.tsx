@@ -1,45 +1,24 @@
 'use client';
-import {
-  motion,
-  useMotionValue,
-  useTransform,
-  animate,
-  AnimationPlaybackControls,
-} from 'framer-motion';
 import Link from 'next/link';
 import { useState } from 'react';
 import CursorBlinker from './CursorBlinker';
+import HomeMenuAnimateText from './HomeMenuAnimateText';
 
 interface HomeMenuButtonProps {
   title: string;
   href: string;
-  text: string;
+  textList: string[];
 }
 
-const HomeMenuButton = ({ title, href, text }: HomeMenuButtonProps) => {
-  const [animateControls, setAnimateControls] =
-    useState<AnimationPlaybackControls | null>(null);
-  const count = useMotionValue(0);
-  const rounded = useTransform(count, (latest) => Math.round(latest));
-  const displayText = useTransform(rounded, (latest) => text.slice(0, latest));
+const HomeMenuButton = ({ title, href, textList }: HomeMenuButtonProps) => {
+  const [isAnimateStart, setIsAnimateStart] = useState(false);
 
   const startAnimate = () => {
-    const controls = animate(count, text.length, {
-      type: 'tween',
-      duration: 1,
-      ease: 'easeInOut',
-      onPlay: () => {},
-    });
-
-    setAnimateControls(controls);
+    setIsAnimateStart(true);
   };
 
   const stopAnimate = () => {
-    animateControls?.stop();
-    displayText.set('');
-    rounded.set(0);
-    count.set(0);
-    setAnimateControls(null);
+    setIsAnimateStart(false);
   };
 
   return (
@@ -48,15 +27,21 @@ const HomeMenuButton = ({ title, href, text }: HomeMenuButtonProps) => {
         onMouseOver={startAnimate}
         onMouseLeave={stopAnimate}
         href={href}
-        className="flex h-10 w-[45%] items-center justify-center rounded-md bg-dark-menu hover:bg-dark-activity"
+        className="flex h-10  w-[45%] items-center justify-center rounded-md bg-dark-menu hover:bg-dark-activity"
       >
         {title}
       </Link>
-      <div className="h-[26.667px]">
-        <div className={`${animateControls ? '' : 'hidden'}`}>
-          <motion.span>{displayText}</motion.span>
-          <CursorBlinker isBlack={false} />
-        </div>
+      <div className={`${isAnimateStart ? 'flex' : 'h-5'}`}>
+        {textList.map((text, index) => (
+          <HomeMenuAnimateText
+            key={text}
+            isAnimateStart={isAnimateStart}
+            text={text}
+            delay={index}
+            spacing={index < 3}
+          />
+        ))}
+        {isAnimateStart && <CursorBlinker isBlack={false} />}
       </div>
     </>
   );
