@@ -35,11 +35,11 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${consola.className} dark:bg-dark-body flex h-dvh bg-white`}
+        className={`${consola.className} flex h-dvh flex-col bg-white sm:flex-row dark:bg-dark-body`}
       >
         <ActivityNav />
         <AnchorNav />
-        <main className="flex size-full flex-grow flex-col overflow-auto p-8">
+        <main className="flex size-full flex-grow flex-col overflow-auto p-4 sm:p-8">
           {children}
         </main>
       </body>

@@ -2,7 +2,7 @@ import MyVSCode from './_components/Home/MyVSCode';
 
 export default function Home() {
   return (
-    <section className="mx-auto">
+    <section className="flex flex-col items-center sm:mx-auto">
       <MyVSCode />
     </section>
   );

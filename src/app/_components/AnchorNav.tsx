@@ -38,8 +38,8 @@ const AnchorNav = () => {
 
   return (
     !HIDE_PATH.includes(pathname) && (
-      <aside className="bg-dark-anchor-bg hidden h-full w-72 flex-shrink-0 overflow-y-auto px-6 py-5 text-sm lg:block">
-        <section className="flex max-h-full w-full flex-col gap-1 border-l border-solid border-white text-dark-600">
+      <aside className="hidden h-full w-72 flex-shrink-0 overflow-y-auto bg-dark-anchor-bg px-6 py-5 text-sm lg:block">
+        <section className="text-dark-600 flex max-h-full w-full flex-col gap-1 border-l border-solid border-white">
           {headings.map(({ level, text }, index) => {
             const beforeLevel = index > 0 ? headings[index - 1].level : level;
 
@@ -51,7 +51,7 @@ const AnchorNav = () => {
               <div
                 style={mlStyle}
                 key={index}
-                className="has-[:hover]:bg-dark-anchor-hover flex w-full"
+                className="flex w-full has-[:hover]:bg-dark-anchor-hover"
               >
                 <Link
                   href={`#${text}`}

@@ -59,13 +59,13 @@ const ActivityNav = () => {
           key={href || index}
           href={href}
           aria-label={ariaLabel}
-          className="group relative flex p-4 md:size-20"
+          className="group relative flex size-16 p-4 md:size-20"
           target={!href.startsWith('/') ? '_blank' : undefined}
         >
           {isSelected && (
             <motion.div
               layoutId="selected"
-              className="absolute left-0 top-0 h-full w-0.5 bg-white"
+              className="absolute bottom-0 left-0 h-0.5 w-full bg-white sm:top-0 sm:h-full sm:w-0.5"
             />
           )}
           {SVGComponent && (
@@ -82,7 +82,7 @@ const ActivityNav = () => {
                 priority={true}
               />
               <div
-                className={`${isSelected ? 'hidden' : 'group-hover:hidden'} bg-dark-disabled/30 absolute top-0 size-full rounded-md backdrop-grayscale`}
+                className={`${isSelected ? 'hidden' : 'group-hover:hidden'} absolute top-0 size-full rounded-md bg-dark-disabled/30 backdrop-grayscale`}
               />
             </div>
           )}
@@ -93,7 +93,7 @@ const ActivityNav = () => {
         <button
           aria-label={ariaLabel}
           key={index}
-          className="group ml-0.5 flex p-4 md:size-20"
+          className="group ml-0.5 flex size-16 p-4 md:size-20"
         >
           {SVGComponent && (
             <SVGComponent className="fill-dark-disabled group-hover:fill-white" />
@@ -104,10 +104,12 @@ const ActivityNav = () => {
   };
 
   return (
-    <aside className="dark:bg-dark-activity md:h-full">
-      <section className="flex h-full flex-col justify-between">
-        <nav>{activityNavList.map(renderNavItem)}</nav>
-        <nav>{etcList.map(renderNavItem)}</nav>
+    <aside className="md:h-full dark:bg-dark-activity">
+      <section className="flex h-full justify-between sm:flex-col">
+        <nav className="flex sm:block">
+          {activityNavList.map(renderNavItem)}
+        </nav>
+        <nav className="hidden sm:block">{etcList.map(renderNavItem)}</nav>
       </section>
     </aside>
   );

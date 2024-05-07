@@ -58,7 +58,7 @@ const Line = ({
 }) => {
   return (
     <div
-      className={`text-White-myVScodeText flex h-full w-10 flex-col ${hiddenOnSmallScreen ? 'hidden sm:flex' : 'sm:hidden'}`}
+      className={`text-White-myVScodeText flex h-full w-10 flex-col ${hiddenOnSmallScreen ? 'hidden md:flex' : 'md:hidden'}`}
     >
       {Array.from({ length }).map((_, index) => (
         <p key={index} className="w-full pr-3 text-right">
