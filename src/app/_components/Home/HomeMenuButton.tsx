@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 import CursorBlinker from './CursorBlinker';
 import HomeMenuAnimateText from './HomeMenuAnimateText';
+import { HOME_TEXT_COLOR } from '@/constants/constants';
 
 interface HomeMenuButtonProps {
   title: string;
@@ -33,13 +34,14 @@ const HomeMenuButton = ({ title, href, textList }: HomeMenuButtonProps) => {
       </Link>
       <div className={`${isAnimateStart ? 'flex' : 'h-5'}`}>
         {textList.map((text, index) => (
-          <HomeMenuAnimateText
-            key={text}
-            isAnimateStart={isAnimateStart}
-            text={text}
-            delay={index}
-            spacing={index < 3}
-          />
+          <span className={`${HOME_TEXT_COLOR[index]} `} key={text}>
+            <HomeMenuAnimateText
+              isAnimateStart={isAnimateStart}
+              text={text}
+              delay={index}
+              spacing={index < 3}
+            />
+          </span>
         ))}
         {isAnimateStart && <CursorBlinker isBlack={false} />}
       </div>

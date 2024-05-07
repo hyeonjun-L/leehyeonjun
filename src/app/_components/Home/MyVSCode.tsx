@@ -46,12 +46,12 @@ const itemVariants = {
 
 const MyVSCode = () => {
   return (
-    <motion.span className="select-none text-black">
+    <motion.span className="mx-auto select-none text-black">
       <motion.div
         variants={containerVariants}
         animate="visible"
         initial="hidden"
-        className="grid aspect-[1/1.41] h-[400px] grid-rows-[auto_1fr] bg-white md:h-[500px]"
+        className="grid aspect-square h-[300px] grid-rows-[auto_1fr] bg-white sm:aspect-[1/1.41] sm:h-[400px] md:h-[500px]"
       >
         <motion.div variants={itemVariants} className="flex items-center">
           <div className="flex w-full items-center gap-1 bg-White-menu-bg pl-1 text-sm">

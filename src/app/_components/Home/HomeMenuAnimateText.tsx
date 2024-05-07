@@ -6,7 +6,6 @@ import {
   useTransform,
 } from 'framer-motion';
 import React, { useEffect, useState } from 'react';
-import { HOME_TEXT_COLOR } from '@/constants/constants';
 
 interface HomeMenuAnimateTextProps {
   delay: number;
@@ -51,9 +50,7 @@ const HomeMenuAnimateText = ({
   }, [isAnimateStart]);
 
   return (
-    <motion.span
-      className={`${HOME_TEXT_COLOR[delay]} ${isSpacing ? 'pr-2' : ''}`}
-    >
+    <motion.span className={`${isSpacing ? 'pr-2' : ''}`}>
       {displayText}
     </motion.span>
   );

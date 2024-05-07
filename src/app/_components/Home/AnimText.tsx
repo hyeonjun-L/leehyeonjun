@@ -16,6 +16,12 @@ export default function AnimText({ delay }: IAnimTextProps) {
     BASE_TEXT.slice(0, latest),
   );
 
+  const LINE_STYLE = [
+    'hidden md:flex',
+    'hidden sm:max-md:flex',
+    'sm:hidden',
+  ] as const;
+
   useEffect(() => {
     const controls = animate(count, BASE_TEXT.length, {
       type: 'tween',
@@ -33,8 +39,9 @@ export default function AnimText({ delay }: IAnimTextProps) {
 
   return (
     <div className="flex h-full py-1">
-      <Line length={16} hiddenOnSmallScreen={true} />
-      <Line length={12} hiddenOnSmallScreen={false} />
+      <Line length={16} style={LINE_STYLE[0]} />
+      <Line length={12} style={LINE_STYLE[1]} />
+      <Line length={9} style={LINE_STYLE[2]} />
       <div className="w-full flex-grow">
         <motion.span>{displayText}</motion.span>
         {done && (
@@ -49,16 +56,10 @@ export default function AnimText({ delay }: IAnimTextProps) {
   );
 }
 
-const Line = ({
-  length,
-  hiddenOnSmallScreen,
-}: {
-  length: number;
-  hiddenOnSmallScreen: boolean;
-}) => {
+const Line = ({ length, style }: { length: number; style: string }) => {
   return (
     <div
-      className={`text-White-myVScodeText flex h-full w-10 flex-col ${hiddenOnSmallScreen ? 'hidden md:flex' : 'md:hidden'}`}
+      className={`text-White-myVScodeText flex h-full w-10 flex-col ${style}`}
     >
       {Array.from({ length }).map((_, index) => (
         <p key={index} className="w-full pr-3 text-right">
