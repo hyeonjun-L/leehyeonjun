@@ -23,13 +23,10 @@ export default function RootLayout({
   settingModal: React.ReactNode;
 }) {
   const cookieStore = cookies();
-  const theme = cookieStore.get('theme')?.value;
+  const theme = cookieStore.get('theme')?.value ?? 'Dark';
 
   return (
-    <html
-      lang="kr"
-      className={!theme || theme === 'dark' ? 'dark text-white' : ''}
-    >
+    <html lang="kr" className={theme === 'Dark' ? 'dark text-white' : ''}>
       <head>
         <link
           rel="stylesheet"

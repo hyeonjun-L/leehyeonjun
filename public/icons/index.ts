@@ -25,3 +25,5 @@ export { default as MarkDwonSVG } from './vscode/markDown.svg';
 export { default as BrushSVG } from './setting/brush.svg';
 
 export { default as TextSVG } from './setting/text.svg';
+
+export { default as CheckSVG } from './setting/check.svg';

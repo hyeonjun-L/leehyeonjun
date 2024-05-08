@@ -1,0 +1,69 @@
+'use client';
+import { useState } from 'react';
+import Modal from './Modal';
+import Text from './Text';
+import Thema from './Theme';
+import Cookies from 'js-cookie';
+import { BrushSVG, CloseSVG, TextSVG } from '@/icons/index';
+import { useRouter } from 'next/navigation';
+
+interface SettingModalProps {
+  selectTheme: string;
+}
+
+const SettingModal = ({ selectTheme }: SettingModalProps) => {
+  const router = useRouter();
+  const [selectMenu, setSelectMenu] = useState(0);
+
+  const closeModalHandler = () => {
+    router.back();
+  };
+
+  const changeThemeHandler = (theme: string) => {
+    Cookies.set('theme', theme);
+    router.refresh();
+  };
+
+  const MENU_LIST = [
+    {
+      title: '테마',
+      SVGComponent: <BrushSVG className="size-4 fill-white" />,
+      Component: (
+        <Thema
+          selectTheme={selectTheme}
+          changeThemeHandler={changeThemeHandler}
+        />
+      ),
+    },
+    {
+      title: '글자',
+      SVGComponent: <TextSVG className="size-4 fill-white" />,
+      Component: <Text />,
+    },
+  ];
+
+  return (
+    <Modal>
+      <nav className="flex w-full justify-between bg-dark-selectFileMenu-bg">
+        <div className="flex">
+          {MENU_LIST.map(({ title, SVGComponent }, index) => (
+            <button
+              key={title}
+              onClick={() => setSelectMenu(index)}
+              className={`flex items-center gap-1 px-3 py-2 ${selectMenu === index ? 'bg-dark-body' : 'bg-dark-selectFileMenu-disabled'} `}
+            >
+              {SVGComponent}
+              {title}
+            </button>
+          ))}
+        </div>
+        <button className="px-3" onClick={closeModalHandler}>
+          <CloseSVG className="size-6 fill-white" />
+        </button>
+      </nav>
+      {MENU_LIST[selectMenu].Component}
+    </Modal>
+  );
+};
+
+export default SettingModal;
