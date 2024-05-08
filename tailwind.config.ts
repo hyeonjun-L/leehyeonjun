@@ -15,11 +15,12 @@ const config: Config = {
             active: '#37373d',
           },
           disabled: '#858585',
-          menu: '#3c3c3c',
+          menu: { bg: '#3c3c3c', hover: '#454646' },
+          selectFileMenu: { bg: '#252526', disabled: '#2d2d2d' },
         },
         White: {
           menu: { bg: '#dddddd', hover: '#d2d2d2' },
-          selectFile: '#ececec',
+          selectFileMenu: { bg: '#ececec', disabled: '' },
           myVScodeText: '#4389ba',
         },
         cursor: {

@@ -77,7 +77,7 @@ const MyVSCode = () => {
             variants={itemVariants}
             className="flex size-full flex-col text-lg text-slate-900"
           >
-            <div className="flex h-5 bg-White-selectFile">
+            <div className="bg-White-selectFileMenu-bg flex h-5">
               <div className="flex h-full items-center gap-1 bg-white px-2 text-sm">
                 <MarkDwonSVG className="size-4 fill-black" />
                 concern.md

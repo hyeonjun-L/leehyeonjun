@@ -1,8 +1,11 @@
-import React from 'react';
-import Modal from './_components/Modal';
+import { cookies } from 'next/headers';
+import SettingModal from './_components/SettingModal';
 
 const page = () => {
-  return <Modal>asdadsa</Modal>;
+  const cookieStore = cookies();
+  const theme = cookieStore.get('theme')?.value;
+
+  return <SettingModal />;
 };
 
 export default page;

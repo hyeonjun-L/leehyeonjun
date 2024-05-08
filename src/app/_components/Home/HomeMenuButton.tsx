@@ -30,7 +30,7 @@ const HomeMenuButton = ({ title, href, textList }: HomeMenuButtonProps) => {
         onTouchStart={startAnimate}
         onTouchEnd={stopAnimate}
         href={href}
-        className="flex h-10 w-[45%] items-center justify-center rounded-md bg-dark-menu hover:bg-dark-activity"
+        className="bg-dark-menu-bg flex h-10 w-[45%] items-center justify-center rounded-md hover:bg-dark-activity"
       >
         {title}
       </Link>

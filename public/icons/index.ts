@@ -21,3 +21,7 @@ export { default as BranchSVG } from './vscode/branch.svg';
 export { default as DebugSVG } from './vscode/debug.svg';
 
 export { default as MarkDwonSVG } from './vscode/markDown.svg';
+
+export { default as BrushSVG } from './setting/brush.svg';
+
+export { default as TextSVG } from './setting/text.svg';
