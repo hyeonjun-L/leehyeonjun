@@ -3,8 +3,8 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
-import { Headings } from '@/types/types';
 import { HIDE_PATH } from '@/constants/constants';
+import { Headings } from '@/types/types';
 
 const AnchorNav = () => {
   const [headings, setHeadings] = useState<Headings[]>([]);

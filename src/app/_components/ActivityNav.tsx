@@ -4,7 +4,6 @@ import Image, { StaticImageData } from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import React from 'react';
-import { NavItem } from '@/types/types';
 import {
   BlogSVG,
   GithubSVG,
@@ -13,6 +12,7 @@ import {
   SettingSVG,
 } from '@/icons/index';
 import myImage from '@/images/이현준.jpg';
+import { NavItem } from '@/types/types';
 
 const activityNavList = [
   { href: '/', SVGComponent: HomeSVG, ariaLabel: 'Hoom' },

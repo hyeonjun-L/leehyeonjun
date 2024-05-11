@@ -1,8 +1,8 @@
 import { motion, useMotionValue, useTransform, animate } from 'framer-motion';
 import { useEffect, useState } from 'react';
+import { BASE_TEXT } from '@/constants/constants';
 import CursorBlinker from './CursorBlinker';
 import RedoAnimText from './RedoAnimText';
-import { BASE_TEXT } from '@/constants/constants';
 
 export interface IAnimTextProps {
   delay: number;

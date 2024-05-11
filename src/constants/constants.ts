@@ -52,3 +52,6 @@ export const HOME_MENU_LIST = [
     textList: ['import ', '블로그 ', 'from ', "'이현준'", ';'],
   },
 ];
+
+export const BUTTON_STYLE =
+  'hover:bg-dark-menu-text flex h-10 w-[45%] items-center justify-center rounded-md bg-dark-disabled dark:bg-dark-menu-bg dark:hover:bg-dark-activity' as const;

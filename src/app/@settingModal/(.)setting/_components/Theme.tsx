@@ -1,5 +1,5 @@
-import { CheckSVG } from '@/icons/index';
 import React from 'react';
+import { CheckSVG } from '@/icons/index';
 
 interface ThemeProps {
   selectTheme: string;

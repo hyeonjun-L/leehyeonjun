@@ -1,11 +1,11 @@
 'use client';
+import Cookies from 'js-cookie';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { BrushSVG, CloseSVG, TextSVG } from '@/icons/index';
 import Modal from './Modal';
 import Text from './Text';
 import Thema from './Theme';
-import Cookies from 'js-cookie';
-import { BrushSVG, CloseSVG, TextSVG } from '@/icons/index';
-import { useRouter } from 'next/navigation';
 
 interface SettingModalProps {
   selectTheme: string;

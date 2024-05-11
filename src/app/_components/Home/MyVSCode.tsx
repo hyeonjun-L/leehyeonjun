@@ -1,6 +1,5 @@
 'use client';
 import { motion } from 'framer-motion';
-import AnimText from './AnimText';
 import { MENU } from '@/constants/constants';
 import {
   BranchSVG,
@@ -11,6 +10,7 @@ import {
   SearchSVG,
   VsCodeSVG,
 } from '@/icons/index';
+import AnimText from './AnimText';
 
 const containerVariants = {
   hidden: {

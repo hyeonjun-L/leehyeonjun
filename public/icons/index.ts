@@ -27,3 +27,5 @@ export { default as BrushSVG } from './setting/brush.svg';
 export { default as TextSVG } from './setting/text.svg';
 
 export { default as CheckSVG } from './setting/check.svg';
+
+export { default as EmailSVG } from './email.svg';

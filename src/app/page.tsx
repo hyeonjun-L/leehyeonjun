@@ -1,6 +1,6 @@
+import { HOME_MENU_LIST } from '@/constants/constants';
 import HomeMenuButton from './_components/Home/HomeMenuButton';
 import MyVSCode from './_components/Home/MyVSCode';
-import { HOME_MENU_LIST } from '@/constants/constants';
 
 export default function Home() {
   return (

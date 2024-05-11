@@ -1,9 +1,9 @@
 'use client';
 import Link from 'next/link';
 import { useState } from 'react';
+import { BUTTON_STYLE, HOME_TEXT_COLOR } from '@/constants/constants';
 import CursorBlinker from './CursorBlinker';
 import HomeMenuAnimateText from './HomeMenuAnimateText';
-import { HOME_TEXT_COLOR } from '@/constants/constants';
 
 interface HomeMenuButtonProps {
   title: string;
@@ -30,7 +30,7 @@ const HomeMenuButton = ({ title, href, textList }: HomeMenuButtonProps) => {
         onTouchStart={startAnimate}
         onTouchEnd={stopAnimate}
         href={href}
-        className="hover:bg-dark-menu-text flex h-10 w-[45%] items-center justify-center rounded-md bg-dark-disabled dark:bg-dark-menu-bg dark:hover:bg-dark-activity"
+        className={BUTTON_STYLE}
       >
         {title}
       </Link>
