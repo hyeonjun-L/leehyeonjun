@@ -18,6 +18,7 @@ const config: Config = {
           menu: { bg: '#3c3c3c', hover: '#454646', text: '#cccccc' },
           selectFileMenu: { bg: '#252526', disabled: '#2d2d2d' },
           myVScodeText: '#858585',
+          text: '#d1d5db',
         },
         White: {
           body: '#ffff',

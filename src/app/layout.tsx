@@ -26,7 +26,7 @@ export default function RootLayout({
   const theme = cookieStore.get('theme')?.value ?? 'Dark';
 
   return (
-    <html lang="kr" className={theme === 'Dark' ? 'dark text-white' : ''}>
+    <html lang="kr" className={theme === 'Dark' ? 'text-dark-text dark' : ''}>
       <head>
         <link
           rel="stylesheet"
