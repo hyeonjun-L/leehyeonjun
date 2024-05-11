@@ -15,14 +15,23 @@ const config: Config = {
             active: '#37373d',
           },
           disabled: '#858585',
-          menu: { bg: '#3c3c3c', hover: '#454646' },
+          menu: { bg: '#3c3c3c', hover: '#454646', text: '#cccccc' },
           selectFileMenu: { bg: '#252526', disabled: '#2d2d2d' },
+          myVScodeText: '#858585',
         },
         White: {
           body: '#ffff',
           activity: '#2c2c2c',
-          menu: { bg: '#dddddd', hover: '#d2d2d2' },
-          selectFileMenu: { bg: '#ececec', disabled: '' },
+          anchor: {
+            bg: '#f3f3f3',
+            hover: '#e7e7e7',
+            active: '#e4e6f1',
+          },
+          menu: { bg: '#dddddd', hover: '#d2d2d2', text: '#000000' },
+          selectFileMenu: {
+            bg: '#f3f3f3',
+            disabled: '#ececec',
+          },
           myVScodeText: '#4389ba',
         },
         cursor: {
@@ -40,7 +49,16 @@ const config: Config = {
       fadeInUp: 'fadeInUp 0.6s ease-out',
     },
   },
-  plugins: [require('@tailwindcss/typography')],
+  plugins: [
+    require('@tailwindcss/typography'),
+    // function ({ addVariant, e }) {
+    //   addVariant('pink', ({ modifySelectors, separator }) => {
+    //     modifySelectors(({ className }) => {
+    //       return `.pink .${e(`pink${separator}${className}`)}`;
+    //     });
+    //   });
+    // },
+  ],
 };
 
 export default config;

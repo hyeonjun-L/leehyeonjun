@@ -51,13 +51,16 @@ const MyVSCode = () => {
         variants={containerVariants}
         animate="visible"
         initial="hidden"
-        className="grid aspect-square h-[300px] grid-rows-[auto_1fr] bg-white sm:aspect-[1/1.41] sm:h-[400px] md:h-[500px]"
+        className="grid aspect-square h-[300px] grid-rows-[auto_1fr] bg-dark-body sm:aspect-[1/1.41] sm:h-[400px] md:h-[500px] dark:bg-white"
       >
         <motion.div variants={itemVariants} className="flex items-center">
-          <div className="flex w-full items-center gap-1 bg-White-menu-bg pl-1 text-sm">
+          <div className="dark:text-White-menu-text text-dark-menu-text flex w-full items-center gap-1 bg-dark-menu-bg pl-1 text-sm dark:bg-White-menu-bg">
             <VsCodeSVG className="size-4" />
             {MENU.map((menu) => (
-              <p key={menu} className="px-2 hover:bg-White-menu-hover">
+              <p
+                key={menu}
+                className="px-2 hover:bg-dark-menu-hover dark:hover:bg-White-menu-hover"
+              >
                 {menu}
               </p>
             ))}
@@ -77,11 +80,11 @@ const MyVSCode = () => {
             variants={itemVariants}
             className="flex size-full flex-col text-lg text-slate-900"
           >
-            <div className="bg-White-selectFileMenu-bg flex h-5">
-              <div className="flex h-full items-center gap-1 bg-white px-2 text-sm">
-                <MarkDwonSVG className="size-4 fill-black" />
+            <div className="flex h-5 bg-dark-selectFileMenu-bg dark:bg-White-selectFileMenu-bg">
+              <div className="flex h-full items-center gap-1 bg-dark-body px-2 text-sm text-white dark:bg-white dark:text-black">
+                <MarkDwonSVG className="size-4 fill-white dark:fill-black" />
                 concern.md
-                <CloseSVG className="size-[10px] fill-black hover:fill-gray-600" />
+                <CloseSVG className="fill-dark-menu-text size-[10px] hover:fill-white dark:fill-black dark:hover:fill-gray-600" />
               </div>
             </div>
             <AnimText delay={1} />

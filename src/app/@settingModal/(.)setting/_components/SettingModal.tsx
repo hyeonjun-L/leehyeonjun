@@ -27,7 +27,7 @@ const SettingModal = ({ selectTheme }: SettingModalProps) => {
   const MENU_LIST = [
     {
       title: '테마',
-      SVGComponent: <BrushSVG className="size-4 fill-white" />,
+      SVGComponent: <BrushSVG className="size-4 fill-black dark:fill-white" />,
       Component: (
         <Thema
           selectTheme={selectTheme}
@@ -37,20 +37,20 @@ const SettingModal = ({ selectTheme }: SettingModalProps) => {
     },
     {
       title: '글자',
-      SVGComponent: <TextSVG className="size-4 fill-white" />,
+      SVGComponent: <TextSVG className="size-4 fill-black dark:fill-white" />,
       Component: <Text />,
     },
   ];
 
   return (
     <Modal>
-      <nav className="flex w-full justify-between bg-dark-selectFileMenu-bg">
+      <nav className="flex w-full justify-between bg-White-selectFileMenu-bg dark:bg-dark-selectFileMenu-bg">
         <div className="flex">
           {MENU_LIST.map(({ title, SVGComponent }, index) => (
             <button
               key={title}
               onClick={() => setSelectMenu(index)}
-              className={`flex items-center gap-1 px-3 py-2 ${selectMenu === index ? 'bg-dark-body' : 'bg-dark-selectFileMenu-disabled'} `}
+              className={`flex items-center gap-1 px-3 py-2 ${selectMenu === index ? 'bg-White-body dark:bg-dark-body' : 'bg-White-selectFileMenu-disabled dark:bg-dark-selectFileMenu-disabled'} `}
             >
               {SVGComponent}
               {title}
@@ -58,7 +58,7 @@ const SettingModal = ({ selectTheme }: SettingModalProps) => {
           ))}
         </div>
         <button className="px-3" onClick={closeModalHandler}>
-          <CloseSVG className="size-6 fill-white" />
+          <CloseSVG className="size-6 fill-black dark:fill-white" />
         </button>
       </nav>
       {MENU_LIST[selectMenu].Component}

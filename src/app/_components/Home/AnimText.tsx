@@ -42,7 +42,7 @@ export default function AnimText({ delay }: IAnimTextProps) {
       <Line length={16} style={LINE_STYLE[0]} />
       <Line length={12} style={LINE_STYLE[1]} />
       <Line length={9} style={LINE_STYLE[2]} />
-      <div className="w-full flex-grow">
+      <div className="w-full flex-grow text-white dark:text-black">
         <motion.span>{displayText}</motion.span>
         {done && (
           <>
@@ -59,7 +59,7 @@ export default function AnimText({ delay }: IAnimTextProps) {
 const Line = ({ length, style }: { length: number; style: string }) => {
   return (
     <div
-      className={`text-White-myVScodeText flex h-full w-10 flex-col ${style}`}
+      className={`text-dark-myVScodeText flex h-full w-10 flex-col dark:text-White-myVScodeText ${style}`}
     >
       {Array.from({ length }).map((_, index) => (
         <p key={index} className="w-full pr-3 text-right">

@@ -17,7 +17,7 @@ const Modal = ({ children }: { children: React.ReactNode }) => {
         onClick={(e) => {
           e.stopPropagation();
         }}
-        className="shadow-float absolute left-1/2 top-1/2 w-[40rem] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-md bg-dark-body"
+        className="shadow-float absolute left-1/2 top-1/2 w-[40rem] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-md bg-White-body dark:bg-dark-body"
       >
         {children}
       </article>

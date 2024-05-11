@@ -100,7 +100,7 @@ const ActivityNav = () => {
   };
 
   return (
-    <aside className="md:h-full dark:bg-dark-activity">
+    <aside className="bg-dark-activity md:h-full dark:bg-dark-activity">
       <section className="flex h-full justify-between sm:flex-col">
         <nav className="flex sm:block">
           {activityNavList.map(renderNavItem)}

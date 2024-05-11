@@ -28,10 +28,10 @@ const Theme = ({ selectTheme, changeThemeHandler }: ThemeProps) => {
         {THEME_LIST.map(({ theme, bg, activity, body }) => (
           <li
             key={theme}
-            className="relative rounded-md border-2 border-solid border-dark-disabled px-4 pb-2 pt-1 hover:border-white"
+            className="relative rounded-md border-2 border-solid px-4 pb-2 pt-1 hover:border-black dark:border-dark-disabled dark:hover:border-white"
           >
             {selectTheme === theme && (
-              <CheckSVG className="absolute right-0 size-5 fill-white" />
+              <CheckSVG className="absolute right-0 size-5 fill-black dark:fill-white" />
             )}
             <button
               className="flex size-full flex-col"
