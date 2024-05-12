@@ -23,8 +23,6 @@ const Theme = ({ selectTheme, changeThemeHandler }: ThemeProps) => {
     },
   ];
 
-  const test = ;
-
   return (
     <section className="h-80 p-5">
       <ul className="grid size-full grid-cols-3 grid-rows-2 gap-3">
