@@ -4,6 +4,6 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <section className="prose dark:prose-invert max-w-none">{children}</section>
+    <section className="prose max-w-none dark:prose-invert">{children}</section>
   );
 }

@@ -2,9 +2,9 @@ import { cookies } from 'next/headers';
 import Image from 'next/image';
 import Link from 'next/link';
 import { EmailSVG } from '@/icons/index';
+import connectionImage from '@/images/connection/connection_main.png';
 import myImage from '@/images/profile.png';
 import myDarkImage from '@/images/profile_dark.png';
-import connectionImage from '@/images/connection/connection_main.png';
 
 const page = () => {
   const cookieStore = cookies();
@@ -73,7 +73,7 @@ const page = () => {
               className="w-full max-w-96"
             />
           </div>
-          <div className="dark:border-dark-line border-White-line h-screen border-l border-solid px-8">
+          <div className="h-screen border-l border-solid border-White-line px-8 dark:border-dark-line">
             <h4 className="text-xl">1.역할</h4>
             <h4 className="text-xl">2.사용 기술</h4>
             <h4 className="text-xl">

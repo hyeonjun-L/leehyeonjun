@@ -49,6 +49,7 @@ const HomeMenuAnimateText = ({
     }
 
     return animateControls?.stop;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAnimateStart]);
 
   return (

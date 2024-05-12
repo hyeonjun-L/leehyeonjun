@@ -54,7 +54,7 @@ const MyVSCode = () => {
         className="grid aspect-square h-[300px] grid-rows-[auto_1fr] bg-dark-body sm:aspect-[1/1.41] sm:h-[400px] md:h-[500px] dark:bg-white"
       >
         <motion.div variants={itemVariants} className="flex items-center">
-          <div className="dark:text-White-menu-text text-dark-menu-text flex w-full items-center gap-1 bg-dark-menu-bg pl-1 text-sm dark:bg-White-menu-bg">
+          <div className="flex w-full items-center gap-1 bg-dark-menu-bg pl-1 text-sm text-dark-menu-text dark:bg-White-menu-bg dark:text-White-menu-text">
             <VsCodeSVG className="size-4" />
             {MENU.map((menu) => (
               <p
@@ -84,7 +84,7 @@ const MyVSCode = () => {
               <div className="flex h-full items-center gap-1 bg-dark-body px-2 text-sm text-white dark:bg-white dark:text-black">
                 <MarkDwonSVG className="size-4 fill-white dark:fill-black" />
                 concern.md
-                <CloseSVG className="fill-dark-menu-text size-[10px] hover:fill-white dark:fill-black dark:hover:fill-gray-600" />
+                <CloseSVG className="size-[10px] fill-dark-menu-text hover:fill-white dark:fill-black dark:hover:fill-gray-600" />
               </div>
             </div>
             <AnimText delay={1} />

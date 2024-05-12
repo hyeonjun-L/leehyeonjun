@@ -59,7 +59,7 @@ export default function AnimText({ delay }: IAnimTextProps) {
 const Line = ({ length, style }: { length: number; style: string }) => {
   return (
     <div
-      className={`text-dark-myVScodeText flex h-full w-10 flex-col dark:text-White-myVScodeText ${style}`}
+      className={`flex h-full w-10 flex-col text-dark-myVScodeText dark:text-White-myVScodeText ${style}`}
     >
       {Array.from({ length }).map((_, index) => (
         <p key={index} className="w-full pr-3 text-right">

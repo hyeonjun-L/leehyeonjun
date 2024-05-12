@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { getPosts } from '@/posts';
 
-const page = async ({ params }: { params: { slug: string } }) => {
+const page = async ({}: { params: { slug: string } }) => {
   const posts = await getPosts();
 
   return (
