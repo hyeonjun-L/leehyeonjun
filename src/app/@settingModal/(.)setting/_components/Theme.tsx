@@ -3,6 +3,7 @@ import { CheckSVG } from '@/icons/index';
 
 interface ThemeProps {
   selectTheme: string;
+  test: string;
   changeThemeHandler: (theme: string) => void;
 }
 
@@ -21,6 +22,8 @@ const Theme = ({ selectTheme, changeThemeHandler }: ThemeProps) => {
       body: 'bg-White-body',
     },
   ];
+
+  const test = ;
 
   return (
     <section className="h-80 p-5">
