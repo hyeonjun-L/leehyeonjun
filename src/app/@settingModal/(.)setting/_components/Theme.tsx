@@ -23,7 +23,7 @@ const Theme = ({ selectTheme, changeThemeHandler }: ThemeProps) => {
   ];
 
   return (
-    <section className="h-80 p-5 ">
+    <section className="h-80 p-5">
       <ul className="grid size-full grid-cols-3 grid-rows-2 gap-3">
         {THEME_LIST.map(({ theme, bg, activity, body }) => (
           <li
