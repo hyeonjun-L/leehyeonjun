@@ -3,7 +3,6 @@ import { CheckSVG } from '@/icons/index';
 
 interface ThemeProps {
   selectTheme: string;
-  test: string;
   changeThemeHandler: (theme: string) => void;
 }
 
