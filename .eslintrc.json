@@ -1,6 +1,6 @@
 {
   "extends": ["next/core-web-vitals", "plugin:prettier/recommended"],
-  "plugins": ["react", "unused-imports", "import"],
+  "plugins": ["react", "unused-imports", "import", "@typescript-eslint"],
   "parser": "@typescript-eslint/parser",
   "settings": {
     "react": {
@@ -17,6 +17,8 @@
     }
   },
   "rules": {
+    "no-unused-vars": "off",
+    "@typescript-eslint/no-unused-vars": "warn",
     "prettier/prettier": [
       "warn",
       {
@@ -28,7 +30,6 @@
     "no-console": ["warn", { "allow": ["warn", "error"] }], // console.log() 금지
     "eqeqeq": "warn", // 일치 연산자 사용 필수
     "dot-notation": "warn", // 가능하다면 dot notation 사용
-    "no-unused-vars": "warn", // 사용하지 않는 변수 금지
     "react/destructuring-assignment": "warn", // state, prop 등에 구조분해 할당 적용
     "react/jsx-pascal-case": "warn", // 컴포넌트 이름은 PascalCase로
     "react/no-direct-mutation-state": "warn", // state 직접 수정 금지
