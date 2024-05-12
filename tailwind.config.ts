@@ -19,6 +19,7 @@ const config: Config = {
           selectFileMenu: { bg: '#252526', disabled: '#2d2d2d' },
           myVScodeText: '#858585',
           text: '#d1d5db',
+          line: '#444444',
         },
         White: {
           body: '#ffff',
@@ -34,6 +35,7 @@ const config: Config = {
             disabled: '#ececec',
           },
           myVScodeText: '#4389ba',
+          line: '#e7e7e7',
         },
         cursor: {
           dark: '#aeafad',

@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { EmailSVG } from '@/icons/index';
 import myImage from '@/images/profile.png';
 import myDarkImage from '@/images/profile_dark.png';
+import connectionImage from '@/images/connection/connection_main.png';
 
 const page = () => {
   const cookieStore = cookies();
@@ -42,8 +43,44 @@ const page = () => {
           </dd>
         </dl>
       </section>
-      <section className="mt-14 flex flex-col gap-10">
+      <section className="mt-14 flex flex-col gap-10 border-b border-solid border-dark-disabled">
         <h2 className="text-4xl font-semibold">프로젝트</h2>
+        <div className="grid grid-cols-[1.4fr_2fr]">
+          <div className="sticky top-0 mx-auto flex max-h-[25rem] flex-col">
+            <h3 className="mb-4 text-3xl">Connection</h3>
+            <p>댄서와 수강생 매칭 서비스</p>
+            <p>2023.09 ~</p>
+            <div className="mt-3 flex items-center gap-4 [&>a]:underline [&>a]:underline-offset-4">
+              <Link
+                className="hover:text-dark-text"
+                href="https://connection-frontend.vercel.app"
+              >
+                WebSite
+              </Link>
+              <Link
+                className="hover:text-dark-text"
+                href="https://github.com/connection-2023/frontend"
+              >
+                GitHub
+              </Link>
+              <Link className="hover:text-dark-text" href="/">
+                개발과정
+              </Link>
+            </div>
+            <Image
+              src={connectionImage}
+              alt="커넥션"
+              className="w-full max-w-96"
+            />
+          </div>
+          <div className="dark:border-dark-line border-White-line h-screen border-l border-solid px-8">
+            <h4 className="text-xl">1.역할</h4>
+            <h4 className="text-xl">2.사용 기술</h4>
+            <h4 className="text-xl">
+              3.프로젝트를 진행하며 경험하고 체득한 부분
+            </h4>
+          </div>
+        </div>
       </section>
       <section className="mt-14 flex flex-col gap-10">
         <h2 className="text-4xl font-semibold">경력</h2>

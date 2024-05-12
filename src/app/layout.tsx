@@ -26,7 +26,7 @@ export default function RootLayout({
   const theme = cookieStore.get('theme')?.value ?? 'Dark';
 
   return (
-    <html lang="kr" className={theme === 'Dark' ? 'text-dark-text dark' : ''}>
+    <html lang="kr" className={theme === 'Dark' ? 'dark text-dark-text' : ''}>
       <head>
         <link
           rel="stylesheet"
@@ -39,8 +39,10 @@ export default function RootLayout({
         <ActivityNav />
         <AnchorNav />
         <main className="flex size-full flex-grow flex-col overflow-auto p-4 sm:p-8">
-          {children}
-          {settingModal}
+          <div className="m-auto max-w-6xl">
+            {children}
+            {settingModal}
+          </div>
         </main>
       </body>
     </html>
