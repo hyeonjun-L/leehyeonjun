@@ -12,4 +12,5 @@ export interface NavItem {
 export interface Headings {
   level: number;
   text: string;
+  id: string;
 }

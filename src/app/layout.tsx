@@ -1,9 +1,9 @@
 import './styles/globals.css';
 import localFont from 'next/font/local';
 import { cookies } from 'next/headers';
+import ActivityNav from '@/app/_components/ActivityNav';
 import AnchorNav from './_components/AnchorNav';
 import type { Metadata } from 'next';
-import ActivityNav from '@/app/_components/ActivityNav';
 
 const consola = localFont({
   src: './fonts/CONSOLA.ttf',
@@ -34,7 +34,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${consola.className} flex h-dvh flex-col bg-white sm:flex-row dark:bg-dark-body`}
+        className={`${consola.className} flex h-dvh flex-col bg-white sm:flex-row dark:bg-dark-body `}
       >
         <ActivityNav />
         <AnchorNav />
