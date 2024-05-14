@@ -1,5 +1,26 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import {
+  DockerSVG,
+  EslintSVG,
+  FirebaseSVG,
+  FramerMotionSVG,
+  GitHubActionsSVG,
+  JestSVG,
+  NaverMapSVG,
+  NextSVG,
+  PwaSVG,
+  ReactHookFormSVG,
+  ReactQuerySVG,
+  ReactTableSVG,
+  SentrySVG,
+  SocketIoSVG,
+  StorybookSVG,
+  TaillwindSVG,
+  TypeScriptSVG,
+  VercelSVG,
+  ZustandSVG,
+} from '@/icons/index';
 import connectionImage from '@/images/connection/connection_main.png';
 
 const Project = () => {
@@ -14,7 +35,103 @@ const Project = () => {
       github: 'https://github.com/connection-2023/frontend',
       developmentProcess: '/',
       role: <div>역할은 어쩌구~</div>,
-      skill: <div>스킬은 어쩌구~</div>,
+      skills: [
+        {
+          svg: <NextSVG className="size-5" />,
+          name: 'Next',
+          bg: 'bg-[#000000]',
+        },
+        {
+          svg: <TypeScriptSVG className="size-5" />,
+          name: 'TypeScript',
+          bg: 'bg-[#3178C6]',
+        },
+        {
+          svg: <TaillwindSVG className="size-5" />,
+          name: 'Taillwind CSS',
+          bg: 'bg-[#06B6D4]',
+        },
+        {
+          svg: <ZustandSVG className="size-5" />,
+          name: 'Zustand',
+          bg: 'bg-[#614a28]',
+        },
+        {
+          svg: <ReactQuerySVG className="size-5" />,
+          name: 'React Query',
+          bg: 'bg-[#FF4154]',
+        },
+        {
+          svg: <ReactTableSVG className="size-5" />,
+          name: 'React Table',
+          bg: 'bg-[#FF4154]',
+        },
+        {
+          svg: <ReactHookFormSVG className="size-5" />,
+          name: 'React Hook Form',
+          bg: 'bg-[#EC5990]',
+        },
+        {
+          svg: <FramerMotionSVG className="size-5" />,
+          name: 'Framer Motion',
+          bg: 'bg-[#0055FF]',
+        },
+        {
+          svg: <NaverMapSVG className="size-5" />,
+          name: 'Naver Map',
+          bg: 'bg-[#03C75A]',
+        },
+        {
+          svg: <FirebaseSVG className="size-5" />,
+          name: 'Firebase',
+          bg: 'bg-[#FFCA28]',
+        },
+        {
+          svg: <PwaSVG className="size-5" />,
+          name: 'PWA',
+          bg: 'bg-[#5A0FC8]',
+        },
+        {
+          svg: <SocketIoSVG className="size-5" />,
+          name: 'Socket.io',
+          bg: 'bg-[#010101]',
+        },
+        {
+          svg: <JestSVG className="size-5" />,
+          name: 'Jest',
+          bg: 'bg-[#C21325]',
+        },
+        {
+          svg: <VercelSVG className="size-5" />,
+          name: 'Vercel',
+          bg: 'bg-[#000000]',
+        },
+        {
+          svg: <DockerSVG className="size-5" />,
+          name: 'Docker',
+          bg: 'bg-[#2496ED]',
+        },
+        {
+          svg: <GitHubActionsSVG className="size-5" />,
+          name: 'GitHub Actions',
+          bg: 'bg-[#2088FF]',
+        },
+        {
+          svg: <SentrySVG className="size-5" />,
+          name: 'Sentry',
+          bg: 'bg-[#362D59]',
+        },
+        {
+          svg: <StorybookSVG className="size-5" />,
+          name: 'StoryBook',
+          bg: 'bg-[#ff4785]',
+        },
+        {
+          svg: <EslintSVG className="size-5" />,
+          name: 'Eslint',
+          bg: 'bg-[#3949ab]',
+        },
+      ],
       experience: <div>경험은 어쩌구~</div>,
     },
   ] as const;
@@ -33,7 +150,7 @@ const Project = () => {
           github,
           developmentProcess,
           role,
-          skill,
+          skills,
           experience,
         }) => (
           <div key={title} className="grid grid-cols-[1.4fr_2fr] gap-y-2">
@@ -52,19 +169,28 @@ const Project = () => {
                   className="hover:text-dark-text"
                   href={developmentProcess}
                 >
-                  개발과정
+                  Detail
                 </Link>
               </div>
               <Image src={image} alt={imageAlt} className="w-full max-w-96" />
             </div>
-            <div className="h-screen border-l border-solid border-White-line px-8 dark:border-dark-line">
-              <h4 className="text-xl">1.역할</h4>
+            <div className="flex flex-col gap-3 border-l border-solid border-White-line px-8 dark:border-dark-line [&>h4]:mt-4 [&>h4]:text-xl">
+              <h4>1.설명</h4>
+              <h4>2.역할</h4>
               {role}
-              <h4 className="text-xl">2.사용 기술</h4>
-              {skill}
-              <h4 className="text-xl">
-                3.프로젝트를 진행하며 경험하고 체득한 부분
-              </h4>
+              <h4>3.사용 기술</h4>
+              <ul className="flex flex-wrap gap-2 text-white">
+                {skills.map(({ svg, name, bg }) => (
+                  <li
+                    className={`flex items-center gap-2 p-1 ${bg}`}
+                    key={name}
+                  >
+                    {svg}
+                    {name}
+                  </li>
+                ))}
+              </ul>
+              <h4>4.프로젝트를 진행하며 경험하고 체득한 부분</h4>
               {experience}
             </div>
           </div>
