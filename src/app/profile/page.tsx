@@ -1,6 +1,9 @@
 import { cookies } from 'next/headers';
 import AboutMe from './_components/AboutMe';
-import ExperienceForm from './_components/CareerHistory';
+import Career from './_components/Career';
+import Certifications from './_components/Certifications';
+import Education from './_components/Education';
+import Experience from './_components/Experience';
 import Project from './_components/Project';
 
 const page = () => {
@@ -10,8 +13,11 @@ const page = () => {
   return (
     <>
       <AboutMe theme={theme} />
+      <Career />
       <Project />
-      <ExperienceForm />
+      <Experience />
+      <Education />
+      <Certifications />
     </>
   );
 };

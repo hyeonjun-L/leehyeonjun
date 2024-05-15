@@ -1,6 +1,6 @@
 import React, { Fragment } from 'react';
 
-const CareerHistory = () => {
+const Career = () => {
   const CAREERS = [
     {
       companyName: '이엑스테크놀로지',
@@ -57,4 +57,4 @@ const CareerHistory = () => {
   );
 };
 
-export default CareerHistory;
+export default Career;
