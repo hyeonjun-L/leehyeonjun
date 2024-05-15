@@ -67,3 +67,15 @@ export { default as SentrySVG } from './skill/sentry.svg';
 export { default as GitHubActionsSVG } from './skill/actions.svg';
 
 export { default as DockerSVG } from './skill/docker.svg';
+
+export { default as ReactSVG } from './skill/react.svg';
+
+export { default as ReactRouterSVG } from './skill/reactRouter.svg';
+
+export { default as StyledComponentsSVG } from './skill/styledComponents.svg';
+
+export { default as AxiosSVG } from './skill/axios.svg';
+
+export { default as ViteSVG } from './skill/vite.svg';
+
+export { default as ChatGPTSVG } from './skill/chatGPT.svg';
