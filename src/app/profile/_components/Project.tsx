@@ -31,8 +31,8 @@ import {
 } from '@/icons/index';
 import connectionImage from '@/images/connection/connection_main.png';
 import connectionHealthImage from '@/images/connection-health/connection-health.png';
-import haruImage from '@/images/haru/haru.jpg';
 import editorImage from '@/images/editor/editor.jpg';
+import haruImage from '@/images/haru/haru.jpg';
 
 const Project = () => {
   const PROJECT = [
@@ -395,7 +395,7 @@ const Project = () => {
   ] as const;
 
   return (
-    <section className="mt-14 flex flex-col gap-10 border-b border-solid border-dark-disabled">
+    <section className="mt-14 flex flex-col gap-10 border-solid border-dark-disabled sm:border-b ">
       <h2 className="text-4xl font-semibold">프로젝트</h2>
       {PROJECT.map(
         ({
@@ -414,8 +414,8 @@ const Project = () => {
           mainColor,
           figma,
         }) => (
-          <div key={title} className="grid grid-cols-[1.4fr_2fr] gap-y-2">
-            <div className="sticky top-0 mx-auto flex max-h-[25rem] flex-col">
+          <div key={title} className="grid gap-y-2 sm:grid-cols-[1.4fr_2fr]">
+            <div className="top-0 mx-auto flex max-h-[25rem] flex-col sm:sticky">
               <h3 className="mb-4 text-3xl">{title}</h3>
               <p>{explanation}</p>
               <p>{personnel}</p>
@@ -458,7 +458,7 @@ const Project = () => {
                 className={`mt-2 w-full max-w-80 border border-solid p-1 ${mainColor}`}
               />
             </div>
-            <div className="flex flex-col gap-3 border-l border-solid border-White-line px-8 dark:border-dark-line [&>div]:pl-5 [&>h4]:mt-4 [&>h4]:text-xl [&>ul]:pl-5">
+            <div className="flex flex-col gap-3 border-l border-solid border-dark-disabled px-8  [&>div]:pl-5 [&>h4]:mt-4 [&>h4]:text-xl [&>ul]:pl-5">
               <h4>1.설명</h4>
               {detailExplanation}
               <h4>2.역할</h4>

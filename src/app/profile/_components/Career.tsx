@@ -26,9 +26,9 @@ const Career = () => {
   ] as const;
 
   return (
-    <section className="mt-14 flex flex-col gap-10">
+    <section className="mt-14 flex flex-col gap-10 border-b border-solid border-dark-disabled pb-10">
       <h2 className="text-4xl font-semibold">경력</h2>
-      <div className="grid grid-cols-[1fr_2fr] gap-y-10">
+      <div className="grid gap-y-10 sm:grid-cols-[1fr_2fr]">
         {CAREERS.map(
           ({
             companyName,
@@ -44,7 +44,7 @@ const Career = () => {
                 <p>부서명: {department}</p>
                 <p>직책: {position}</p>
               </div>
-              <ul className="flex list-disc flex-col gap-4">
+              <ul className="ml-5 flex list-disc flex-col gap-4 sm:ml-0">
                 {businessInformation.map((info, index) => (
                   <li key={`${companyName}${index}`}>{info}</li>
                 ))}
