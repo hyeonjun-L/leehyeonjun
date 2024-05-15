@@ -79,3 +79,7 @@ export { default as AxiosSVG } from './skill/axios.svg';
 export { default as ViteSVG } from './skill/vite.svg';
 
 export { default as ChatGPTSVG } from './skill/chatGPT.svg';
+
+export { default as JavaScriptSVG } from './skill/javaScript.svg';
+
+export { default as WebpackSVG } from './skill/webpack.svg';

@@ -8,6 +8,7 @@ import {
   FirebaseSVG,
   FramerMotionSVG,
   GitHubActionsSVG,
+  JavaScriptSVG,
   JestSVG,
   NaverMapSVG,
   NextSVG,
@@ -25,10 +26,13 @@ import {
   TypeScriptSVG,
   VercelSVG,
   ViteSVG,
+  WebpackSVG,
   ZustandSVG,
 } from '@/icons/index';
 import connectionImage from '@/images/connection/connection_main.png';
 import connectionHealthImage from '@/images/connection-health/connection-health.png';
+import haruImage from '@/images/haru/haru.jpg';
+import editorImage from '@/images/editor/editor.jpg';
 
 const Project = () => {
   const PROJECT = [
@@ -191,7 +195,7 @@ const Project = () => {
       title: 'Connection-Health',
       explanation: '개인 맞춤형 AI 건강 관리 어시스턴트',
       personnel: '(FE: 2명, BE: 1명, Designer: 1명)',
-      period: '23.08.24 ~ 23.09.04',
+      period: '23.08 ~ 23.09',
       image: connectionHealthImage,
       mainColor: 'border-[#12DDCE]',
       imageAlt: 'connection health',
@@ -266,6 +270,122 @@ const Project = () => {
           bg: 'bg-[#1fc390]',
         },
         {
+          svg: <EslintSVG className="size-5" />,
+          name: 'Eslint',
+          bg: 'bg-[#3949ab]',
+        },
+        {
+          svg: <VercelSVG className="size-5" />,
+          name: 'Vercel',
+          bg: 'bg-[#000000]',
+        },
+      ],
+    },
+    {
+      title: 'Online Editor',
+      explanation: '온라인 에디터',
+      personnel: '(개인 프로젝트)',
+      period: '2023.06.27 ~ 2023.07.17',
+      image: editorImage,
+      mainColor: 'border-[#2ca9bc]',
+      imageAlt: 'connection health',
+      webSite: 'https://project-online-editor.vercel.app/',
+      github: 'https://github.com/hyeonjun-L/Project_Notion_VanillaJS-',
+      figma: '',
+      developmentProcess: '/',
+      detailExplanation: (
+        <div>
+          글 작성, 수정, 삭제를 할 수 있는 온라인 에디터를 순수 JavaScript를
+          이용해 컴포넌트 방식으로 구현한 개인 프로젝트
+        </div>
+      ),
+      role: (
+        <ul className="flex flex-col gap-2">
+          <li>
+            용이한 상태 관리를 위해 싱글톤 패턴을 이용한 전역 Store를 만들어
+            사용
+          </li>
+          <li>
+            글 자동 저장 기능 구현 시 api 호출 회수 감소를 줄이기 위해 keyup
+            이벤트 핸들러에 debounce를 사용
+          </li>
+        </ul>
+      ),
+      skills: [
+        {
+          svg: <JavaScriptSVG className="size-5" />,
+          name: 'JavaScript',
+          bg: 'bg-[#F7DF1E]',
+        },
+        {
+          svg: <WebpackSVG className="size-5" />,
+          name: 'Webpack',
+          bg: 'bg-[#8DD6F9]',
+        },
+        {
+          svg: <VercelSVG className="size-5" />,
+          name: 'Vercel',
+          bg: 'bg-[#000000]',
+        },
+      ],
+    },
+    {
+      title: 'HARU',
+      explanation: '친구들과 공유가 가능한 캘린더',
+      personnel: '(FE: 1명, BE: 3명, Designer: 1명)',
+      period: '23.01 ~ 23.02',
+      image: haruImage,
+      mainColor: 'border-gray',
+      imageAlt: 'connection health',
+      webSite: 'https://5term-mini-front.vercel.app/',
+      github: 'https://github.com/hyeonjun-L/5term-mini-front',
+      figma:
+        'https://xd.adobe.com/view/304fe50c-487e-4afc-8d53-fe7699e134f4-651c/screen/266e2c5f-4b59-4568-a6ba-8668cc55aa76',
+      developmentProcess: '/',
+      detailExplanation: (
+        <div>
+          친구들과 일정 및 일기를 공유할 수 있는 캘린더 서비스 입니다.
+          <br />
+          <br />각 날짜별로 일정과 일기를 기록하고, 친구들의 일정과 일기를
+          확인할 수 있는 기능을 제공합니다. 또한, 댓글과 좋아요 기능을 통해
+          친구들과 소통할 수 있습니다.
+        </div>
+      ),
+      role: (
+        <ul className="flex flex-col gap-2">
+          <li>캘린더 및 공휴일 표시 기능 구현</li>
+          <li>친구 (검색, 신청, 조회, 삭제) 기능 구현</li>
+          <li>댓글 및 좋아요 기능 구현</li>
+          <li>일정 및 일기 CRUD 기능 구현</li>
+        </ul>
+      ),
+      skills: [
+        {
+          svg: <ReactSVG className="size-5" />,
+          name: 'React',
+          bg: 'bg-[#61DAFB]',
+        },
+        {
+          svg: <JavaScriptSVG className="size-5" />,
+          name: 'JavaScript',
+          bg: 'bg-[#F7DF1E]',
+        },
+        {
+          svg: <ReactRouterSVG className="size-5" />,
+          name: 'React Router',
+          bg: 'bg-[#CA4245]',
+        },
+        {
+          svg: <StyledComponentsSVG className="size-5" />,
+          name: 'Styled-components',
+          bg: 'bg-[#DB7093]',
+        },
+        {
+          svg: <AxiosSVG className="size-5" />,
+          name: 'Axios',
+          bg: 'bg-[#5A29E4]',
+        },
+        {
           svg: <VercelSVG className="size-5" />,
           name: 'Vercel',
           bg: 'bg-[#000000]',
@@ -308,6 +428,7 @@ const Project = () => {
                 >
                   WebSite
                 </Link>
+
                 <Link
                   className="hover:text-dark-text"
                   href={github}
@@ -315,13 +436,15 @@ const Project = () => {
                 >
                   GitHub
                 </Link>
-                <Link
-                  className="hover:text-dark-text"
-                  href={figma}
-                  target="_blank"
-                >
-                  Figma
-                </Link>
+                {figma && (
+                  <Link
+                    className="hover:text-dark-text"
+                    href={figma}
+                    target="_blank"
+                  >
+                    Design
+                  </Link>
+                )}
                 <Link
                   className="hover:text-dark-text"
                   href={developmentProcess}
@@ -332,7 +455,7 @@ const Project = () => {
               <Image
                 src={image}
                 alt={imageAlt}
-                className={`mt-2 w-full max-w-80 border border-solid ${mainColor}`}
+                className={`mt-2 w-full max-w-80 border border-solid p-1 ${mainColor}`}
               />
             </div>
             <div className="flex flex-col gap-3 border-l border-solid border-White-line px-8 dark:border-dark-line [&>div]:pl-5 [&>h4]:mt-4 [&>h4]:text-xl [&>ul]:pl-5">
