@@ -3,6 +3,7 @@ import localFont from 'next/font/local';
 import { cookies } from 'next/headers';
 import ActivityNav from '@/app/_components/ActivityNav';
 import AnchorNav from './_components/AnchorNav';
+import RouterNav from './_components/RouterNav';
 import type { Metadata } from 'next';
 
 const consola = localFont({
@@ -38,8 +39,9 @@ export default function RootLayout({
       >
         <ActivityNav />
         <AnchorNav />
-        <main className="flex size-full flex-grow flex-col overflow-auto p-4 sm:p-8">
-          <div className="m-auto max-w-6xl">
+        <main className="flex size-full flex-grow flex-col overflow-auto">
+          <RouterNav />
+          <div className="m-auto max-w-6xl p-4 sm:p-4 xl:p-8 2xl:p-0">
             {children}
             {settingModal}
           </div>
