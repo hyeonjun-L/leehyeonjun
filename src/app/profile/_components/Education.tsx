@@ -1,5 +1,3 @@
-import React from 'react';
-
 const Education = () => {
   return (
     <section className="mt-14 flex flex-col gap-10 border-b border-solid border-dark-disabled pb-10">
@@ -10,7 +8,7 @@ const Education = () => {
             <h3 className="text-2xl">인덕대학교</h3>
             <p>(2017.03 ~ 2024.02)</p>
           </div>
-          <p>정보통신공학 (학사졸업)</p>
+          <p>컴퓨터전자공학 / 정보통신공학 (학사졸업)</p>
           <p>학점: 4.3/4.5</p>
         </div>
         <ul className="flex list-disc flex-col gap-1 pl-5 text-lg sm:pl-0">

@@ -1,5 +1,3 @@
-import React from 'react';
-
 const Certifications = () => {
   return (
     <section className="mt-14 flex flex-col gap-5">

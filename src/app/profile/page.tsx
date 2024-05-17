@@ -5,6 +5,7 @@ import Certifications from './_components/Certifications';
 import Education from './_components/Education';
 import Experience from './_components/Experience';
 import Project from './_components/Project';
+import Skill from './_components/Skill';
 
 const page = () => {
   const cookieStore = cookies();
@@ -13,6 +14,7 @@ const page = () => {
   return (
     <>
       <AboutMe theme={theme} />
+      <Skill />
       <Career />
       <Project />
       <Experience />

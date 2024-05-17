@@ -83,3 +83,5 @@ export { default as ChatGPTSVG } from './skill/chatGPT.svg';
 export { default as JavaScriptSVG } from './skill/javaScript.svg';
 
 export { default as WebpackSVG } from './skill/webpack.svg';
+
+export { default as RecoilSVG } from './skill/recoil.svg';

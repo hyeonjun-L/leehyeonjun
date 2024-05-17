@@ -5,7 +5,7 @@ const Experience = () => {
     {
       title: 'Prompt-er Day Seoul 2023 해커톤',
       explanation: '삶의 질을 높이는 Generative AI 서비스 ',
-      period: '(23.08 ~ 23.09)',
+      period: '(2023.08 ~ 2023.09)',
       historyInformation: ['200팀이 넘는 참가 팀 중 상위 40팀 예선 통과'],
     },
     {
