@@ -24,6 +24,14 @@ const AnchorNav = () => {
     setViewHeadings([]);
   };
 
+  const addViewHeadings = (prevHeadings: Headings[], newHeading: Headings) => {
+    const exists = prevHeadings.some(({ id }) => id === newHeading.id);
+    if (!exists) {
+      return [...prevHeadings, { ...newHeading }];
+    }
+    return prevHeadings;
+  };
+
   useEffect(() => {
     const allHeadings = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
 
@@ -52,44 +60,35 @@ const AnchorNav = () => {
           const headingId = target.id;
 
           if (isIntersecting) {
-            setViewHeadings((prevHeadings) => {
-              const exists = prevHeadings.some(({ id }) => id === headingId);
-              if (!exists) {
-                return [
-                  ...prevHeadings,
-                  { level: headingLevel, text: headingText, id: headingId },
-                ];
-              }
-              return prevHeadings;
-            });
+            setViewHeadings((prevHeadings) =>
+              addViewHeadings(prevHeadings, {
+                id: headingId,
+                text: headingText,
+                level: headingLevel,
+              }),
+            );
           } else {
-            if (rootBounds && boundingClientRect.top < rootBounds.top) {
-              setViewHeadings((prevHeadings) => {
-                const prevHeadingList = prevHeadings.filter(
-                  ({ id }) => id !== headingId,
-                );
+            setViewHeadings((prevHeadings) => {
+              const newHeadings = prevHeadings.filter(
+                ({ id }) => id !== headingId,
+              );
 
-                return prevHeadingList.length === 0
-                  ? prevHeadings
-                  : prevHeadingList;
-              });
-            } else {
-              setViewHeadings((prevHeadings) => {
-                const newHeadings = prevHeadings.filter(
-                  (heading) => heading.id !== headingId,
-                );
-                if (
-                  newHeadings.length === 0 ||
-                  !(rootBounds && boundingClientRect.top < rootBounds.top)
-                ) {
-                  return newHeadings;
-                } else {
-                  const prevIndex =
-                    prevHeadings.findIndex(({ id }) => id === headingId) - 1;
-                  return prevIndex >= 0 ? [prevHeadings[prevIndex]] : [];
-                }
-              });
-            }
+              const isTopBoundaryExceeded =
+                rootBounds && boundingClientRect.top < rootBounds.top;
+
+              if (isTopBoundaryExceeded) {
+                return newHeadings.length === 0 ? prevHeadings : newHeadings;
+              } else {
+                const prevIndex =
+                  prevHeadings.findIndex(({ id }) => id === headingId) - 1;
+
+                return newHeadings.length === 0 || !isTopBoundaryExceeded
+                  ? newHeadings
+                  : prevIndex >= 0
+                    ? [prevHeadings[prevIndex]]
+                    : [];
+              }
+            });
           }
         });
       },
