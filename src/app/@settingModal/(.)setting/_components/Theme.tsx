@@ -23,12 +23,12 @@ const Theme = ({ selectTheme, changeThemeHandler }: ThemeProps) => {
   ];
 
   return (
-    <section className="h-80 p-5">
-      <ul className="grid size-full grid-cols-3 grid-rows-2 gap-3">
+    <section className="h-full p-5 sm:h-80">
+      <ul className="grid size-full grid-cols-2 gap-3 sm:grid-cols-3 sm:grid-rows-2">
         {THEME_LIST.map(({ theme, bg, activity, body }) => (
           <li
             key={theme}
-            className="relative rounded-md border-2 border-solid px-4 pb-2 pt-1 hover:border-black dark:border-dark-disabled dark:hover:border-white"
+            className="relative aspect-square rounded-md border-2 border-solid px-4 pb-2 pt-1 hover:border-black sm:aspect-auto dark:border-dark-disabled dark:hover:border-white"
           >
             {selectTheme === theme && (
               <CheckSVG className="absolute right-0 size-5 fill-black dark:fill-white" />
