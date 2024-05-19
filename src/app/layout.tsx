@@ -3,6 +3,7 @@ import localFont from 'next/font/local';
 import { cookies } from 'next/headers';
 import ActivityNav from '@/app/_components/ActivityNav';
 import AnchorNav from './_components/AnchorNav';
+import AnchorNavButton from './_components/AnchorNavButton';
 import RouterNav from './_components/RouterNav';
 import { AnchorViewProvider } from './Provider';
 import type { Metadata } from 'next';
@@ -48,6 +49,7 @@ export default function RootLayout({
               {settingModal}
             </div>
           </main>
+          <AnchorNavButton />
         </body>
       </AnchorViewProvider>
     </html>

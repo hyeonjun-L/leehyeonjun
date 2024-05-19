@@ -153,7 +153,7 @@ const AnchorNav = () => {
       {isView && (
         <button
           onClick={changeAnchorView}
-          className="z-anchorNav group absolute left-72 p-3 sm:left-[22rem] md:max-xl:left-[23rem] xl:hidden"
+          className="z-anchorNav group absolute bottom-8 left-[300px] rounded-full border border-solid border-dark-disabled bg-dark-activity p-2 sm:bottom-auto sm:left-72 sm:left-[22rem] sm:rounded-none sm:border-none sm:bg-none sm:p-3 md:max-xl:left-[23rem] xl:hidden"
         >
           <ArrowSVG className="size-8 fill-white group-hover:fill-cursor-dark sm:fill-black sm:dark:fill-white " />
         </button>
