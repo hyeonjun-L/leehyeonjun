@@ -1,5 +1,6 @@
 import { readdir } from 'fs/promises';
 import { categories } from './constants/constants';
+import path from 'path';
 
 type Category = (typeof categories)[number];
 
@@ -11,12 +12,24 @@ export interface Post {
 }
 
 export async function getPosts(): Promise<Post[]> {
-  const slugs = (
-    await readdir('./src/app/blog/(posts)', { withFileTypes: true })
-  ).filter((dirent) => dirent.isDirectory());
+  const postPath = path.resolve(process.cwd(), 'src', 'app', 'blog', '(posts)');
+
+  const slugs = (await readdir(postPath, { withFileTypes: true })).filter(
+    (dirent) => dirent.isDirectory(),
+  );
 
   const posts = await Promise.all(
     slugs.map(async ({ name }) => {
+      const metadataPath = path.resolve(
+        process.cwd(),
+        'src',
+        'app',
+        'blog',
+        '(posts)',
+        `${name}`,
+        'page.mdx',
+      );
+
       const { metadata } = await import(`./app/blog/(posts)/${name}/page.mdx`);
       return { slug: name, ...metadata };
     }),
