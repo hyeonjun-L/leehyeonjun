@@ -23,8 +23,15 @@ export default function RootLayout({
   children: React.ReactNode;
   settingModal: React.ReactNode;
 }) {
+  const verificationAnchorView = (str?: string) => {
+    return str === 'true' ? true : str === 'false' ? false : undefined;
+  };
+
   const cookieStore = cookies();
   const theme = cookieStore.get('theme')?.value ?? 'Dark';
+  const anchorView = verificationAnchorView(
+    cookieStore.get('anchor_view')?.value,
+  );
 
   return (
     <html lang="kr" className={theme === 'Dark' ? 'dark text-dark-text' : ''}>
@@ -38,9 +45,9 @@ export default function RootLayout({
         className={`${consola.className} flex h-dvh flex-col bg-white sm:flex-row dark:bg-dark-body `}
       >
         <ActivityNav />
-        <AnchorNav />
+        <AnchorNav defaultView={!!anchorView} />
         <main className="flex size-full flex-grow flex-col overflow-auto">
-          <RouterNav />
+          <RouterNav anchorView={!!anchorView} />
           <div className="m-auto max-w-6xl p-4 sm:p-4 xl:p-8 2xl:p-0">
             {children}
             {settingModal}
