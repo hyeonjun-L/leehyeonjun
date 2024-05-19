@@ -24,7 +24,7 @@ const RouterNav = () => {
   };
 
   return (
-    <aside className="bg-White-selectFileMenu-bg dark:bg-dark-selectFileMenu-bg">
+    <aside className="z-nav top-0 bg-White-selectFileMenu-bg sm:sticky dark:bg-dark-selectFileMenu-bg">
       <section>
         <nav className="flex">
           {pathnameList.map((name, index) => {

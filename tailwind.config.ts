@@ -5,6 +5,10 @@ const config: Config = {
   content: ['./src/app/**/*.{js,ts,jsx,tsx,mdx}'],
   theme: {
     extend: {
+      zIndex: {
+        nav: '30',
+        modal: '50',
+      },
       colors: {
         dark: {
           body: '#1e1e1e',
