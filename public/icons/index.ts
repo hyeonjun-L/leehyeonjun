@@ -85,3 +85,7 @@ export { default as JavaScriptSVG } from './skill/javaScript.svg';
 export { default as WebpackSVG } from './skill/webpack.svg';
 
 export { default as RecoilSVG } from './skill/recoil.svg';
+
+export { default as ListSVG } from './list.svg';
+
+export { default as ArrowSVG } from './arrow.svg';

@@ -68,7 +68,7 @@ const ActivityNav = () => {
         href={href}
         scroll={scroll}
         aria-label={ariaLabel}
-        className="group relative flex size-16 p-4 md:size-20"
+        className="group relative flex aspect-square max-h-20 w-full max-w-20 p-3 sm:size-16 sm:p-4 md:size-20"
         target={!href.startsWith('/') ? '_blank' : undefined}
       >
         {isSelected && (
@@ -101,11 +101,11 @@ const ActivityNav = () => {
 
   return (
     <aside className="bg-dark-activity md:h-full dark:bg-dark-activity">
-      <section className="flex h-full justify-between sm:flex-col">
+      <section className="grid h-full grid-cols-[0.66fr_0.33fr] sm:flex sm:flex-col sm:justify-between">
         <nav className="flex sm:block">
           {activityNavList.map(renderNavItem)}
         </nav>
-        <nav className="hidden sm:block">{etcList.map(renderNavItem)}</nav>
+        <nav className="flex sm:block">{etcList.map(renderNavItem)}</nav>
       </section>
     </aside>
   );

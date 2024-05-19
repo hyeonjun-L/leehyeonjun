@@ -3,6 +3,9 @@ import localFont from 'next/font/local';
 import { cookies } from 'next/headers';
 import ActivityNav from '@/app/_components/ActivityNav';
 import AnchorNav from './_components/AnchorNav';
+import AnchorNavButton from './_components/AnchorNavButton';
+import RouterNav from './_components/RouterNav';
+import { AnchorViewProvider } from './Provider';
 import type { Metadata } from 'next';
 
 const consola = localFont({
@@ -33,18 +36,22 @@ export default function RootLayout({
           href="https://unpkg.com/dracula-prism/dist/css/dracula-prism.css"
         />
       </head>
-      <body
-        className={`${consola.className} flex h-dvh flex-col bg-white sm:flex-row dark:bg-dark-body `}
-      >
-        <ActivityNav />
-        <AnchorNav />
-        <main className="flex size-full flex-grow flex-col overflow-auto p-4 sm:p-8">
-          <div className="m-auto max-w-6xl">
-            {children}
-            {settingModal}
-          </div>
-        </main>
-      </body>
+      <AnchorViewProvider>
+        <body
+          className={`${consola.className} relative flex h-dvh flex-col bg-white sm:flex-row dark:bg-dark-body `}
+        >
+          <ActivityNav />
+          <AnchorNav />
+          <main className="flex size-full flex-grow flex-col overflow-auto">
+            <RouterNav />
+            <div className="m-auto max-w-6xl p-4 sm:p-4 xl:p-8 2xl:p-0">
+              {children}
+              {settingModal}
+            </div>
+          </main>
+          <AnchorNavButton />
+        </body>
+      </AnchorViewProvider>
     </html>
   );
 }

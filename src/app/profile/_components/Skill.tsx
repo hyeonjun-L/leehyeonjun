@@ -181,8 +181,8 @@ const Skill = () => {
             key={header}
             className="border border-solid border-dark-disabled "
           >
-            <div className="dark:bg-dark-menu-bg">
-              <h3 className="inline-block p-3 text-xl dark:bg-dark-body">
+            <div className="bg-White-selectFileMenu-bg dark:bg-dark-selectFileMenu-bg">
+              <h3 className="inline-block bg-White-body p-3 text-xl dark:bg-dark-body">
                 {header}
               </h3>
             </div>

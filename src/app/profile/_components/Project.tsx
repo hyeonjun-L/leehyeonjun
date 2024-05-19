@@ -415,7 +415,7 @@ const Project = () => {
           figma,
         }) => (
           <div key={title} className="grid gap-y-2 sm:grid-cols-[1.4fr_2fr]">
-            <div className="top-0 mx-auto flex max-h-[25rem] flex-col sm:sticky">
+            <div className="top-16 mx-auto flex max-h-[25rem] flex-col sm:sticky">
               <h3 className="mb-4 text-3xl">{title}</h3>
               <p>{explanation}</p>
               <p>{personnel}</p>
