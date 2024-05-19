@@ -4,14 +4,17 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useContext, useEffect, useState } from 'react';
 import { HIDE_PATH } from '@/constants/constants';
+import { ArrowSVG } from '@/icons/index';
 import { Context } from '../Provider';
 import { Headings } from '@/types/types';
 
 const AnchorNav = () => {
-  const { anchorView } = useContext(Context);
+  const { anchorView, changeAnchorView } = useContext(Context);
   const [headings, setHeadings] = useState<Headings[]>([]);
   const [viewHeadings, setViewHeadings] = useState<Headings[]>([]);
   const pathname = usePathname();
+
+  const isView = anchorView && !HIDE_PATH.includes(pathname);
 
   const viewHeading = viewHeadings.reduce(
     (acc, heading) => (acc.level < heading.level ? acc : heading),
@@ -115,11 +118,11 @@ const AnchorNav = () => {
   const ANCHOR_HEADER_MARGIN = ['', 'pl-4', 'pl-8', 'pl-12', 'pl-16', 'pl-20'];
 
   return (
-    !HIDE_PATH.includes(pathname) && (
+    <>
       <aside
-        className={`${anchorView ? 'block' : 'hidden'} h-full w-72 flex-shrink-0 overflow-y-auto bg-White-anchor-bg p-5 text-sm xl:block dark:bg-dark-anchor-bg`}
+        className={`${isView ? 'block' : 'hidden'} z-anchorNav absolute flex h-full w-72 flex-shrink-0 overflow-y-auto border-l border-solid border-black bg-White-anchor-bg p-5 text-sm sm:left-16 md:max-xl:left-20 xl:static xl:block dark:border-white dark:bg-dark-anchor-bg`}
       >
-        <section className="text-dark-600 flex max-h-full w-full flex-col gap-1 border-l border-solid border-black pl-1 dark:border-white">
+        <section className="text-dark-600 flex max-h-full w-full flex-col gap-1 pl-1">
           {headings.map(({ level: currentLevel, text, id }, index) => {
             const beforeLevel = headings[index - 1]?.level;
             const hasHigherPrevLevel =
@@ -147,7 +150,15 @@ const AnchorNav = () => {
           })}
         </section>
       </aside>
-    )
+      {isView && (
+        <button
+          onClick={changeAnchorView}
+          className="z-anchorNav group absolute left-72 p-3 sm:left-[22rem] md:max-xl:left-[23rem] xl:hidden"
+        >
+          <ArrowSVG className="size-8 fill-white group-hover:fill-cursor-dark sm:fill-black sm:dark:fill-white " />
+        </button>
+      )}
+    </>
   );
 };
 

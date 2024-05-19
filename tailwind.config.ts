@@ -6,7 +6,8 @@ const config: Config = {
   theme: {
     extend: {
       zIndex: {
-        nav: '30',
+        routerNav: '10',
+        anchorNav: '20',
         modal: '50',
       },
       colors: {

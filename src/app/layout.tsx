@@ -37,7 +37,7 @@ export default function RootLayout({
       </head>
       <AnchorViewProvider>
         <body
-          className={`${consola.className} flex h-dvh flex-col bg-white sm:flex-row dark:bg-dark-body `}
+          className={`${consola.className} relative flex h-dvh flex-col bg-white sm:flex-row dark:bg-dark-body `}
         >
           <ActivityNav />
           <AnchorNav />

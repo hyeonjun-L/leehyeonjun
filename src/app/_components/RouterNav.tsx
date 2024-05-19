@@ -4,6 +4,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useContext } from 'react';
 import { CloseSVG, ListSVG } from '@/icons/index';
 import { Context } from '../Provider';
+import { HIDE_PATH } from '@/constants/constants';
 
 const RouterNav = () => {
   const { anchorView, changeAnchorView } = useContext(Context);
@@ -27,16 +28,18 @@ const RouterNav = () => {
   };
 
   return (
-    <aside className="z-nav top-0 bg-White-selectFileMenu-bg sm:sticky dark:bg-dark-selectFileMenu-bg">
+    <aside className="z-routerNav top-0 bg-White-selectFileMenu-bg sm:sticky dark:bg-dark-selectFileMenu-bg">
       <section className="flex">
-        <button
-          onClick={changeAnchorView}
-          className="group hidden size-14 bg-White-anchor-bg p-4 sm:max-xl:block dark:bg-dark-anchor-bg"
-        >
-          <ListSVG
-            className={`${anchorView ? 'fill-black group-hover:fill-dark-disabled dark:fill-white ' : 'fill-dark-disabled group-hover:fill-black group-hover:dark:fill-white'}`}
-          />
-        </button>
+        {!HIDE_PATH.includes(pathname) && (
+          <button
+            onClick={changeAnchorView}
+            className="group hidden size-14 bg-White-anchor-bg p-4 sm:max-xl:block dark:bg-dark-anchor-bg"
+          >
+            <ListSVG
+              className={`${anchorView ? 'fill-black group-hover:fill-dark-disabled dark:fill-white ' : 'fill-dark-disabled group-hover:fill-black group-hover:dark:fill-white'}`}
+            />
+          </button>
+        )}
         <nav className="flex">
           {pathnameList.map((name, index) => {
             if (!name) return null;
