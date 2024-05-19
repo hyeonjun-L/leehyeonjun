@@ -1,10 +1,13 @@
 'use client';
-import Cookies from 'js-cookie';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import { useContext } from 'react';
 import { CloseSVG, ListSVG } from '@/icons/index';
+import { Context } from '../Provider';
 
-const RouterNav = ({ anchorView }: { anchorView: boolean }) => {
+const RouterNav = () => {
+  const { anchorView, changeAnchorView } = useContext(Context);
+
   const pathname = usePathname();
   const router = useRouter();
   const pathnameList = pathname.split('/').filter((p) => p);
@@ -23,16 +26,11 @@ const RouterNav = ({ anchorView }: { anchorView: boolean }) => {
     router.push(href);
   };
 
-  const changeAnchorViewHandler = () => {
-    Cookies.set('anchor_view', String(!anchorView));
-    router.refresh();
-  };
-
   return (
     <aside className="z-nav top-0 bg-White-selectFileMenu-bg sm:sticky dark:bg-dark-selectFileMenu-bg">
       <section className="flex">
         <button
-          onClick={changeAnchorViewHandler}
+          onClick={changeAnchorView}
           className="group hidden size-14 bg-White-anchor-bg p-4 sm:max-xl:block dark:bg-dark-anchor-bg"
         >
           <ListSVG

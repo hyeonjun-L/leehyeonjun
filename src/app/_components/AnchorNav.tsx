@@ -2,12 +2,13 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useEffect, useMemo, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { HIDE_PATH } from '@/constants/constants';
+import { Context } from '../Provider';
 import { Headings } from '@/types/types';
 
-const AnchorNav = ({ defaultView }: { defaultView: boolean }) => {
-  const isView = useMemo(() => defaultView, [defaultView]);
+const AnchorNav = () => {
+  const { anchorView } = useContext(Context);
   const [headings, setHeadings] = useState<Headings[]>([]);
   const [viewHeadings, setViewHeadings] = useState<Headings[]>([]);
   const pathname = usePathname();
@@ -116,7 +117,7 @@ const AnchorNav = ({ defaultView }: { defaultView: boolean }) => {
   return (
     !HIDE_PATH.includes(pathname) && (
       <aside
-        className={`${isView ? 'block' : 'hidden'} h-full w-72 flex-shrink-0 overflow-y-auto bg-White-anchor-bg p-5 text-sm xl:block dark:bg-dark-anchor-bg`}
+        className={`${anchorView ? 'block' : 'hidden'} h-full w-72 flex-shrink-0 overflow-y-auto bg-White-anchor-bg p-5 text-sm xl:block dark:bg-dark-anchor-bg`}
       >
         <section className="text-dark-600 flex max-h-full w-full flex-col gap-1 border-l border-solid border-black pl-1 dark:border-white">
           {headings.map(({ level: currentLevel, text, id }, index) => {
