@@ -2,9 +2,9 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useContext } from 'react';
+import { HIDE_PATH } from '@/constants/constants';
 import { CloseSVG, ListSVG } from '@/icons/index';
 import { Context } from '../Provider';
-import { HIDE_PATH } from '@/constants/constants';
 
 const RouterNav = () => {
   const { anchorView, changeAnchorView } = useContext(Context);

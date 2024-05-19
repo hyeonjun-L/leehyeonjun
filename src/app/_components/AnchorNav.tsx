@@ -14,8 +14,6 @@ const AnchorNav = () => {
   const [viewHeadings, setViewHeadings] = useState<Headings[]>([]);
   const pathname = usePathname();
 
-  const isView = anchorView && !HIDE_PATH.includes(pathname);
-
   const viewHeading = viewHeadings.reduce(
     (acc, heading) => (acc.level < heading.level ? acc : heading),
     { level: 7, text: '', id: '' },
@@ -120,7 +118,7 @@ const AnchorNav = () => {
   return (
     <>
       <aside
-        className={`${isView ? 'block' : 'hidden'} z-anchorNav absolute flex h-full w-72 flex-shrink-0 overflow-y-auto border-l border-solid border-black bg-White-anchor-bg p-5 text-sm sm:left-16 md:max-xl:left-20 xl:static xl:block dark:border-white dark:bg-dark-anchor-bg`}
+        className={`${anchorView ? (HIDE_PATH.includes(pathname) ? 'hidden' : 'block') : HIDE_PATH.includes(pathname) ? 'hidden' : 'hidden xl:block'} z-anchorNav absolute flex h-full w-72 flex-shrink-0 overflow-y-auto border-l border-solid border-black bg-White-anchor-bg p-5 text-sm sm:left-16 md:max-xl:left-20 xl:static dark:border-white dark:bg-dark-anchor-bg`}
       >
         <section className="text-dark-600 flex max-h-full w-full flex-col gap-1 pl-1">
           {headings.map(({ level: currentLevel, text, id }, index) => {
@@ -150,10 +148,10 @@ const AnchorNav = () => {
           })}
         </section>
       </aside>
-      {isView && (
+      {anchorView && !HIDE_PATH.includes(pathname) && (
         <button
           onClick={changeAnchorView}
-          className="z-anchorNav group absolute bottom-8 left-[300px] rounded-full border border-solid border-dark-disabled bg-dark-activity p-2 sm:bottom-auto sm:left-72 sm:left-[22rem] sm:rounded-none sm:border-none sm:bg-none sm:p-3 md:max-xl:left-[23rem] xl:hidden"
+          className="z-anchorNav group absolute bottom-8 left-[300px] rounded-full border border-solid border-dark-disabled bg-dark-activity p-2 sm:bottom-auto sm:left-72 sm:rounded-none sm:border-none sm:bg-none sm:p-3 md:max-xl:left-[23rem] xl:hidden"
         >
           <ArrowSVG className="size-8 fill-white group-hover:fill-cursor-dark sm:fill-black sm:dark:fill-white " />
         </button>
