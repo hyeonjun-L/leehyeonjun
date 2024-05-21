@@ -12,3 +12,16 @@
 .dark strong {
   color: white;
 }
+
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 5px;
+}
+
+*::-webkit-scrollbar-track {
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: #c1c1c1;
+  border-radius: 0.5rem;
+}

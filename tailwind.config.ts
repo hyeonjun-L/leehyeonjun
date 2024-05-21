@@ -58,6 +58,7 @@ const config: Config = {
     },
   },
   plugins: [
+    require('tailwind-scrollbar')({ nocompatible: true }),
     require('@tailwindcss/typography'),
     // function ({ addVariant, e }) {
     //   addVariant('pink', ({ modifySelectors, separator }) => {

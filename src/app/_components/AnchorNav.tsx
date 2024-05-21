@@ -36,6 +36,7 @@ const AnchorNav = () => {
   };
 
   useEffect(() => {
+    resetViewHeadings();
     const allHeadings = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
 
     const newHeadings: Headings[] = Array.from(allHeadings).map(
@@ -151,7 +152,8 @@ const AnchorNav = () => {
       {anchorView && !HIDE_PATH.includes(pathname) && (
         <button
           onClick={changeAnchorView}
-          className="group absolute bottom-8 left-[300px] z-anchorNav rounded-full border border-solid border-dark-disabled bg-dark-activity p-2 sm:bottom-auto sm:left-72 sm:rounded-none sm:border-none sm:bg-none sm:p-3 md:max-xl:left-[23rem] xl:hidden"
+          className="group absolute bottom-8 left-[300px] z-anchorNav rounded-full border border-solid border-dark-disabled bg-dark-activity p-2 sm:bottom-auto sm:left-[22rem] sm:rounded-none sm:border-none sm:bg-none sm:p-3 md:max-xl:left-[23rem] xl:hidden"
+          aria-label="close anchorNav"
         >
           <DoubleArrowSVG className="size-8 fill-white group-hover:fill-cursor-dark sm:fill-black sm:dark:fill-white " />
         </button>
