@@ -12,7 +12,7 @@ const page = () => {
   const theme = cookieStore.get('theme')?.value ?? 'Dark';
 
   return (
-    <>
+    <section className="m-auto max-w-6xl p-4 sm:p-4 xl:p-8 2xl:p-0">
       <AboutMe theme={theme} />
       <Skill />
       <Career />
@@ -20,7 +20,7 @@ const page = () => {
       <Experience />
       <Education />
       <Certifications />
-    </>
+    </section>
   );
 };
 

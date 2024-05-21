@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useContext, useEffect, useState } from 'react';
 import { HIDE_PATH } from '@/constants/constants';
-import { ArrowSVG } from '@/icons/index';
+import { DoubleArrowSVG } from '@/icons/index';
 import { Context } from '../Provider';
 import { Headings } from '@/types/types';
 
@@ -118,7 +118,7 @@ const AnchorNav = () => {
   return (
     <>
       <aside
-        className={`${anchorView ? (HIDE_PATH.includes(pathname) ? 'hidden' : 'block') : HIDE_PATH.includes(pathname) ? 'hidden' : 'hidden xl:block'} z-anchorNav absolute flex h-full w-72 flex-shrink-0 overflow-y-auto border-l border-solid border-black bg-White-anchor-bg p-5 text-sm sm:left-16 md:max-xl:left-20 xl:static dark:border-white dark:bg-dark-anchor-bg`}
+        className={`${anchorView ? (HIDE_PATH.includes(pathname) ? 'hidden' : 'block') : HIDE_PATH.includes(pathname) ? 'hidden' : 'hidden xl:block'} absolute z-anchorNav flex h-full w-72 flex-shrink-0 overflow-y-auto border-l border-solid border-black bg-White-anchor-bg p-5 text-sm sm:left-16 md:max-xl:left-20 xl:static dark:border-white dark:bg-dark-anchor-bg`}
       >
         <section className="text-dark-600 flex max-h-full w-full flex-col gap-1 pl-1">
           {headings.map(({ level: currentLevel, text, id }, index) => {
@@ -151,9 +151,9 @@ const AnchorNav = () => {
       {anchorView && !HIDE_PATH.includes(pathname) && (
         <button
           onClick={changeAnchorView}
-          className="z-anchorNav group absolute bottom-8 left-[300px] rounded-full border border-solid border-dark-disabled bg-dark-activity p-2 sm:bottom-auto sm:left-72 sm:rounded-none sm:border-none sm:bg-none sm:p-3 md:max-xl:left-[23rem] xl:hidden"
+          className="group absolute bottom-8 left-[300px] z-anchorNav rounded-full border border-solid border-dark-disabled bg-dark-activity p-2 sm:bottom-auto sm:left-72 sm:rounded-none sm:border-none sm:bg-none sm:p-3 md:max-xl:left-[23rem] xl:hidden"
         >
-          <ArrowSVG className="size-8 fill-white group-hover:fill-cursor-dark sm:fill-black sm:dark:fill-white " />
+          <DoubleArrowSVG className="size-8 fill-white group-hover:fill-cursor-dark sm:fill-black sm:dark:fill-white " />
         </button>
       )}
     </>

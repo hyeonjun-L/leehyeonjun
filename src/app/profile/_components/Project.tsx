@@ -46,7 +46,7 @@ const Project = () => {
       imageAlt: '커넥션',
       webSite: 'https://connection-frontend.vercel.app',
       github: 'https://github.com/connection-2023/frontend',
-      developmentProcess: '/',
+      developmentProcess: '/portfolio/connection',
       figma:
         'https://www.figma.com/design/R0JimB5gutov7mYBOZ0yVB/%EC%BB%A4%EB%84%A5%EC%85%98-%EB%B0%98%EC%9D%91%ED%98%95',
       detailExplanation: (
@@ -203,7 +203,7 @@ const Project = () => {
       github: 'https://github.com/Eunseo-jo/prompterday-frontend',
       figma:
         'https://www.figma.com/design/57fx1eyB2NXD2iVwSFn2rp/%EC%BB%A4%EB%84%A5%EC%85%98_%ED%95%B4%EC%BB%A4%ED%86%A4',
-      developmentProcess: '/',
+      developmentProcess: '/portfolio/connection-health',
       detailExplanation: (
         <div>
           사용자의 질병 정보와 음식 및 의약품의 성분을 입력 받아, GPT-3.5
@@ -288,11 +288,11 @@ const Project = () => {
       period: '2023.06.27 ~ 2023.07.17',
       image: editorImage,
       mainColor: 'border-[#2ca9bc]',
-      imageAlt: 'connection health',
+      imageAlt: 'online editor',
       webSite: 'https://project-online-editor.vercel.app/',
       github: 'https://github.com/hyeonjun-L/Project_Notion_VanillaJS-',
       figma: '',
-      developmentProcess: '/',
+      developmentProcess: '/portfolio/online-editor',
       detailExplanation: (
         <div>
           글 작성, 수정, 삭제를 할 수 있는 온라인 에디터를 순수 JavaScript를
@@ -336,12 +336,12 @@ const Project = () => {
       period: '2023.01 ~ 2023.02',
       image: haruImage,
       mainColor: 'border-gray',
-      imageAlt: 'connection health',
+      imageAlt: 'HARU',
       webSite: 'https://5term-mini-front.vercel.app/',
       github: 'https://github.com/hyeonjun-L/5term-mini-front',
       figma:
         'https://xd.adobe.com/view/304fe50c-487e-4afc-8d53-fe7699e134f4-651c/screen/266e2c5f-4b59-4568-a6ba-8668cc55aa76',
-      developmentProcess: '/',
+      developmentProcess: '/portfolio/haru',
       detailExplanation: (
         <div>
           친구들과 일정 및 일기를 공유할 수 있는 캘린더 서비스 입니다.
