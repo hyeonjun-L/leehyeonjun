@@ -28,12 +28,13 @@ const RouterNav = () => {
   };
 
   return (
-    <aside className="z-routerNav top-0 bg-White-selectFileMenu-bg sm:sticky dark:bg-dark-selectFileMenu-bg">
+    <aside className="top-0 z-routerNav bg-White-selectFileMenu-bg sm:sticky dark:bg-dark-selectFileMenu-bg">
       <section className="flex">
         {!HIDE_PATH.includes(pathname) && (
           <button
             onClick={changeAnchorView}
             className="group hidden size-14 bg-White-anchor-bg p-4 sm:max-xl:block dark:bg-dark-anchor-bg"
+            aria-label="open anchorNav"
           >
             <ListSVG
               className={`${anchorView ? 'fill-black group-hover:fill-dark-disabled dark:fill-white ' : 'fill-dark-disabled group-hover:fill-black group-hover:dark:fill-white'}`}
@@ -51,9 +52,13 @@ const RouterNav = () => {
                 className={`flex gap-2 p-4 ${href === pathname ? 'bg-White-body dark:bg-dark-body' : 'bg-White-selectFileMenu-disabled dark:bg-dark-selectFileMenu-disabled'}`}
                 key={href}
                 href={href}
+                aria-label="move link"
               >
                 {name}
-                <button onClick={(e) => closeFileHandler(e, closeHref)}>
+                <button
+                  onClick={(e) => closeFileHandler(e, closeHref)}
+                  aria-label="close link"
+                >
                   <CloseSVG className="size-4 fill-black hover:fill-gray-600 dark:fill-dark-menu-text dark:hover:fill-white" />
                 </button>
               </Link>

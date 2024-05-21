@@ -1,6 +1,6 @@
-import { ArrowSVG } from '@/icons/index';
 import Image, { StaticImageData } from 'next/image';
 import Link from 'next/link';
+import { ArrowSVG } from '@/icons/index';
 
 interface ProjectProps {
   src: StaticImageData;
@@ -24,11 +24,11 @@ const Project = ({
         alt={alt}
         className="size-full duration-500 group-hover:scale-110 dark:bg-white"
       />
-      <figcaption className="absolute top-0 flex size-full flex-col items-center justify-evenly bg-White-selectFileMenu-bg p-5 opacity-0 duration-700 group-hover:opacity-100 dark:bg-dark-menu-bg">
+      <figcaption className="absolute top-0 flex size-full flex-col items-center justify-evenly bg-White-selectFileMenu-bg px-2 text-sm opacity-0 duration-700 group-hover:opacity-100 sm:p-5 sm:text-base dark:bg-dark-menu-bg">
         <h1>{explanation}</h1>
         <Link
           href={webLink}
-          className="flex items-center gap-2 rounded-full border border-solid border-black p-4 hover:bg-White-anchor-hover dark:border-white dark:hover:bg-dark-activity"
+          className=" flex items-center gap-2 rounded-full border border-solid border-black p-2 hover:bg-White-anchor-hover sm:p-4 dark:border-white dark:hover:bg-dark-activity"
           aria-label="해당 프로젝트 웹사이트 방문"
           target="_blank"
         >
@@ -37,7 +37,7 @@ const Project = ({
         </Link>
         <Link
           href={detailLink}
-          className="flex items-center gap-2 rounded-full border border-solid border-black p-4 hover:bg-White-anchor-hover dark:border-white dark:hover:bg-dark-activity"
+          className="flex items-center gap-2 rounded-full border border-solid border-black p-2 hover:bg-White-anchor-hover sm:p-4 dark:border-white dark:hover:bg-dark-activity"
           aria-label="해당 프로젝트 개발 내용 보기"
         >
           개발 내용 보기

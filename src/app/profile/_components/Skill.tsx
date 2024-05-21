@@ -188,10 +188,10 @@ const Skill = () => {
             </div>
             {skill.map(({ svg, title, detail }) => (
               <dl className="p-3" key={title}>
-                <div className="flex gap-2">
+                <dt className="flex gap-2">
                   {svg}
-                  <dt className="mr-3 text-black dark:text-white">{title}</dt>
-                </div>
+                  <p className="mr-3 text-black dark:text-white">{title}</p>
+                </dt>
                 <dd className="mt-4">{detail}</dd>
               </dl>
             ))}
