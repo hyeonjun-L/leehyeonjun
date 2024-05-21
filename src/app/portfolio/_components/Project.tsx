@@ -1,3 +1,4 @@
+import { ArrowSVG } from '@/icons/index';
 import Image, { StaticImageData } from 'next/image';
 import Link from 'next/link';
 
@@ -27,17 +28,20 @@ const Project = ({
         <h1>{explanation}</h1>
         <Link
           href={webLink}
-          className="rounded-full border border-solid border-black p-4 hover:bg-White-anchor-hover dark:border-white dark:hover:bg-dark-activity"
+          className="flex items-center gap-2 rounded-full border border-solid border-black p-4 hover:bg-White-anchor-hover dark:border-white dark:hover:bg-dark-activity"
           aria-label="해당 프로젝트 웹사이트 방문"
+          target="_blank"
         >
           웹 사이트 방문하기
+          <ArrowSVG className="size-4 dark:fill-white" />
         </Link>
         <Link
           href={detailLink}
-          className="rounded-full border border-solid border-black p-4 hover:bg-White-anchor-hover dark:border-white dark:hover:bg-dark-activity"
+          className="flex items-center gap-2 rounded-full border border-solid border-black p-4 hover:bg-White-anchor-hover dark:border-white dark:hover:bg-dark-activity"
           aria-label="해당 프로젝트 개발 내용 보기"
         >
           개발 내용 보기
+          <ArrowSVG className="size-4 dark:fill-white" />
         </Link>
       </figcaption>
     </figure>
