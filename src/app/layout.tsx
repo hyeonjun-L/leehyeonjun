@@ -44,10 +44,8 @@ export default function RootLayout({
           <AnchorNav />
           <main className="flex size-full flex-grow flex-col overflow-auto">
             <RouterNav />
-            <div className="m-auto max-w-6xl p-4 sm:p-4 xl:p-8 2xl:p-0">
-              {children}
-              {settingModal}
-            </div>
+            {children}
+            {settingModal}
           </main>
           <AnchorNavButton />
         </body>

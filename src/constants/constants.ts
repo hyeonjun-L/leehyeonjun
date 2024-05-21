@@ -1,6 +1,6 @@
 export const categories = ['dog', 'cat', 'rock'] as const;
 
-export const HIDE_PATH = ['/', '/blog', '/setting'];
+export const HIDE_PATH = ['/', '/blog', '/setting', '/portfolio'];
 
 export const MENU = ['File', 'Edit', 'View', 'Terminal', 'Help'] as const;
 
