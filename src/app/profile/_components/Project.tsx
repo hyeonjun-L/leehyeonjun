@@ -288,7 +288,7 @@ const Project = () => {
       period: '2023.06.27 ~ 2023.07.17',
       image: editorImage,
       mainColor: 'border-[#2ca9bc]',
-      imageAlt: 'connection health',
+      imageAlt: 'online Editor',
       webSite: 'https://project-online-editor.vercel.app/',
       github: 'https://github.com/hyeonjun-L/Project_Notion_VanillaJS-',
       figma: '',
