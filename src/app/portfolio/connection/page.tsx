@@ -22,18 +22,19 @@ import {
   VercelSVG,
   ZustandSVG,
 } from '@/icons/index';
+import Design from '../_components/Design';
 
 const page = () => {
-  const explanation = {
+  const EXPLANATION = {
     title: 'Connection',
     personnel: 'FE: 2명, BE: 2명, Designer: 1명',
     period: '( 2023.09 ~ 진행중 )',
     webSite: 'https://connection-frontend.vercel.app',
     github: 'https://github.com/connection-2023/frontend',
     logo,
-  };
+  } as const;
 
-  const skills = [
+  const SKILLS = [
     {
       svg: <NextSVG className="size-5" />,
       name: 'Next',
@@ -169,9 +170,12 @@ const page = () => {
     },
   ];
 
+  const DESIGN_LINK =
+    'https://www.figma.com/embed?embed_host=share&url=https%3A%2F%2Fwww.figma.com%2Fdesign%2FR0JimB5gutov7mYBOZ0yVB%2F%25EC%25BB%25A4%25EB%2584%25A5%25EC%2585%2598-%25EB%25B0%2598%25EC%259D%2591%25ED%2598%2595%3Fnode-id%3D0%253A1%26t%3DZABXiEcbqGzOawN6-1';
+
   return (
     <div className="max-w-6xl p-4 sm:p-4 xl:p-8 [&>section]:mb-16 [&>section]:border-b [&>section]:border-solid [&>section]:border-dark-disabled [&>section]:pb-4">
-      <Explanation {...explanation}>
+      <Explanation {...EXPLANATION}>
         <div className="border-t border-solid border-dark-menu-hover pt-2">
           댄서와 수강생을 연결해주는 웹 플랫폼으로 유저의 요구를 이해하기 위해
           <strong> 설문조사 결과를 기반으로 기획</strong>
@@ -189,14 +193,8 @@ const page = () => {
           절차 진행 중에 있습니다.
         </div>
       </Explanation>
-      <Skill skillList={skills} />
-      <section>
-        <h2 className="mb-4 text-4xl font-semibold">디자인</h2>
-        <iframe
-          className="h-[28.125rem] w-full"
-          src="https://www.figma.com/embed?embed_host=share&url=https%3A%2F%2Fwww.figma.com%2Fdesign%2FR0JimB5gutov7mYBOZ0yVB%2F%25EC%25BB%25A4%25EB%2584%25A5%25EC%2585%2598-%25EB%25B0%2598%25EC%259D%2591%25ED%2598%2595%3Fnode-id%3D0%253A1%26t%3DZABXiEcbqGzOawN6-1"
-        />
-      </section>
+      <Skill skillList={SKILLS} />
+      <Design link={DESIGN_LINK} />
       <section>
         <h2 className="text-4xl font-semibold">개발 과정</h2>
       </section>

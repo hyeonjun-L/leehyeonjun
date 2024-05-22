@@ -13,7 +13,10 @@ const Skill = ({ skillList }: SkillProps) => {
       <h2 className="mb-4 text-4xl font-semibold">사용 기술</h2>
       <dl>
         {skillList.map(({ svg, name, bg, explanation }) => (
-          <div key={name} className="mb-4 flex items-center gap-4">
+          <div
+            key={name}
+            className="mb-4 flex flex-col gap-4 md:flex-row md:items-center"
+          >
             <dt
               className={`flex items-center gap-2 ${bg} whitespace-nowrap p-1`}
             >
