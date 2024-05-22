@@ -106,7 +106,7 @@ const Project = () => {
         },
         {
           svg: <TaillwindSVG className="size-5" />,
-          name: 'Taillwind CSS',
+          name: 'Tailwind CSS',
           bg: 'bg-[#06B6D4]',
         },
         {
