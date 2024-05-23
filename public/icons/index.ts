@@ -91,3 +91,7 @@ export { default as ListSVG } from './list.svg';
 export { default as DoubleArrowSVG } from './doubleArrow.svg';
 
 export { default as ArrowSVG } from './arrow.svg';
+
+export { default as MobileSVG } from './mobile.svg';
+
+export { default as PcSVG } from './pc.svg';
