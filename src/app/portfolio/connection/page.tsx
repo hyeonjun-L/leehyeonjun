@@ -1,6 +1,3 @@
-import { logo } from '@/images/connection';
-import Explanation from '../_components/Explanation';
-import Skill from '../_components/Skill';
 import {
   DockerSVG,
   EslintSVG,
@@ -22,7 +19,11 @@ import {
   VercelSVG,
   ZustandSVG,
 } from '@/icons/index';
+import { logo } from '@/images/connection';
 import Design from '../_components/Design';
+import Explanation from '../_components/Explanation';
+import Skill from '../_components/Skill';
+import DevProcessTimeline from './_components/DevProcessTimeline';
 
 const page = () => {
   const EXPLANATION = {
@@ -174,7 +175,7 @@ const page = () => {
     'https://www.figma.com/embed?embed_host=share&url=https%3A%2F%2Fwww.figma.com%2Fdesign%2FR0JimB5gutov7mYBOZ0yVB%2F%25EC%25BB%25A4%25EB%2584%25A5%25EC%2585%2598-%25EB%25B0%2598%25EC%259D%2591%25ED%2598%2595%3Fnode-id%3D0%253A1%26t%3DZABXiEcbqGzOawN6-1';
 
   return (
-    <div className="max-w-6xl p-4 sm:p-4 xl:p-8 [&>section]:mb-16 [&>section]:border-b [&>section]:border-solid [&>section]:border-dark-disabled [&>section]:pb-4">
+    <div className="mx-auto max-w-7xl p-4 sm:p-4 [&>section]:mb-16 [&>section]:border-b [&>section]:border-solid [&>section]:border-dark-disabled [&>section]:pb-4">
       <Explanation {...EXPLANATION}>
         <div className="border-t border-solid border-dark-menu-hover pt-2">
           댄서와 수강생을 연결해주는 웹 플랫폼으로 유저의 요구를 이해하기 위해
@@ -195,9 +196,7 @@ const page = () => {
       </Explanation>
       <Skill skillList={SKILLS} />
       <Design link={DESIGN_LINK} />
-      <section>
-        <h2 className="text-4xl font-semibold">개발 과정</h2>
-      </section>
+      <DevProcessTimeline />
       <section>
         <h2 className="text-4xl font-semibold">느낀점 & 아쉬운점</h2>
       </section>
