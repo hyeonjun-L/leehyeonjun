@@ -37,6 +37,8 @@ const AnchorNav = () => {
 
   useEffect(() => {
     resetViewHeadings();
+    let unremoveHeading = false;
+
     const allHeadings = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
 
     const newHeadings: Headings[] = Array.from(allHeadings).map(
@@ -64,13 +66,20 @@ const AnchorNav = () => {
           const headingId = target.id;
 
           if (isIntersecting) {
-            setViewHeadings((prevHeadings) =>
-              addViewHeadings(prevHeadings, {
+            setViewHeadings((prevHeadings) => {
+              const newHeadings = addViewHeadings(prevHeadings, {
                 id: headingId,
                 text: headingText,
                 level: headingLevel,
-              }),
-            );
+              });
+
+              if (unremoveHeading) {
+                unremoveHeading = false;
+                return newHeadings.splice(1);
+              }
+
+              return newHeadings;
+            });
           } else {
             setViewHeadings((prevHeadings) => {
               const newHeadings = prevHeadings.filter(
@@ -81,10 +90,13 @@ const AnchorNav = () => {
                 rootBounds && boundingClientRect.top < rootBounds.top;
 
               if (isTopBoundaryExceeded) {
+                if (newHeadings.length === 0) {
+                  unremoveHeading = true;
+                }
                 return newHeadings.length === 0 ? prevHeadings : newHeadings;
               } else {
                 const prevIndex =
-                  prevHeadings.findIndex(({ id }) => id === headingId) - 1;
+                  newHeadings.findIndex(({ id }) => id === headingId) - 1;
 
                 return newHeadings.length === 0 || !isTopBoundaryExceeded
                   ? newHeadings
