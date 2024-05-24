@@ -23,7 +23,9 @@ const Explanation = ({
 }: ExplanationProps) => {
   return (
     <section className="flex flex-col gap-3">
-      {logo && <Image src={logo} alt="logo Image" className="bg-white p-2" />}
+      {logo && (
+        <Image src={logo} priority alt="logo Image" className="bg-white p-2" />
+      )}
       <h1 className="text-5xl font-bold">{title}</h1>
       <div className="flex flex-wrap justify-between text-white">
         <div className="flex flex-wrap gap-2">

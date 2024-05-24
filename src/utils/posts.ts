@@ -1,6 +1,6 @@
 import { readdir } from 'fs/promises';
 import path from 'path';
-import { categories } from './constants/constants';
+import { categories } from '../constants/constants';
 
 type Category = (typeof categories)[number];
 
@@ -20,7 +20,7 @@ export async function getPosts(): Promise<Post[]> {
 
   const posts = await Promise.all(
     slugs.map(async ({ name }) => {
-      const { metadata } = await import(`./app/blog/(posts)/${name}/page.mdx`);
+      const { metadata } = await import(`../app/blog/(posts)/${name}/page.mdx`);
       return { slug: name, ...metadata };
     }),
   );
