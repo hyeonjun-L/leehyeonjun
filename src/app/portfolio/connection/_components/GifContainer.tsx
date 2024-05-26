@@ -1,6 +1,6 @@
 'use client';
 import Image from 'next/image';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { MobileSVG, PcSVG } from '@/icons/index';
 import { BlurImageSrc } from '@/types/types';
 
@@ -16,7 +16,7 @@ const GifContainer = ({ title, children, pc, mobile }: GifContainerProps) => {
 
   return (
     <>
-      <div className="absolute right-0 top-4 flex gap-3 lg:hidden">
+      <div className="right-0 top-4 mb-2 flex gap-3 sm:absolute sm:mb-0 lg:hidden">
         <button
           className="group p-1"
           onClick={() => setIsMobile(true)}

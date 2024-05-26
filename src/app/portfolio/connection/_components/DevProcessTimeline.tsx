@@ -288,11 +288,11 @@ const DevProcessTimeline = async () => {
           key={mainTitle}
           className="mb-4 border-l border-solid border-dark-disabled pl-2"
         >
-          <h3 className="mb-2 pb-2 text-3xl ">{mainTitle}</h3>
+          <h3 className="mb-2 pb-2 text-2xl sm:text-3xl ">{mainTitle}</h3>
           {details.map(({ title, image, explanation }) => (
             <Fragment key={title}>
               <div className="relative mb-4 border-t border-solid pt-4 dark:border-dark-menu-hover">
-                <h4 className="mb-2 text-2xl">{title}</h4>
+                <h4 className="mb-2 text-xl sm:text-2xl">{title}</h4>
                 <GifContainer pc={image.pc} mobile={image.mobile} title={title}>
                   {explanation}
                 </GifContainer>
