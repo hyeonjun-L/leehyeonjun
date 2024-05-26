@@ -1,5 +1,6 @@
 import getPlaceholderImage from '@/utils/dynamicBlurDataUrl';
 import GifContainer from './GifContainer';
+import { Fragment } from 'react';
 
 const DevProcessTimeline = async () => {
   const PROCESS_TIME_LINE = [
@@ -101,6 +102,74 @@ const DevProcessTimeline = async () => {
       ],
     },
     {
+      mainTitle: '네이버 api',
+      details: [
+        {
+          title: '네이버 지도 공통 컴포넌트 구현',
+          image: {
+            pc: await getPlaceholderImage('/images/connection/map/pc.gif'),
+            mobile: await getPlaceholderImage(
+              '/images/connection/map/mobile.gif',
+            ),
+          },
+          explanation: (
+            <ul>
+              <li>ssss</li>
+            </ul>
+          ),
+        },
+        {
+          title: '네이버 소셜 로그인 구현',
+          image: {
+            pc: await getPlaceholderImage('/images/connection/login/pc.gif'),
+            mobile: await getPlaceholderImage(
+              '/images/connection/login/mobile.gif',
+            ),
+          },
+          explanation: (
+            <ul>
+              <li>ssss</li>
+            </ul>
+          ),
+        },
+      ],
+    },
+    {
+      mainTitle: '실시간 채팅 및 알림',
+      details: [
+        {
+          title: '채팅',
+          image: {
+            pc: await getPlaceholderImage('/images/connection/chat/pc.gif'),
+            mobile: await getPlaceholderImage(
+              '/images/connection/chat/mobile.gif',
+            ),
+          },
+          explanation: (
+            <ul>
+              <li>ssss</li>
+            </ul>
+          ),
+        },
+        {
+          title: '알림',
+          image: {
+            pc: await getPlaceholderImage(
+              '/images/connection/notifications/pc.gif',
+            ),
+            mobile: await getPlaceholderImage(
+              '/images/connection/notifications/mobile.gif',
+            ),
+          },
+          explanation: (
+            <ul>
+              <li>ssss</li>
+            </ul>
+          ),
+        },
+      ],
+    },
+    {
       mainTitle: '클래스',
       details: [
         {
@@ -119,6 +188,39 @@ const DevProcessTimeline = async () => {
             </ul>
           ),
           troubleshooting: '각 섹션의 크기를 줄이기 위한 dynamic 처리?',
+        },
+      ],
+    },
+    {
+      mainTitle: 'PWA 및 FCM 연결',
+      details: [
+        {
+          title: 'PWA 연결 및 설치 방법 페이지',
+          image: {
+            pc: await getPlaceholderImage('/images/connection/PWA/pc.gif'),
+            mobile: await getPlaceholderImage(
+              '/images/connection/PWA/mobile.gif',
+            ),
+          },
+          explanation: (
+            <ul>
+              <li>ssss</li>
+            </ul>
+          ),
+        },
+        {
+          title: 'FCM 연결 및 웹 푸쉬 알림 구현',
+          image: {
+            pc: await getPlaceholderImage('/images/connection/FCM/pc.gif'),
+            mobile: await getPlaceholderImage(
+              '/images/connection/FCM/mobile.gif',
+            ),
+          },
+          explanation: (
+            <ul>
+              <li>ssss</li>
+            </ul>
+          ),
         },
       ],
     },
@@ -188,17 +290,16 @@ const DevProcessTimeline = async () => {
         >
           <h3 className="mb-2 pb-2 text-3xl ">{mainTitle}</h3>
           {details.map(({ title, image, explanation }) => (
-            <div
-              key={title}
-              className="relative mb-4 border-t border-solid pt-4 dark:border-dark-menu-hover"
-            >
-              <h4 className="mb-2 text-2xl">{title}</h4>
-              <GifContainer pc={image.pc} mobile={image.mobile} title={title}>
-                {explanation}
-              </GifContainer>
-            </div>
+            <Fragment key={title}>
+              <div className="relative mb-4 border-t border-solid pt-4 dark:border-dark-menu-hover">
+                <h4 className="mb-2 text-2xl">{title}</h4>
+                <GifContainer pc={image.pc} mobile={image.mobile} title={title}>
+                  {explanation}
+                </GifContainer>
+              </div>
+              <h5>트러블 슈팅</h5>
+            </Fragment>
           ))}
-          <h5>트러블 슈팅</h5>
         </div>
       ))}
     </section>
