@@ -4,8 +4,143 @@ import GifContainer from './GifContainer';
 const DevProcessTimeline = async () => {
   const PROCESS_TIME_LINE = [
     {
+      mainTitle: '검색',
+      details: [
+        {
+          title: '검색 필터 및 검색 페이지',
+          image: {
+            pc: await getPlaceholderImage('/images/connection/search/pc.gif'),
+            mobile: await getPlaceholderImage(
+              '/images/connection/search/mobile.gif',
+            ),
+          },
+          explanation: (
+            <ul>
+              <li>ssss</li>
+            </ul>
+          ),
+          troubleshooting: '뒤로가기 진행 시 보던 곳으로 이동 & 캐싱 문제',
+        },
+      ],
+    },
+    {
+      mainTitle: '리뷰',
+      details: [
+        {
+          title: '수강생 및 강사 리뷰 관리 페이지',
+          image: {
+            pc: await getPlaceholderImage('/images/connection/review/pc.gif'),
+            mobile: await getPlaceholderImage(
+              '/images/connection/review/mobile.gif',
+            ),
+          },
+          explanation: (
+            <ul>
+              <li>ssss</li>
+            </ul>
+          ),
+        },
+      ],
+    },
+    {
+      mainTitle: '좋아요 및 차단',
+      details: [
+        {
+          title: '강사 & 클래스',
+          image: {
+            pc: await getPlaceholderImage('/images/connection/like/pc.gif'),
+            mobile: await getPlaceholderImage(
+              '/images/connection/like/mobile.gif',
+            ),
+          },
+          explanation: (
+            <ul>
+              <li>ssss</li>
+            </ul>
+          ),
+          troubleshooting: '좋아요 봤던 거 다시 들어가면 좋아요 안된거 처리',
+        },
+      ],
+    },
+    {
+      mainTitle: '회원 관리',
+      details: [
+        {
+          title: '클래스 수강 회원 관리',
+          image: {
+            pc: await getPlaceholderImage('/images/connection/member/pc.gif'),
+            mobile: await getPlaceholderImage(
+              '/images/connection/member/mobile.gif',
+            ),
+          },
+          explanation: (
+            <ul>
+              <li>ssss</li>
+            </ul>
+          ),
+        },
+      ],
+    },
+    {
+      mainTitle: '내 정보',
+      details: [
+        {
+          title: '내 정보 수정 페이지',
+          image: {
+            pc: await getPlaceholderImage('/images/connection/myInfo/pc.gif'),
+            mobile: await getPlaceholderImage(
+              '/images/connection/myInfo/mobile.gif',
+            ),
+          },
+          explanation: (
+            <ul>
+              <li>ssss</li>
+            </ul>
+          ),
+        },
+      ],
+    },
+    {
+      mainTitle: '클래스',
+      details: [
+        {
+          title: '등록 페이지',
+          image: {
+            pc: await getPlaceholderImage(
+              '/images/connection/class_register/pc.gif',
+            ),
+            mobile: await getPlaceholderImage(
+              '/images/connection/class_register/mobile.gif',
+            ),
+          },
+          explanation: (
+            <ul>
+              <li>ssss</li>
+            </ul>
+          ),
+          troubleshooting: '각 섹션의 크기를 줄이기 위한 dynamic 처리?',
+        },
+      ],
+    },
+    {
       mainTitle: '강사',
       details: [
+        {
+          title: '등록 페이지',
+          image: {
+            pc: await getPlaceholderImage(
+              '/images/connection/instructor_register/pc.gif',
+            ),
+            mobile: await getPlaceholderImage(
+              '/images/connection/instructor_register/mobile.gif',
+            ),
+          },
+          explanation: (
+            <ul>
+              <li>ssss</li>
+            </ul>
+          ),
+        },
         {
           title: '상세 페이지',
           image: {
@@ -16,6 +151,28 @@ const DevProcessTimeline = async () => {
               '/images/connection/instructor_detail/mobile.gif',
             ),
           },
+          explanation: (
+            <ul>
+              <li>ssss</li>
+            </ul>
+          ),
+          troubleshooting: '동적 메타 데이터 생성 2번 api 요청',
+        },
+        {
+          title: '수정 페이지',
+          image: {
+            pc: await getPlaceholderImage(
+              '/images/connection/instructor_edit/pc.gif',
+            ),
+            mobile: await getPlaceholderImage(
+              '/images/connection/instructor_edit/mobile.gif',
+            ),
+          },
+          explanation: (
+            <ul>
+              <li>ssss</li>
+            </ul>
+          ),
         },
       ],
     },
@@ -27,23 +184,21 @@ const DevProcessTimeline = async () => {
       {PROCESS_TIME_LINE.map(({ mainTitle, details }) => (
         <div
           key={mainTitle}
-          className="border-l border-solid border-dark-disabled pl-2"
+          className="mb-4 border-l border-solid border-dark-disabled pl-2"
         >
-          <h3 className="mb-2 border-b border-solid pb-2 text-3xl dark:border-dark-menu-hover">
-            {mainTitle}
-          </h3>
-          {details.map(({ title, image }) => (
-            <div key={title} className="relative">
-              <h4 className="mb-2 text-2xl">상세 페이지</h4>
-              <GifContainer
-                pc={image.pc}
-                mobile={image.mobile}
-                title="상세 페이지"
-              >
-                상세 페이지 내용 작성
+          <h3 className="mb-2 pb-2 text-3xl ">{mainTitle}</h3>
+          {details.map(({ title, image, explanation }) => (
+            <div
+              key={title}
+              className="relative mb-4 border-t border-solid pt-4 dark:border-dark-menu-hover"
+            >
+              <h4 className="mb-2 text-2xl">{title}</h4>
+              <GifContainer pc={image.pc} mobile={image.mobile} title={title}>
+                {explanation}
               </GifContainer>
             </div>
           ))}
+          <h5>트러블 슈팅</h5>
         </div>
       ))}
     </section>
