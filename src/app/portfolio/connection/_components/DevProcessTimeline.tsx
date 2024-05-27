@@ -1,6 +1,6 @@
+import { Fragment } from 'react';
 import getPlaceholderImage from '@/utils/dynamicBlurDataUrl';
 import GifContainer from './GifContainer';
-import { Fragment } from 'react';
 
 const DevProcessTimeline = async () => {
   const PROCESS_TIME_LINE = [
@@ -10,9 +10,11 @@ const DevProcessTimeline = async () => {
         {
           title: '검색 필터 및 검색 페이지',
           image: {
-            pc: await getPlaceholderImage('/images/connection/search/pc.gif'),
+            pc: await getPlaceholderImage(
+              'https://storage.googleapis.com/leehyeonjun.com/connection/search_pc.gif',
+            ),
             mobile: await getPlaceholderImage(
-              '/images/connection/search/mobile.gif',
+              'https://storage.googleapis.com/leehyeonjun.com/connection/search_mobile.gif',
             ),
           },
           explanation: (
@@ -30,9 +32,11 @@ const DevProcessTimeline = async () => {
         {
           title: '수강생 및 강사 리뷰 관리 페이지',
           image: {
-            pc: await getPlaceholderImage('/images/connection/review/pc.gif'),
+            pc: await getPlaceholderImage(
+              'https://storage.googleapis.com/leehyeonjun.com/connection/review_pc.gif',
+            ),
             mobile: await getPlaceholderImage(
-              '/images/connection/review/mobile.gif',
+              'https://storage.googleapis.com/leehyeonjun.com/connection/review_mobile.gif',
             ),
           },
           explanation: (
@@ -49,9 +53,11 @@ const DevProcessTimeline = async () => {
         {
           title: '강사 & 클래스',
           image: {
-            pc: await getPlaceholderImage('/images/connection/like/pc.gif'),
+            pc: await getPlaceholderImage(
+              'https://storage.googleapis.com/leehyeonjun.com/connection/like_pc.gif',
+            ),
             mobile: await getPlaceholderImage(
-              '/images/connection/like/mobile.gif',
+              'https://storage.googleapis.com/leehyeonjun.com/connection/like_mobile.gif',
             ),
           },
           explanation: (
@@ -69,9 +75,11 @@ const DevProcessTimeline = async () => {
         {
           title: '클래스 수강 회원 관리',
           image: {
-            pc: await getPlaceholderImage('/images/connection/member/pc.gif'),
+            pc: await getPlaceholderImage(
+              'https://storage.googleapis.com/leehyeonjun.com/connection/member_pc.gif',
+            ),
             mobile: await getPlaceholderImage(
-              '/images/connection/member/mobile.gif',
+              'https://storage.googleapis.com/leehyeonjun.com/connection/member_mobile.gif',
             ),
           },
           explanation: (
@@ -88,9 +96,11 @@ const DevProcessTimeline = async () => {
         {
           title: '내 정보 수정 페이지',
           image: {
-            pc: await getPlaceholderImage('/images/connection/myInfo/pc.gif'),
+            pc: await getPlaceholderImage(
+              'https://storage.googleapis.com/leehyeonjun.com/connection/myInfo_pc.gif',
+            ),
             mobile: await getPlaceholderImage(
-              '/images/connection/myInfo/mobile.gif',
+              'https://storage.googleapis.com/leehyeonjun.com/connection/myInfo_mobile.gif',
             ),
           },
           explanation: (
@@ -107,9 +117,11 @@ const DevProcessTimeline = async () => {
         {
           title: '네이버 지도 공통 컴포넌트 구현',
           image: {
-            pc: await getPlaceholderImage('/images/connection/map/pc.gif'),
+            pc: await getPlaceholderImage(
+              'https://storage.googleapis.com/leehyeonjun.com/connection/map_pc.gif',
+            ),
             mobile: await getPlaceholderImage(
-              '/images/connection/map/mobile.gif',
+              'https://storage.googleapis.com/leehyeonjun.com/connection/map_mobile.gif',
             ),
           },
           explanation: (
@@ -121,9 +133,11 @@ const DevProcessTimeline = async () => {
         {
           title: '네이버 소셜 로그인 구현',
           image: {
-            pc: await getPlaceholderImage('/images/connection/login/pc.gif'),
+            pc: await getPlaceholderImage(
+              'https://storage.googleapis.com/leehyeonjun.com/connection/login_pc.gif',
+            ),
             mobile: await getPlaceholderImage(
-              '/images/connection/login/mobile.gif',
+              'https://storage.googleapis.com/leehyeonjun.com/connection/login_mobile.gif',
             ),
           },
           explanation: (
@@ -140,9 +154,11 @@ const DevProcessTimeline = async () => {
         {
           title: '채팅',
           image: {
-            pc: await getPlaceholderImage('/images/connection/chat/pc.gif'),
+            pc: await getPlaceholderImage(
+              'https://storage.googleapis.com/leehyeonjun.com/connection/chat_pc.gif',
+            ),
             mobile: await getPlaceholderImage(
-              '/images/connection/chat/mobile.gif',
+              'https://storage.googleapis.com/leehyeonjun.com/connection/chat_mobile.gif',
             ),
           },
           explanation: (
@@ -155,10 +171,10 @@ const DevProcessTimeline = async () => {
           title: '알림',
           image: {
             pc: await getPlaceholderImage(
-              '/images/connection/notifications/pc.gif',
+              'https://storage.googleapis.com/leehyeonjun.com/connection/notifications_pc.gif',
             ),
             mobile: await getPlaceholderImage(
-              '/images/connection/notifications/mobile.gif',
+              'https://storage.googleapis.com/leehyeonjun.com/connection/notifications_mobile.gif',
             ),
           },
           explanation: (
@@ -176,10 +192,10 @@ const DevProcessTimeline = async () => {
           title: '등록 페이지',
           image: {
             pc: await getPlaceholderImage(
-              '/images/connection/class_register/pc.gif',
+              'https://storage.googleapis.com/leehyeonjun.com/connection/class_register_pc.gif',
             ),
             mobile: await getPlaceholderImage(
-              '/images/connection/class_register/mobile.gif',
+              'https://storage.googleapis.com/leehyeonjun.com/connection/class_register_mobile.gif',
             ),
           },
           explanation: (
@@ -197,9 +213,11 @@ const DevProcessTimeline = async () => {
         {
           title: 'PWA 연결 및 설치 방법 페이지',
           image: {
-            pc: await getPlaceholderImage('/images/connection/PWA/pc.gif'),
+            pc: await getPlaceholderImage(
+              'https://storage.googleapis.com/leehyeonjun.com/connection/PWA_pc.gif',
+            ),
             mobile: await getPlaceholderImage(
-              '/images/connection/PWA/mobile.gif',
+              'https://storage.googleapis.com/leehyeonjun.com/connection/PWA_mobile.gif',
             ),
           },
           explanation: (
@@ -211,9 +229,11 @@ const DevProcessTimeline = async () => {
         {
           title: 'FCM 연결 및 웹 푸쉬 알림 구현',
           image: {
-            pc: await getPlaceholderImage('/images/connection/FCM/pc.gif'),
+            pc: await getPlaceholderImage(
+              'https://storage.googleapis.com/leehyeonjun.com/connection/FCM_pc.gif',
+            ),
             mobile: await getPlaceholderImage(
-              '/images/connection/FCM/mobile.gif',
+              'https://storage.googleapis.com/leehyeonjun.com/connection/FCM_mobile.gif',
             ),
           },
           explanation: (
@@ -231,10 +251,10 @@ const DevProcessTimeline = async () => {
           title: '등록 페이지',
           image: {
             pc: await getPlaceholderImage(
-              '/images/connection/instructor_register/pc.gif',
+              'https://storage.googleapis.com/leehyeonjun.com/connection/instructor_register_pc.gif',
             ),
             mobile: await getPlaceholderImage(
-              '/images/connection/instructor_register/mobile.gif',
+              'https://storage.googleapis.com/leehyeonjun.com/connection/instructor_register_mobile.gif',
             ),
           },
           explanation: (
@@ -247,10 +267,10 @@ const DevProcessTimeline = async () => {
           title: '상세 페이지',
           image: {
             pc: await getPlaceholderImage(
-              '/images/connection/instructor_detail/pc.gif',
+              'https://storage.googleapis.com/leehyeonjun.com/connection/instructor_detail_pc.gif',
             ),
             mobile: await getPlaceholderImage(
-              '/images/connection/instructor_detail/mobile.gif',
+              'https://storage.googleapis.com/leehyeonjun.com/connection/instructor_detail_mobile.gif',
             ),
           },
           explanation: (
@@ -264,10 +284,10 @@ const DevProcessTimeline = async () => {
           title: '수정 페이지',
           image: {
             pc: await getPlaceholderImage(
-              '/images/connection/instructor_edit/pc.gif',
+              'https://storage.googleapis.com/leehyeonjun.com/connection/instructor_edit_pc.gif',
             ),
             mobile: await getPlaceholderImage(
-              '/images/connection/instructor_edit/mobile.gif',
+              'https://storage.googleapis.com/leehyeonjun.com/connection/instructor_edit_mobile.gif',
             ),
           },
           explanation: (

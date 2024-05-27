@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useContext, useEffect, useState } from 'react';
+import { Fragment, useContext, useEffect, useState } from 'react';
 import { HIDE_PATH } from '@/constants/constants';
 import { DoubleArrowSVG } from '@/icons/index';
 import { Context } from '../Provider';
@@ -140,23 +140,25 @@ const AnchorNav = () => {
               beforeLevel && beforeLevel !== currentLevel;
 
             return (
-              <div
-                key={index}
-                className={`flex w-full has-[:hover]:bg-White-anchor-hover dark:has-[:hover]:bg-dark-anchor-hover
+              <Fragment key={index}>
+                <div
+                  className={`flex w-full has-[:hover]:bg-White-anchor-hover dark:has-[:hover]:bg-dark-anchor-hover
                 ${viewHeading.id === id ? 'bg-White-anchor-active dark:bg-dark-anchor-active' : ''}`}
-              >
-                <Link
-                  href={`#${id}`}
-                  onClick={resetViewHeadings}
-                  className={`${ANCHOR_HEADER_MARGIN[--currentLevel]} relative line-clamp-2 max-w-full break-words dark:hover:text-white`}
-                  replace
                 >
-                  {hasHigherPrevLevel && (
-                    <span className="absolute -translate-x-5">┗</span>
-                  )}
-                  {text}
-                </Link>
-              </div>
+                  <Link
+                    href={`#${id}`}
+                    onClick={resetViewHeadings}
+                    className={`${ANCHOR_HEADER_MARGIN[--currentLevel]} relative line-clamp-2 max-w-full break-words dark:hover:text-white`}
+                    replace
+                  >
+                    {hasHigherPrevLevel && (
+                      <span className="absolute -translate-x-5">┗</span>
+                    )}
+                    {text}
+                  </Link>
+                </div>
+                {headings.length - 1 === index && <br />}
+              </Fragment>
             );
           })}
         </section>
