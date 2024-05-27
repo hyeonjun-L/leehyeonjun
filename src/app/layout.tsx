@@ -5,9 +5,9 @@ import ActivityNav from '@/app/_components/ActivityNav';
 import AnchorNav from './_components/AnchorNav';
 import AnchorNavButton from './_components/AnchorNavButton';
 import RouterNav from './_components/RouterNav';
+import WebVitals from './_components/WebVitals';
 import { AnchorViewProvider } from './Provider';
 import type { Metadata } from 'next';
-import WebVitals from './_components/WebVitals';
 
 const consola = localFont({
   src: './fonts/CONSOLA.ttf',
