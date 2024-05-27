@@ -12,9 +12,19 @@ const getFileBufferLocal = (filepath: string) => {
   return fs.readFile(realFilepath);
 };
 
+const getFileBufferRemote = async (url: string) => {
+  const response = await fetch(url);
+  return Buffer.from(await response.arrayBuffer());
+};
+
+const getFileBuffer = (src: string) => {
+  const isRemote = src.startsWith('http');
+  return isRemote ? getFileBufferRemote(src) : getFileBufferLocal(src);
+};
+
 const getPlaceholderImage = async (filepath: string) => {
   try {
-    const originalBuffer = await getFileBufferLocal(filepath);
+    const originalBuffer = await getFileBuffer(filepath);
     const resizedBuffer = await sharp(originalBuffer).resize(20).toBuffer();
 
     return {
