@@ -5,6 +5,7 @@ import ActivityNav from '@/app/_components/ActivityNav';
 import AnchorNav from './_components/AnchorNav';
 import AnchorNavButton from './_components/AnchorNavButton';
 import RouterNav from './_components/RouterNav';
+import WebVitals from './_components/WebVitals';
 import { AnchorViewProvider } from './Provider';
 import type { Metadata } from 'next';
 
@@ -48,6 +49,7 @@ export default function RootLayout({
             {settingModal}
           </main>
           <AnchorNavButton />
+          {process.env.NODE_ENV === 'development' && <WebVitals />}
         </body>
       </AnchorViewProvider>
     </html>

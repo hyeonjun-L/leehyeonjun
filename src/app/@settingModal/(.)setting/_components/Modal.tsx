@@ -11,7 +11,7 @@ const Modal = ({ children }: { children: React.ReactNode }) => {
   return (
     <div
       onClick={closeModalHandler}
-      className="z-modal fixed bottom-0 left-0 right-0 top-0 mx-auto bg-dark-disabled/60"
+      className="fixed bottom-0 left-0 right-0 top-0 z-modal mx-auto bg-dark-disabled/60"
     >
       <article
         onClick={(e) => {

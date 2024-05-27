@@ -69,22 +69,21 @@ const Project = () => {
         <ul className="flex flex-col gap-2">
           <li>강사 (등록, 상세, 수정) 페이지 구현</li>
           <li>클래스 작성 페이지 및 임시저장 기능 구현</li>
-          <li>쿠폰 (판매, 사용, 결제, 관리) 페이지 구현</li>
-          <li>패스권 (판매, 사용, 결제, 검색, 관리) 페이지 구현</li>
+          <li>쿠폰 (생성, 결제, 관리) 페이지 및 기능 구현</li>
+          <li>패스권 (판매, 결제, 검색, 관리) 페이지 및 기능 구현</li>
           <li>(전체, 강사, 클래스, 패스권) 검색 페이지 구현</li>
           <li>리뷰 관련 기능 및 관리 페이지 구현</li>
-          <li>관심 or 차단 강사, 클래스 페이지 구현</li>
+          <li>관심 or 차단 강사, 클래스 좋아요 기능 및 페이지 구현</li>
           <li>회원 관리 페이지 구현</li>
           <li>내 정보 수정 페이지 구현</li>
-          <li>캐러셀 공통 컴포넌트 구현</li>
           <li>네이버 지도 공통 컴포넌트 구현</li>
           <li>네이버 소셜 로그인 구현</li>
-          <li>access Token 관리 및 refresh Token 재발급 로직 구현</li>
-          <li>미들웨어로 token 검사 및 protect route 구현</li>
-          <li>강사 및 클래스 좋아요 기능 구현</li>
           <li>실시간 채팅 및 알림 기능 구현</li>
           <li>PWA 구축 및 설치 방법 알림 페이지 구현</li>
           <li>FCM 연결 및 웹 푸쉬 알림 구현</li>
+          <li>캐러셀 공통 컴포넌트 구현</li>
+          <li>access Token 관리 및 refresh Token 재발급 로직 구현</li>
+          <li>미들웨어로 token 검사 및 protect route 구현</li>
           <li>usePagiNation 공통 커스텀 훅 구현</li>
           <li>progressbar 구현</li>
           <li>Storybook을 활용한 컴포넌트 문서화 및 UI 리뷰 간편화</li>

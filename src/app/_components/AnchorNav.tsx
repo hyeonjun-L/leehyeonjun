@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useContext, useEffect, useState } from 'react';
+import { Fragment, useContext, useEffect, useState } from 'react';
 import { HIDE_PATH } from '@/constants/constants';
 import { DoubleArrowSVG } from '@/icons/index';
 import { Context } from '../Provider';
@@ -37,6 +37,8 @@ const AnchorNav = () => {
 
   useEffect(() => {
     resetViewHeadings();
+    let unremoveHeading = false;
+
     const allHeadings = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
 
     const newHeadings: Headings[] = Array.from(allHeadings).map(
@@ -64,13 +66,20 @@ const AnchorNav = () => {
           const headingId = target.id;
 
           if (isIntersecting) {
-            setViewHeadings((prevHeadings) =>
-              addViewHeadings(prevHeadings, {
+            setViewHeadings((prevHeadings) => {
+              const newHeadings = addViewHeadings(prevHeadings, {
                 id: headingId,
                 text: headingText,
                 level: headingLevel,
-              }),
-            );
+              });
+
+              if (unremoveHeading) {
+                unremoveHeading = false;
+                return newHeadings.splice(1);
+              }
+
+              return newHeadings;
+            });
           } else {
             setViewHeadings((prevHeadings) => {
               const newHeadings = prevHeadings.filter(
@@ -81,10 +90,13 @@ const AnchorNav = () => {
                 rootBounds && boundingClientRect.top < rootBounds.top;
 
               if (isTopBoundaryExceeded) {
+                if (newHeadings.length === 0) {
+                  unremoveHeading = true;
+                }
                 return newHeadings.length === 0 ? prevHeadings : newHeadings;
               } else {
                 const prevIndex =
-                  prevHeadings.findIndex(({ id }) => id === headingId) - 1;
+                  newHeadings.findIndex(({ id }) => id === headingId) - 1;
 
                 return newHeadings.length === 0 || !isTopBoundaryExceeded
                   ? newHeadings
@@ -128,23 +140,25 @@ const AnchorNav = () => {
               beforeLevel && beforeLevel !== currentLevel;
 
             return (
-              <div
-                key={index}
-                className={`flex w-full has-[:hover]:bg-White-anchor-hover dark:has-[:hover]:bg-dark-anchor-hover
+              <Fragment key={index}>
+                <div
+                  className={`flex w-full has-[:hover]:bg-White-anchor-hover dark:has-[:hover]:bg-dark-anchor-hover
                 ${viewHeading.id === id ? 'bg-White-anchor-active dark:bg-dark-anchor-active' : ''}`}
-              >
-                <Link
-                  href={`#${id}`}
-                  onClick={resetViewHeadings}
-                  className={`${ANCHOR_HEADER_MARGIN[--currentLevel]} relative line-clamp-2 max-w-full break-words dark:hover:text-white`}
-                  replace
                 >
-                  {hasHigherPrevLevel && (
-                    <span className="absolute -translate-x-5">┗</span>
-                  )}
-                  {text}
-                </Link>
-              </div>
+                  <Link
+                    href={`#${id}`}
+                    onClick={resetViewHeadings}
+                    className={`${ANCHOR_HEADER_MARGIN[--currentLevel]} relative line-clamp-2 max-w-full break-words dark:hover:text-white`}
+                    replace
+                  >
+                    {hasHigherPrevLevel && (
+                      <span className="absolute -translate-x-5">┗</span>
+                    )}
+                    {text}
+                  </Link>
+                </div>
+                {headings.length - 1 === index && <br />}
+              </Fragment>
             );
           })}
         </section>

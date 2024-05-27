@@ -20,10 +20,10 @@ import {
   ZustandSVG,
 } from '@/icons/index';
 import { logo } from '@/images/connection';
+import DevProcessTimeline from './_components/DevProcessTimeline';
 import Design from '../_components/Design';
 import Explanation from '../_components/Explanation';
 import Skill from '../_components/Skill';
-import DevProcessTimeline from './_components/DevProcessTimeline';
 
 const page = () => {
   const EXPLANATION = {
@@ -41,7 +41,7 @@ const page = () => {
       name: 'Next',
       bg: 'bg-[#000000]',
       explanation:
-        '(App Router) SEO 최적화를 위한 동적 메타 데이터 생성, 서버 사이드 렌더링을 포함한 서버 컴포넌트, 링크 사전 가져오기(Link prefetch), 이미지 로딩 우선 순위 설정(Image priority), 경로 처리(Route Handler), 경로 가로채기(Intercepting Routes), 병렬 경로 처리(Parallel Routes) 등의 고급 기능을 활용하기 위해 사용하였습니다.',
+        '(App Router) SEO 최적화를 위한 동적 메타 데이터 생성, 서버 사이드 렌더링을 포함한 서버 컴포넌트, 링크 사전 가져오기(Link prefetch), 이미지 최적화 (Image), 경로 처리(Route Handler), 경로 가로채기(Intercepting Routes), 병렬 경로 처리(Parallel Routes) 등의 고급 기능을 활용하기 위해 사용하였습니다.',
     },
     {
       svg: <TypeScriptSVG className="size-5" />,
@@ -195,7 +195,7 @@ const page = () => {
         </div>
       </Explanation>
       <Skill skillList={SKILLS} />
-      <Design link={DESIGN_LINK} />
+      {/* <Design link={DESIGN_LINK} /> */}
       <DevProcessTimeline />
       <section>
         <h2 className="text-4xl font-semibold">느낀점 & 아쉬운점</h2>

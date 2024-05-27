@@ -2,22 +2,21 @@
 import Image from 'next/image';
 import { useState } from 'react';
 import { MobileSVG, PcSVG } from '@/icons/index';
-import {
-  instructor_detail_pc,
-  instructor_detail_mobile,
-} from '@/images/connection';
+import { BlurImageSrc } from '@/types/types';
 
 interface GifContainerProps {
   title: string;
   children: React.ReactNode;
+  pc: BlurImageSrc;
+  mobile: BlurImageSrc;
 }
 
-const GifContainer = ({ title, children }: GifContainerProps) => {
+const GifContainer = ({ title, children, pc, mobile }: GifContainerProps) => {
   const [isMobile, setIsMobile] = useState(true);
 
   return (
     <>
-      <div className="absolute right-0 top-0 flex gap-3 lg:hidden">
+      <div className="right-0 top-4 mb-2 flex gap-3 sm:absolute sm:mb-0 lg:hidden">
         <button
           className="group p-1"
           onClick={() => setIsMobile(true)}
@@ -44,15 +43,25 @@ const GifContainer = ({ title, children }: GifContainerProps) => {
           className={`${isMobile ? '' : 'hidden lg:block'} mx-auto aspect-[9/16] max-h-[28rem] sm:mx-0 sm:max-h-[37.5rem]`}
         >
           <Image
-            src={instructor_detail_mobile}
+            src={mobile.src}
             className="mx-auto h-full w-auto border border-solid border-black"
             alt={`${title}-mobile-동작-gif`}
+            width={0}
+            height={0}
+            placeholder="blur"
+            blurDataURL={mobile.placeholder}
+            unoptimized
           />
         </div>
         <Image
-          src={instructor_detail_pc}
+          src={pc.src}
           className={`${isMobile ? 'hidden lg:block' : ''} h-full w-auto border border-solid border-black`}
           alt={`${title}-pc-동작-gif`}
+          width={0}
+          height={0}
+          placeholder="blur"
+          blurDataURL={pc.placeholder}
+          unoptimized
         />
         <figcaption className="my-4 lg:col-span-2">{children}</figcaption>
       </figure>

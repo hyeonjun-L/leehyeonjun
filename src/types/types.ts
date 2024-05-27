@@ -14,3 +14,8 @@ export interface Headings {
   text: string;
   id: string;
 }
+
+export interface BlurImageSrc {
+  src: string;
+  placeholder: string;
+}
