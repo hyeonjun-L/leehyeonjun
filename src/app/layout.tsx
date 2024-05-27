@@ -7,6 +7,7 @@ import AnchorNavButton from './_components/AnchorNavButton';
 import RouterNav from './_components/RouterNav';
 import { AnchorViewProvider } from './Provider';
 import type { Metadata } from 'next';
+import WebVitals from './_components/WebVitals';
 
 const consola = localFont({
   src: './fonts/CONSOLA.ttf',
@@ -48,6 +49,7 @@ export default function RootLayout({
             {settingModal}
           </main>
           <AnchorNavButton />
+          {process.env.NODE_ENV === 'development' && <WebVitals />}
         </body>
       </AnchorViewProvider>
     </html>
