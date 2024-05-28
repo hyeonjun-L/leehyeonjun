@@ -62,7 +62,7 @@ export const PrevButton: React.FC<PropType> = (props) => {
       {...restProps}
       aria-label="PrevButton"
     >
-      <ArrowSVG className="size-6 rotate-180 dark:fill-white" />
+      <ArrowSVG className="size-4 rotate-180 sm:size-6 dark:fill-white" />
       {children}
     </button>
   );
@@ -78,7 +78,7 @@ export const NextButton: React.FC<PropType> = (props) => {
       {...restProps}
       aria-label="NextButton"
     >
-      <ArrowSVG className="size-6 dark:fill-white" />
+      <ArrowSVG className="size-4 sm:size-6 dark:fill-white" />
       {children}
     </button>
   );

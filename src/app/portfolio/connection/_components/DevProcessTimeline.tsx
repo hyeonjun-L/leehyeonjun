@@ -1,20 +1,56 @@
-import { EmblaOptionsType } from 'embla-carousel';
+import getPlaceholderImage from '@/utils/dynamicBlurDataUrl';
 import GifContainer from './GifContainer';
 import Carousel from '../../_components/carousel/Carousel';
-
-const OPTIONS: EmblaOptionsType = { loop: true };
-const SLIDE_COUNT = 5;
-const SLIDES = Array.from(Array(SLIDE_COUNT).keys());
 
 const DevProcessTimeline = async () => {
   const PROCESS_TIME_LINE = [
     {
       title: 'Storybook을 활용한 컴포넌트 문서화 및 UI 리뷰 간편화',
-      explanation: <Carousel slides={SLIDES} options={OPTIONS} />,
+      images: [
+        await getPlaceholderImage(
+          'https://storage.googleapis.com/leehyeonjun.com/connection/storybook/4.jpg',
+        ),
+        await getPlaceholderImage(
+          'https://storage.googleapis.com/leehyeonjun.com/connection/storybook/5.jpg',
+        ),
+        await getPlaceholderImage(
+          'https://storage.googleapis.com/leehyeonjun.com/connection/storybook/1.jpg',
+        ),
+        await getPlaceholderImage(
+          'https://storage.googleapis.com/leehyeonjun.com/connection/storybook/2.jpg',
+        ),
+        await getPlaceholderImage(
+          'https://storage.googleapis.com/leehyeonjun.com/connection/storybook/3.jpg',
+        ),
+      ],
+      explanation: (
+        <ul className="flex list-disc flex-col gap-4 p-10 pt-4">
+          <li>
+            디자이너와의 협업과 UI 리뷰를 간편화하기 위해{' '}
+            <strong>Storybook을 도입</strong>하고{' '}
+            <strong>공통 컴포넌트를 문서화</strong>하였습니다. 이를 통해 각
+            컴포넌트의 상태를 시각적으로 확인하고 테스트할 수 있게 되었으며,
+            <strong>디자이너와의 원할한 의사소통</strong>이 가능하게 되었습니다.
+            또한, 컴포넌트의 기능과 사용 방법에 대한 명확한 가이드라인을
+            제공함으로{' '}
+            <strong>
+              팀원 모두가 일관된 이해를 바탕으로 보다 효율적으로 개발을 진행
+            </strong>
+            할 수 있게 되었습니다.
+          </li>
+          <li>
+            <strong>디자인 시스템 구축</strong>을 통해{' '}
+            <strong>
+              디자인의 일관성이 높아지고 컴포넌트의 재사용성이 증가
+            </strong>
+            하였습니다.
+          </li>
+        </ul>
+      ),
     },
     {
       title: '검색 필터 및 검색 페이지 구현',
-      image: {
+      gif: {
         pc: {
           src: 'https://storage.googleapis.com/leehyeonjun.com/connection/search_pc.gif',
           placeholder:
@@ -35,7 +71,7 @@ const DevProcessTimeline = async () => {
     },
     {
       title: '수강생 및 강사 리뷰 관리 페이지',
-      image: {
+      gif: {
         pc: {
           src: 'https://storage.googleapis.com/leehyeonjun.com/connection/review_pc.gif',
           placeholder:
@@ -55,7 +91,7 @@ const DevProcessTimeline = async () => {
     },
     {
       title: '좋아요 및 차단 (강사 & 클래스)',
-      image: {
+      gif: {
         pc: {
           src: 'https://storage.googleapis.com/leehyeonjun.com/connection/like_pc.gif',
           placeholder:
@@ -76,7 +112,7 @@ const DevProcessTimeline = async () => {
     },
     {
       title: '수강생 관리 페이지',
-      image: {
+      gif: {
         pc: {
           src: 'https://storage.googleapis.com/leehyeonjun.com/connection/member_pc.gif',
           placeholder:
@@ -97,7 +133,7 @@ const DevProcessTimeline = async () => {
     },
     {
       title: '내 정보 수정 페이지',
-      image: {
+      gif: {
         pc: {
           src: 'https://storage.googleapis.com/leehyeonjun.com/connection/myInfo_pc.gif',
           placeholder:
@@ -118,7 +154,7 @@ const DevProcessTimeline = async () => {
     },
     {
       title: '지도 공통 컴포넌트 구현',
-      image: {
+      gif: {
         pc: {
           src: 'https://storage.googleapis.com/leehyeonjun.com/connection/map_pc.gif',
           placeholder:
@@ -139,7 +175,7 @@ const DevProcessTimeline = async () => {
     },
     {
       title: '네이버 소셜 로그인 구현',
-      image: {
+      gif: {
         pc: {
           src: 'https://storage.googleapis.com/leehyeonjun.com/connection/login_pc.gif',
           placeholder:
@@ -160,7 +196,7 @@ const DevProcessTimeline = async () => {
     },
     {
       title: '실시간 채팅',
-      image: {
+      gif: {
         pc: {
           src: 'https://storage.googleapis.com/leehyeonjun.com/connection/chat_pc.gif',
           placeholder:
@@ -181,7 +217,7 @@ const DevProcessTimeline = async () => {
     },
     {
       title: '실시간 알림',
-      image: {
+      gif: {
         pc: {
           src: 'https://storage.googleapis.com/leehyeonjun.com/connection/notifications_pc.gif',
           placeholder:
@@ -202,7 +238,7 @@ const DevProcessTimeline = async () => {
     },
     {
       title: '클래스 등록 페이지',
-      image: {
+      gif: {
         pc: {
           src: 'https://storage.googleapis.com/leehyeonjun.com/connection/class_register_pc.gif',
           placeholder:
@@ -224,7 +260,7 @@ const DevProcessTimeline = async () => {
     },
     {
       title: 'PWA 연결 및 설치 방법 페이지',
-      image: {
+      gif: {
         pc: {
           src: 'https://storage.googleapis.com/leehyeonjun.com/connection/PWA_pc.gif',
           placeholder:
@@ -245,7 +281,7 @@ const DevProcessTimeline = async () => {
     },
     {
       title: 'FCM 연결 및 웹 푸쉬 알림 구현',
-      image: {
+      gif: {
         pc: {
           src: 'https://storage.googleapis.com/leehyeonjun.com/connection/FCM_pc.gif',
           placeholder:
@@ -266,7 +302,7 @@ const DevProcessTimeline = async () => {
     },
     {
       title: '강사 등록 페이지',
-      image: {
+      gif: {
         pc: {
           src: 'https://storage.googleapis.com/leehyeonjun.com/connection/instructor_register_pc.gif',
           placeholder:
@@ -287,7 +323,7 @@ const DevProcessTimeline = async () => {
     },
     {
       title: '강사 상세 페이지',
-      image: {
+      gif: {
         pc: {
           src: 'https://storage.googleapis.com/leehyeonjun.com/connection/instructor_detail_pc.gif',
           placeholder:
@@ -309,7 +345,7 @@ const DevProcessTimeline = async () => {
     },
     {
       title: '강사 수정 페이지',
-      image: {
+      gif: {
         pc: {
           src: 'https://storage.googleapis.com/leehyeonjun.com/connection/instructor_edit_pc.gif',
           placeholder:
@@ -366,21 +402,23 @@ const DevProcessTimeline = async () => {
     <section>
       <h2 className="mb-4 text-4xl font-semibold">개발 과정</h2>
       {PROCESS_TIME_LINE.map(
-        ({ title, image, explanation, troubleshooting }) => (
+        ({ title, images, gif, explanation, troubleshooting }) => (
           <div
             key={title}
             className="mb-4 border-l border-solid border-dark-disabled pl-2"
           >
-            <h3 className="mb-2 pb-2 text-2xl sm:text-3xl ">{title}</h3>
+            <h3 className="mb-2 pb-2 text-xl sm:text-3xl ">{title}</h3>
             <div className="relative mb-4 border-t border-solid pt-4 dark:border-dark-menu-hover">
-              {/* <h4 className="mb-2 text-xl sm:text-2xl">{title}</h4> */}
-              {image ? (
-                <GifContainer pc={image.pc} mobile={image.mobile} title={title}>
+              {gif ? (
+                <GifContainer pc={gif.pc} mobile={gif.mobile} title={title}>
                   {explanation}
                 </GifContainer>
-              ) : (
-                <div>{explanation}</div>
-              )}
+              ) : images ? (
+                <>
+                  <Carousel slides={images} />
+                  {explanation}
+                </>
+              ) : null}
             </div>
             {troubleshooting && <h5>트러블 슈팅</h5>}
           </div>
