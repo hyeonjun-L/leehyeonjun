@@ -33,7 +33,7 @@ const Carousel = ({ slides }: CarouselProps) => {
         <div className="embla__container">
           {slides.map(({ src, placeholder, width, height }) => (
             <div className="embla__slide" key={src}>
-              <div className="embla__slide__number">
+              <div className="embla__slide__number border border-solid border-black">
                 <Image
                   src={src}
                   alt="개발과정 이미지"

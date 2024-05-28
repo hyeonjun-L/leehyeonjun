@@ -1,6 +1,8 @@
 import getPlaceholderImage from '@/utils/dynamicBlurDataUrl';
 import GifContainer from './GifContainer';
 import Carousel from '../../_components/carousel/Carousel';
+import Link from 'next/link';
+import Image from 'next/image';
 
 const DevProcessTimeline = async () => {
   const PROCESS_TIME_LINE = [
@@ -38,12 +40,33 @@ const DevProcessTimeline = async () => {
             </strong>
             할 수 있게 되었습니다.
           </li>
+
+          <li className="list-none">
+            <Link
+              href="https://connection-2023.github.io/frontend/storybook"
+              target="_blank"
+              className="underline underline-offset-4 hover:text-dark-text"
+            >
+              Storybook Link
+            </Link>
+          </li>
+
           <li>
             <strong>디자인 시스템 구축</strong>을 통해{' '}
             <strong>
               디자인의 일관성이 높아지고 컴포넌트의 재사용성이 증가
             </strong>
             하였습니다.
+          </li>
+
+          <li className="list-none">
+            <Link
+              href="https://www.figma.com/file/MPkE0HmKUGj72lnGHcvbcy/%EB%94%94%EC%9E%90%EC%9D%B8%EC%8B%9C%EC%8A%A4%ED%85%9C-%EC%A0%95%EC%9D%98%EC%A4%91...?type=design&node-id=0%3A1&mode=design&t=T8rNsKLpxfhJdAJ2-1"
+              target="_blank"
+              className="underline underline-offset-4 hover:text-dark-text"
+            >
+              디자인 시스템 Figma Link
+            </Link>
           </li>
         </ul>
       ),
@@ -366,6 +389,14 @@ const DevProcessTimeline = async () => {
     },
     {
       title: '캐러셀 공통 컴포넌트 구현',
+      images: [
+        await getPlaceholderImage(
+          'https://storage.googleapis.com/leehyeonjun.com/connection/carousel/1.png',
+        ),
+        await getPlaceholderImage(
+          'https://storage.googleapis.com/leehyeonjun.com/connection/carousel/2.jpg',
+        ),
+      ],
       explanation: (
         <ul>
           <li>ssss</li>
@@ -374,11 +405,15 @@ const DevProcessTimeline = async () => {
     },
     {
       title: 'access Token 관리 및 refresh Token 재발급 로직 구현',
+      images: await getPlaceholderImage(
+        'https://storage.googleapis.com/leehyeonjun.com/connection/accessToken/image.gif',
+      ),
       explanation: (
         <ul>
           <li>ssss</li>
         </ul>
       ),
+      troubleshooting: '보일러 플레이팅 많은 문제',
     },
     {
       title: '미들웨어로 token 검사 및 protect route 구현',
@@ -387,6 +422,7 @@ const DevProcessTimeline = async () => {
           <li>ssss</li>
         </ul>
       ),
+      troubleshooting: 'CDN 문제',
     },
     {
       title: 'usePagiNation 공통 커스텀 훅 구현',
@@ -413,14 +449,26 @@ const DevProcessTimeline = async () => {
                 <GifContainer pc={gif.pc} mobile={gif.mobile} title={title}>
                   {explanation}
                 </GifContainer>
-              ) : images ? (
+              ) : Array.isArray(images) ? (
                 <>
                   <Carousel slides={images} />
                   {explanation}
                 </>
+              ) : images ? (
+                <div className="mx-auto h-[28rem] sm:aspect-video lg:h-[37.5rem]">
+                  <Image
+                    src={images.src}
+                    alt="개발과정 이미지"
+                    width={images.width}
+                    height={images.height}
+                    placeholder="blur"
+                    className="size-full"
+                    blurDataURL={images.placeholder}
+                  />
+                </div>
               ) : null}
             </div>
-            {troubleshooting && <h5>트러블 슈팅</h5>}
+            {troubleshooting && <h4>트러블 슈팅</h4>}
           </div>
         ),
       )}
