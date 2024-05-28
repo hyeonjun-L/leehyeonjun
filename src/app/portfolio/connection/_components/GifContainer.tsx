@@ -40,7 +40,7 @@ const GifContainer = ({ title, children, pc, mobile }: GifContainerProps) => {
         className={`sm:grid ${isMobile ? 'sm:grid-cols-[auto_1fr]' : ''} lg:grid-cols-[auto_1fr]`}
       >
         <div
-          className={`${isMobile ? '' : 'hidden lg:block'} mx-auto aspect-[9/16] max-h-[28rem] sm:mx-0 sm:max-h-[37.5rem]`}
+          className={`${isMobile ? '' : 'hidden lg:block'} mx-auto aspect-[9/16] h-[28rem] sm:mx-0 sm:h-[37.5rem]`}
         >
           <Image
             src={mobile.src}
