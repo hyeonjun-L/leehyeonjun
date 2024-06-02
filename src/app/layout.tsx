@@ -5,11 +5,11 @@ import { cookies } from 'next/headers';
 import ActivityNav from '@/app/_components/ActivityNav';
 import AnchorNav from './_components/AnchorNav';
 import AnchorNavButton from './_components/AnchorNavButton';
+import Footer from './_components/Footer';
 import RouterNav from './_components/RouterNav';
 import WebVitals from './_components/WebVitals';
 import { AnchorViewProvider } from './Provider';
 import type { Metadata } from 'next';
-import Footer from './_components/Footer';
 
 const consola = localFont({
   src: './fonts/CONSOLA.ttf',

@@ -2,8 +2,8 @@ import Link from 'next/link';
 
 const Footer = () => {
   return (
-    <footer className="flex flex-col items-center bg-dark-anchor-bg py-6 text-sm">
-      <nav className="mb-3 flex gap-3">
+    <footer className="flex flex-col items-center bg-dark-menu-text py-6 text-sm dark:bg-dark-anchor-bg">
+      <nav className="mb-3 flex flex-wrap gap-3">
         <p>사이트 맵</p>
         <span className="h-full border border-solid border-dark-line" />
         <Link href="/">홈</Link>
@@ -15,11 +15,18 @@ const Footer = () => {
         ⓒ 2024 <Link href="https://github.com/hyeonjun-L">이현준</Link> All
         rights reserved.
       </p>
-      <p>
-        Created by <Link href="https://leehyeonjun.com/">@이현준</Link>. Powered
-        By <Link href="https://github.com/hyeonjun-L/leehyeonjun">@이현준</Link>
-        . Icons by <Link href="https://icons8.kr/license">Icons8</Link>
-      </p>
+      <div className="flex flex-wrap justify-center gap-x-3">
+        <p>
+          Created by <Link href="https://leehyeonjun.com/">@이현준</Link>.
+        </p>
+        <p>
+          Powered By{' '}
+          <Link href="https://github.com/hyeonjun-L/leehyeonjun">@이현준</Link>.
+        </p>
+        <p>
+          Icons by <Link href="https://icons8.kr/license">Icons8</Link>.
+        </p>
+      </div>
     </footer>
   );
 };
