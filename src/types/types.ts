@@ -19,3 +19,8 @@ export interface BlurImageSrc {
   src: string;
   placeholder: string;
 }
+
+export interface ImageInfo extends BlurImageSrc {
+  width: number;
+  height: number;
+}

@@ -18,6 +18,16 @@ const nextConfig = {
     });
     return config;
   },
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'storage.googleapis.com',
+        port: '',
+        pathname: '/leehyeonjun.com/**',
+      },
+    ],
+  },
 };
 
 module.exports = withMDX(nextConfig);

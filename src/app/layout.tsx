@@ -1,4 +1,5 @@
 import './styles/globals.css';
+import './styles/carousel.css';
 import localFont from 'next/font/local';
 import { cookies } from 'next/headers';
 import ActivityNav from '@/app/_components/ActivityNav';
@@ -30,7 +31,12 @@ export default function RootLayout({
   const theme = cookieStore.get('theme')?.value ?? 'Dark';
 
   return (
-    <html lang="kr" className={theme === 'Dark' ? 'dark text-dark-text' : ''}>
+    <html
+      lang="kr"
+      className={
+        theme === 'Dark' ? 'theme-light dark text-dark-text' : 'theme-dark'
+      }
+    >
       <head>
         <link
           rel="stylesheet"

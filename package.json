@@ -17,6 +17,7 @@
     "@types/react": "18.3.1",
     "@types/react-dom": "18.3.0",
     "autoprefixer": "10.4.19",
+    "embla-carousel-react": "^8.1.3",
     "eslint-config-next": "14.2.3",
     "framer-motion": "^11.1.7",
     "js-cookie": "^3.0.5",

@@ -28,7 +28,7 @@ const Project = ({
         <h1>{explanation}</h1>
         <Link
           href={webLink}
-          className=" flex items-center gap-2 rounded-full border border-solid border-black p-2 hover:bg-White-anchor-hover sm:p-4 dark:border-white dark:hover:bg-dark-activity"
+          className=" flex translate-y-96 items-center gap-2 rounded-full border border-solid border-black p-2 duration-300 group-hover:translate-y-0 hover:bg-White-anchor-hover sm:p-4 dark:border-white dark:hover:bg-dark-activity"
           aria-label="해당 프로젝트 웹사이트 방문"
           target="_blank"
         >
@@ -37,7 +37,7 @@ const Project = ({
         </Link>
         <Link
           href={detailLink}
-          className="flex items-center gap-2 rounded-full border border-solid border-black p-2 hover:bg-White-anchor-hover sm:p-4 dark:border-white dark:hover:bg-dark-activity"
+          className="flex translate-y-96 items-center gap-2 rounded-full border border-solid border-black p-2 duration-300 group-hover:translate-y-0 hover:bg-White-anchor-hover sm:p-4 dark:border-white dark:hover:bg-dark-activity"
           aria-label="해당 프로젝트 개발 내용 보기"
         >
           개발 내용 보기
