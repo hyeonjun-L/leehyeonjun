@@ -1,30 +1,52 @@
+import Image from 'next/image';
+import Link from 'next/link';
 import getPlaceholderImage from '@/utils/dynamicBlurDataUrl';
 import GifContainer from './GifContainer';
 import Carousel from '../../_components/carousel/Carousel';
-import Link from 'next/link';
-import Image from 'next/image';
 
 const DevProcessTimeline = async () => {
+  const imageGroups = [
+    [
+      'https://storage.googleapis.com/leehyeonjun.com/connection/storybook/4.jpg',
+      'https://storage.googleapis.com/leehyeonjun.com/connection/storybook/5.jpg',
+      'https://storage.googleapis.com/leehyeonjun.com/connection/storybook/1.jpg',
+      'https://storage.googleapis.com/leehyeonjun.com/connection/storybook/2.jpg',
+      'https://storage.googleapis.com/leehyeonjun.com/connection/storybook/3.jpg',
+    ],
+    [
+      'https://storage.googleapis.com/leehyeonjun.com/connection/carousel/1.png',
+      'https://storage.googleapis.com/leehyeonjun.com/connection/carousel/2.jpg',
+    ],
+    [
+      'https://storage.googleapis.com/leehyeonjun.com/connection/accessToken/image.gif',
+    ],
+    [
+      'https://storage.googleapis.com/leehyeonjun.com/connection/middleware/middleware.gif',
+    ],
+    [
+      'https://storage.googleapis.com/leehyeonjun.com/connection/usePagiNation/GIF.gif',
+      'https://storage.googleapis.com/leehyeonjun.com/connection/usePagiNation/JSDoc.png',
+      'https://storage.googleapis.com/leehyeonjun.com/connection/usePagiNation/coupon.jpg',
+      'https://storage.googleapis.com/leehyeonjun.com/connection/usePagiNation/coupon_user.jpg',
+      'https://storage.googleapis.com/leehyeonjun.com/connection/usePagiNation/income.jpg',
+      'https://storage.googleapis.com/leehyeonjun.com/connection/usePagiNation/member.jpg',
+      'https://storage.googleapis.com/leehyeonjun.com/connection/usePagiNation/pass.jpg',
+      'https://storage.googleapis.com/leehyeonjun.com/connection/usePagiNation/paymentHistory.jpg',
+      'https://storage.googleapis.com/leehyeonjun.com/connection/usePagiNation/review.jpg',
+      'https://storage.googleapis.com/leehyeonjun.com/connection/usePagiNation/review_user.jpg',
+    ],
+  ];
+
+  const imageResults = await Promise.all(
+    imageGroups.map((group) =>
+      Promise.all(group.map((url) => getPlaceholderImage(url))),
+    ),
+  );
+
   const PROCESS_TIME_LINE = [
     {
       title: 'Storybook을 활용한 컴포넌트 문서화 및 UI 리뷰 간편화',
-      images: [
-        await getPlaceholderImage(
-          'https://storage.googleapis.com/leehyeonjun.com/connection/storybook/4.jpg',
-        ),
-        await getPlaceholderImage(
-          'https://storage.googleapis.com/leehyeonjun.com/connection/storybook/5.jpg',
-        ),
-        await getPlaceholderImage(
-          'https://storage.googleapis.com/leehyeonjun.com/connection/storybook/1.jpg',
-        ),
-        await getPlaceholderImage(
-          'https://storage.googleapis.com/leehyeonjun.com/connection/storybook/2.jpg',
-        ),
-        await getPlaceholderImage(
-          'https://storage.googleapis.com/leehyeonjun.com/connection/storybook/3.jpg',
-        ),
-      ],
+      images: imageResults[0],
       explanation: (
         <ul className="flex list-disc flex-col gap-4 p-10 pt-4">
           <li>
@@ -453,14 +475,7 @@ const DevProcessTimeline = async () => {
     },
     {
       title: '캐러셀 공통 컴포넌트 구현',
-      images: [
-        await getPlaceholderImage(
-          'https://storage.googleapis.com/leehyeonjun.com/connection/carousel/1.png',
-        ),
-        await getPlaceholderImage(
-          'https://storage.googleapis.com/leehyeonjun.com/connection/carousel/2.jpg',
-        ),
-      ],
+      images: imageResults[1],
       explanation: (
         <ul>
           <li>ssss</li>
@@ -469,9 +484,7 @@ const DevProcessTimeline = async () => {
     },
     {
       title: 'access Token 관리 및 refresh Token 재발급 로직 구현',
-      images: await getPlaceholderImage(
-        'https://storage.googleapis.com/leehyeonjun.com/connection/accessToken/image.gif',
-      ),
+      images: imageResults[2][0],
       explanation: (
         <ul>
           <li>ssss</li>
@@ -481,9 +494,7 @@ const DevProcessTimeline = async () => {
     },
     {
       title: '미들웨어로 token 검사 및 protect route 구현',
-      images: await getPlaceholderImage(
-        'https://storage.googleapis.com/leehyeonjun.com/connection/middleware/middleware.gif',
-      ),
+      images: imageResults[3][0],
       explanation: (
         <ul>
           <li>ssss</li>
@@ -493,38 +504,7 @@ const DevProcessTimeline = async () => {
     },
     {
       title: 'usePagiNation 공통 커스텀 훅 구현',
-      images: [
-        await getPlaceholderImage(
-          'https://storage.googleapis.com/leehyeonjun.com/connection/usePagiNation/GIF.gif',
-        ),
-        await getPlaceholderImage(
-          'https://storage.googleapis.com/leehyeonjun.com/connection/usePagiNation/JSDoc.png',
-        ),
-        await getPlaceholderImage(
-          'https://storage.googleapis.com/leehyeonjun.com/connection/usePagiNation/coupon.jpg',
-        ),
-        await getPlaceholderImage(
-          'https://storage.googleapis.com/leehyeonjun.com/connection/usePagiNation/coupon_user.jpg',
-        ),
-        await getPlaceholderImage(
-          'https://storage.googleapis.com/leehyeonjun.com/connection/usePagiNation/income.jpg',
-        ),
-        await getPlaceholderImage(
-          'https://storage.googleapis.com/leehyeonjun.com/connection/usePagiNation/member.jpg',
-        ),
-        await getPlaceholderImage(
-          'https://storage.googleapis.com/leehyeonjun.com/connection/usePagiNation/pass.jpg',
-        ),
-        await getPlaceholderImage(
-          'https://storage.googleapis.com/leehyeonjun.com/connection/usePagiNation/paymentHistory.jpg',
-        ),
-        await getPlaceholderImage(
-          'https://storage.googleapis.com/leehyeonjun.com/connection/usePagiNation/review.jpg',
-        ),
-        await getPlaceholderImage(
-          'https://storage.googleapis.com/leehyeonjun.com/connection/usePagiNation/review_user.jpg',
-        ),
-      ],
+      images: imageResults[4],
       explanation: (
         <ul>
           <li>ssss</li>
