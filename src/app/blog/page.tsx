@@ -5,7 +5,7 @@ const page = async ({}: { params: { slug: string } }) => {
   const posts = await getPosts();
 
   return (
-    <main>
+    <main className="min-h-[80dvh]">
       <h1>Next.js MDX Blog</h1>
       <ol>
         {posts.map(({ slug, title, publishDate, categories }) => (
