@@ -5,12 +5,13 @@ import { cookies } from 'next/headers';
 import ActivityNav from '@/app/_components/ActivityNav';
 import AnchorNav from './_components/AnchorNav';
 import AnchorNavButton from './_components/AnchorNavButton';
+import ConsoleLog from './_components/ConsoleLog';
 import Footer from './_components/Footer';
+import NprogressBarProvider from './_components/ProgressbarProvider';
 import RouterNav from './_components/RouterNav';
 import WebVitals from './_components/WebVitals';
 import { AnchorViewProvider } from './Provider';
 import type { Metadata } from 'next';
-import ConsoleLog from './_components/ConsoleLog';
 
 const consola = localFont({
   src: './fonts/CONSOLA.ttf',
@@ -50,16 +51,18 @@ export default function RootLayout({
         <body
           className={`${consola.className} relative flex h-dvh flex-col bg-white sm:flex-row dark:bg-dark-body `}
         >
-          <ActivityNav />
-          <AnchorNav />
-          <main className="flex size-full flex-grow flex-col overflow-auto">
-            <RouterNav />
-            {children}
-            {settingModal}
-            <Footer />
-          </main>
-          <AnchorNavButton />
-          {process.env.NODE_ENV === 'development' && <WebVitals />}
+          <NprogressBarProvider>
+            <ActivityNav />
+            <AnchorNav />
+            <main className="flex size-full flex-grow flex-col overflow-auto">
+              <RouterNav />
+              {children}
+              {settingModal}
+              <Footer />
+            </main>
+            <AnchorNavButton />
+            {process.env.NODE_ENV === 'development' && <WebVitals />}
+          </NprogressBarProvider>
         </body>
       </AnchorViewProvider>
     </html>

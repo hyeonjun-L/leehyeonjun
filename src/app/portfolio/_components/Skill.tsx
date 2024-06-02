@@ -18,7 +18,7 @@ const Skill = ({ skillList }: SkillProps) => {
             className="mb-4 flex flex-col gap-4 md:flex-row md:items-center"
           >
             <dt
-              className={`flex items-center gap-2 ${bg} whitespace-nowrap p-1`}
+              className={`flex items-center gap-2 ${bg} whitespace-nowrap p-1 text-white`}
             >
               {svg} {name}
             </dt>
