@@ -10,6 +10,7 @@ import RouterNav from './_components/RouterNav';
 import WebVitals from './_components/WebVitals';
 import { AnchorViewProvider } from './Provider';
 import type { Metadata } from 'next';
+import ConsoleLog from './_components/ConsoleLog';
 
 const consola = localFont({
   src: './fonts/CONSOLA.ttf',
@@ -44,6 +45,7 @@ export default function RootLayout({
           href="https://unpkg.com/dracula-prism/dist/css/dracula-prism.css"
         />
       </head>
+      <ConsoleLog />
       <AnchorViewProvider>
         <body
           className={`${consola.className} relative flex h-dvh flex-col bg-white sm:flex-row dark:bg-dark-body `}
