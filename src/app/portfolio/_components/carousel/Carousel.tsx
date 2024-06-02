@@ -42,6 +42,7 @@ const Carousel = ({ slides }: CarouselProps) => {
                   placeholder="blur"
                   className="size-full"
                   blurDataURL={placeholder}
+                  unoptimized={src.endsWith('.gif')}
                 />
               </div>
             </div>

@@ -155,18 +155,18 @@ const DevProcessTimeline = async () => {
       ),
     },
     {
-      title: '내 정보 수정 페이지',
+      title: '쿠폰 사용',
       gif: {
         pc: {
-          src: 'https://storage.googleapis.com/leehyeonjun.com/connection/myInfo_pc.gif',
+          src: 'https://storage.googleapis.com/leehyeonjun.com/connection/coupon_payment_pc.gif',
           placeholder:
-            'data:image/png;base64,R0lGODlhFAALAIcAAExpcfbx/Pbz8vby/Pb3+PHq+/Pz9ff39vXu7////v7///////Py9/39/f39/Pf39+na5Onl7/fy+vLr/PDv8fDp++DRzvz8/fPy8vf0/OrEqO7u7v38/vLx8/j1/fj0/OLg4v7+/9fX2Orm7/Lp5fXz+PPz8/z7/v37/v3+/fX0+PX19fvy/fHr/Pv+/vfx/PXy+PPw+uXHuvfv8vTCju/f5uvq6vLw9f3v2+nm8PPy9fn5+fbz+vn4+fXx/O/u7/j4+Pj2+vr4+/r5+cl7Rfz8//n1/e3u8vPr/+/v7/Dw7/z7/fXy/P/+/uno5/Lu+NWsl/Tt/+zv8fj1/PLq9vf1+vf0/fj49+3p8+rn7/Hu8/Xy+ezo6PPs//Dz9vv7+/Ly9P38/fHx8vn5+Obm5fn3+/Xz9/X29e7u7ff4+fb39fHq/PTw+v7+/uzt7Pj0/e3r8/b0+fXx9fz6/fn6+e/o+/Ts6fDq+/Lu9/Lt+/z6/vfz/O3t7/f0++7k5Ono6+7t7Ovj6/Xw+v7+/fHp/PPt//Xx+/Lt+O/w7+/r9fb19gAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH/C05FVFNDQVBFMi4wAwEAAAAh+QQFCgAAACwAAAAAFAALAAAI5gBZQBABwkAHCj3CLDmxpOGSEHL82IEjgUQHDihUHClyoeGchkH+/OGjJ0sGAQ+aKECgAQeBHQ8WpGhQBoMSNQuyeEijyMECC0RoOEnyI8mKQVUy9OHxYcSHMUPahNABRYYUGxs2fEnQp06BCkgivLlxZkEDIS68iHkAxESSK1vWTCgQReyFBm3awNBipkSVOCUYxImxpsWdQhGmNEmQYAEYNHQGMW6cYIpcuiN8MLEyYMATPE+eGBo9Og+hNRW65DBCBYshNoIOJRoQoHbtAXtyvwi0gAsZN4AQXTkwuXiCJgtm1AgIADs=',
+            'data:image/png;base64,R0lGODlhFAALAIYAAExpcfz8/IdkWPDw8Pz8/fz7/PCwcPfp8NrBt/7+/uGaZP39/fb3+f3+/c93Q/7w9/XZwv/8/vz8+vj09ZRZPfv6++7q8fb2+P36+P3+/vX59/38/Ork7/Dw8fz7+vj3+P3+//79/fbz+vf39/z6/fX19fj1/YZvbvn9+/j39/W61vb29fr5+a6Edvz7/fTg0ffz/bqJcPn4/fXXvvr5/ff3+Pv5/uq7mfn3+dOJWP75+/36/Pf2/vv5/P7v9v38/fn+/P6ezP/t9v7///z8+//+/vr4+vHn7PmmzvHy8v2u1PP3+fn3+PLy8v6kzv39/vza6X9kX/yhzalYN/v+/b9yUfPj6u3Ksf38/8mAUfb29vK0d/+r0/79/vj8+/r4+f7i8Pj29v6byufv8/3///v7+/n3+/HQu/6fzLx6Vv6m0Pvis/u/2/7//vz+/ezs7/7k8JJVOv/w9/j6+/v6+ePj4vv9/PPj6/ft8f///wAAAAAAAAAAAAAAAAAAAAAAACH/C05FVFNDQVBFMi4wAwEAAAAh+QQFCgAAACwAAAAAFAALAAAHvIALEUd1AyUrO3l5Q0MJCw1hb2N5TQlFE0kjZTUIV2cQMy+NFRdLeR0JCUN5CXkMMTkKawY3eSGMrQOpqQt5cwIUWVsOLXkbu3kfu455AVFxaVVTJ83LC8upTykYHBYSdD/LbQXYCT0kMjAmNDYu2AGOC/IEIjhfTEZaZgVELD8LGeAtA8EDSwMqQ+yQceMFCAoN1XZ18QHFyoMHcg7cwcOGCxIVeb6k6jJEhxIpToKoDIJGjBo4YIQM8RAIADs=',
         },
 
         mobile: {
-          src: 'https://storage.googleapis.com/leehyeonjun.com/connection/myInfo_mobile.gif',
+          src: 'https://storage.googleapis.com/leehyeonjun.com/connection/coupon_payment_mobile.gif',
           placeholder:
-            'data:image/png;base64,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',
+            'data:image/png;base64,R0lGODlhFAArAIcAAO65idvNysaAWsW9u71rQoBgTIpQP2M0JNXJx4BGM3hEMy8QDJdgSHs0IpZmT+G8mdjKx+CpfdJ3Qfvg7fvO5OB7OpFEJYtGLdzOy2g/N+OqecJpQsJqRuGqe+OXXp9IKuWmZvn9+8TQy/ayZ//J4+La2eCYaP+r1baztfTv6rNnSfq7a+Osh/4ahrmwtPu+2/z2+b27u/C8j+SbasxqPvrN4/fjt+GQWszT0P+z2P87mPrqwf7R5vnSlO6VTdhWJqlSMqpYOet+RZIzG9FJIvWwZPi/ecFJJXshEv5bqfOzd2wiF/GmXd+AU7NeQqtmSfXx8KZVOYM4H/5Bm/jGhEUVEYdUQ+6qceemcvOzfuyeYcyzv2U5Mv5tssbLyUgiHvfo7+jG1d6hbfjMnPTGlmJEQPnx79nE+d7O9Pj79M/BvtnLybmFXZZaQmo4KHc3J8J9VUQtKaRrTq51U8uKWuqPS7VsReWLStiDVD4eGtOEWF0wJP8qj2EkGcvJx96CT/bbrquqqZJSQc5+U/Oyb8PDwP72+vjNjPbUpP6kzv9wtOuZX8+LYvjEfvP49f99u/fesNRlNuSfYdqPYf7w9/W6eNOJYPr//ptbRbNZNvvz3CkNDPOvb8/Oz+mmbrtmSe2pcP+Fv/G7hvK/jfHHn+XY+Ovi9/X38zckIJlJLnNAMlglHHYrGf93uP96ue2+lM2CV+y1gf8ljeewg+Sgaem3jP7j8f3p8v7b7NqdcN+ldPvx6vz18JVYRu2jaPDDm9aSZ9nW2N7d3efn5uvg/PP08ujp6ff2+fTt/crCwEMgGbhgQMfHx8d3T+Df4OTj4/Hv7+rr7OLR+v3//e7k+vDm/Pfz/e7k/Pjqx/+o0f+r0vr6+vv29PPu+/Ho/Pr6+f/9+vPy9P79/e3t7fPy8vz+//38/vj//vT09fn5+u/v7/X19vv7+vXw/f7///Lx8fDx8P///fn4+Pv5/v7+/vz7/P39/f////z7/vf39/////n2/vv4/fz8/P/+/gAAACH/C05FVFNDQVBFMi4wAwEAAAAh+QQECgAAACwAAAAAFAArAAAI/wDpubtHkF5BegjpsVs3DcwtR+lsvXARKEahQH7u2RNn7566TsO2hPFCztAtctGiwRsGLyFCc+q2HUs3bts9eSVS8Np1Lx64n0Dj7dzlj909DKrkzDLBotarV79+kSL1q9aYWbzM3YMgiJEGWnom/blBy5MvLaBEkbFkpty9AG/gxOoAy9IfGYAgIfKVZVQuRty0rjEgIFaEDcvuIMKGbUclX7F0AQt8b02bXLN0NeNQBxBjTVSuYBGTizICN3bo1HoAq84hG9g0NeKERdekrPeS5WFF4NWcVHdWNOoByYgSUaMma02m7A0eNgUYVBhBqNKhIouaRLHyziDzOHLYJP9wIsHDDFCcfEQ6gmQVtIHMUbWB48bBHD2D7MAS8mNInz1QuKXGKqiokkofrHxAwzJABBEJEaxsosw7Aw2IigINXEAHLYs0k0kzkmSyxCZ5dHfPAAvskYoFIBACTDOfLOOEJExIUcUX793jRxwZqKLCIJgI0ksvmPTyBB6fcFEGOfRsg8478qSTTzjo5LPOleugQ84633yj0DOFMPPOPQYRZOaZZPbDTjelmEJMN/mkY8+cG4ljJ0fskLONN9L0Sc0p3/Tkkkv25LNNPfzss4817TTaTTvW8CPppPzMk84+xFRzDTXUXFPNp8jwg8+opM5zzJzmpCqOOfXU008/rFL/Wmk61nRTDDpPykPPnNbAo+ucdjaJDDXFjKPOOOuQiQ8yxuRjJkL3sIOMKcMkSyY98fBzDTnCjDNONP0gxM4+3cCTDz3hYstPNceMQ86T6bJDDBppaDQomtdG24037LSqJjvsqPkvwAKnI048HMVjjzkI2bOrww0btM0+1VhjTjvzfLNOlPnYs1A+XqYTJTVnSEONNO2cEo068KjTjzzGHGvPOu/kU4+i1uzD8KBlJhStOP74E0/DEBNND0cOsyOQO/T4c5BBUENLEDuU4IILJeqQA0+y+bwLDzrpqPPOO86Ew0MiOdSAQzCdOOOPOs8ME8wz5AQjjDPCvGOILbbAUeBOsO6cI7jglwx+iZyXMH1PPSHgkkg2kGsjOeTZaHPLM8w4wwwzKIhwQgt8yDJFF4okoYMssvBBwTbr5MOyOo6QoIgrrTwSSiiP0N6KKxMEBAA7',
         },
       },
       explanation: (
@@ -175,6 +175,70 @@ const DevProcessTimeline = async () => {
         </ul>
       ),
     },
+    {
+      title: '쿠폰 관리',
+      gif: {
+        pc: {
+          src: 'https://storage.googleapis.com/leehyeonjun.com/connection/coupon_pc.gif',
+          placeholder:
+            'data:image/png;base64,R0lGODlhFAALAIYAAExpcfn2/fj29/v6/fj0/Pv4//nz+PXx/O3t7f7+/vbz9/z8/Pz5+vz7/fz6/v3+/ff5+Pr6+vX49/79/vj5+P///vf3+P3//vz6+/3+/vXx9/n5+fbw8/v5//rq8vz7/vv8/f38/vbt8vr7+/rs9fb39/v5+vf4+Pr5+f7+/evr6vn3/vnw9f39/O/s8fv8+/Px8/vt9vHx8vr3+O3i6Pn5+uzt7fT09Pz8+/fx9Pjx9P39/fv6+vHx8fv4+f////jw9Pv7++rm6Pv7/fj3+vn09vTz9vP08+rp7Pz7/Pn2/O7k6vr5/Pz6/ezr7vX19fPz9e3p6+TY4Pj09fTz9P7///rw+/z8/fn0/Pz9/fn2/vr5+vf39/z9/Ovp7Pr5+/jx9e7o7tbW2O7s7fLy9P39/vj3/fb29vT09vTw8vj2/fz8/vv0+PDm7PPz8vXr8/Hx8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH/C05FVFNDQVBFMi4wAwEAAAAh+QQFCgAAACwAAAAAFAALAAAHzYBZVlJiXmRORh8DDUMDAx9obW8BbmVYYBs/TEgyFltfSVdXDVlmBwU9ZQFUXD9ENmcLQRAvCwkJOztJqGVaUEc/QyIYVTweBhdsMRldC6gTSmcRPw5jwBFCGj8KYS0JCx2pATW2ICQsFz46OA9FU1kLzuK3CQ0uMD8oKtM3CLdXvAKUudUgR5EMQYCYeDBDADxwcFQNTLBmCYcfW2gw+JEmSoIUV1ZskHhrwIkSO7pIoJBgxJMgD3ao2VFGzYSSISokqNCEQLwft1QtCAQAOw==',
+        },
+
+        mobile: {
+          src: 'https://storage.googleapis.com/leehyeonjun.com/connection/coupon_mobile.gif',
+          placeholder:
+            'data:image/png;base64,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',
+        },
+      },
+      explanation: (
+        <ul>
+          <li>ssss</li>
+        </ul>
+      ),
+    },
+    {
+      title: '패스권 구매 및 사용',
+      gif: {
+        pc: {
+          src: 'https://storage.googleapis.com/leehyeonjun.com/connection/pass_payment_pc.gif',
+          placeholder:
+            'data:image/png;base64,R0lGODlhFAALAIYAAExpcfz7/Pj1+////vTz9P7+/fz6/fDl7f///ff0/Pz+/f7+/u3u7v////r6+/n5+fXy+/jx9fPy9P38/fny9vT09Pr5+fz5//z6+/v7/fr8+/bz/Pzz+P36/PPy8/35+/j5+Pf29+jo6f3+/vvz9/v7/Pf4+Pz6/PX19fv5//r3+fv4//Py8vj2/P3x9/r5/PTy8/Px9Pv5+/X19Pf09vrw+/v8+/r4/Pz4+dbW2P39+/v6/PPx8/n2/fzx9vv6/f7z+Pz8/P3+/fj2/frz9vz8/fr6/f79/vj2+Pb29v79/fv8/Pb19v37/Prx9f39/P73+vn5+vz7/vn3/f7z9/j3+fTz8/f1+Pj39+TY4Pv5+v39/vzw9vr6+vz3+vz7/fvx9vTz9v3x9vDw8Pr4+evp7Pf1/Pz9/fHx8Pj4+Pbz+/r3+Pj0/e3s7/by+/7//vn0/P39/fXr8/r3//Ly8vHx8QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH/C05FVFNDQVBFMi4wAwEAAAAh+QQFCgAAACwAAAAAFAALAAAH0IBnNVk5ZTFtYV87GV8ZP1JhB3JDdFtwEQ8NL1cSIiETDgEBRUVmbnNjWz0zaQ1VDBUmS0tJGgoFcSMlK3VbQ2kPAz8RQVAuOG9AHBhKVCcpvS1JXQ0/HiABSCxdMkwVRVoBF2i+UUEDRsQdJERCH05rTVwB0KoL9z88D0FrMDYBNKxMICOuV48j+ChM6OBDxYgPYLw0EXPiQqqD+AhYCJIGRZASWEIE6RJkRYUtUwaoNBCnQAEENwToeOLyzYIecRZs2JAgAYSeQIP2VMPmSSAAOw==',
+        },
+
+        mobile: {
+          src: 'https://storage.googleapis.com/leehyeonjun.com/connection/pass_payment_mobile.gif',
+          placeholder:
+            'data:image/png;base64,R0lGODlhFAArAIcAAOzn7ezq7/fz/vT0+7uts6Sko/T19KWopvy92vfl8vfx9+Xj6Pf49fv4/uzp7vPz8u/F2Oru7M+nuOno5+jl6/TV5Pva6vL3+cLIxO3x8+ju6tLS0vz9/NHS0PPw9fbx+snJya+vrrCwsLW1tf36//Lv+eDg4MfHx/Tx+uvp7fnp8f3R5vL18/n8+fjs8urr6frx9vv3+fbz+vD18/n19+Hh4eXl5t7d3rS0tNnZ2fHz8vvc6/rS5fzy9vjk7uPj4+zt6/j6+ufm5tzc3PL29Pb39vnc6+rg+PLu+PX29uno6Prz9/u/3O/o+Pjv9PDv8PrU5vLx8frp8fv9/PXx+/j29/n/+/fz9fy62dPS0+7o+PLz8vrk7/u82uzr6/f8+vf7+vns8/rL4vnv9PTw9/nb6vj++vX59/vS5fju8/Hw8PX49+HR9/nt8vPv+frQ5Ozu7fX09/vK4vr6+PX19PvW5/r8+uvj9/jz9frr8vjn7/r7+/rU5+fl6sDAv/f0/Pn1/fLt+vrj7rSzs/b0+PDw7+Xm5eXk5ePj4vXx+fLw9/f6+fXw+efo5/7//ffy/PHx8fjj7tzb2/vD3vX19vnb6fTx+fX09fb1+O/v7/j39/nl7/f5+Pf1+vj49/vN4/v9+/b6+Pnw9fj7+vj8+vf6+fP08+3l+Pre6/Tx9/j6+fXy+fvT5vb49/Lx8vHw8fnk7vf3+O/v7/Tz8/r5+vj7+fnx9fTy9/nq8fvH3/n3+Pj5+fn8+/no8O/u7vLy8/ns8vny9ffz/PLy8vr7+uLi4vb29fv8+vv7+u3s7evq6/j9+/n+/Pb0+fLu9/n9+/Py8/b19enp6fj3+PrO4/r5+fLz8+zs7PPv9/r7+efn5+Xl5ebm5vj5+fn8+vPv+Pv7+/n7+evr6/Dw8Pn4+Pz8/Pn6+vn7+vT09Pn5+O3t7ejo6PPw9/n6+O7u7vLy8urq6vn4+fHx8fn6+fLv9/r6+vf39/j4+Pr6+fX19fb29vPz8/Pw+PLv+Pn5+QAAACH/C05FVFNDQVBFMi4wAwEAAAAh+QQECgAAACwAAAAAFAArAAAI/wDneSMGrlw9g/4SJrTnblEFCxGiCUJA4MAgPwX8cEiHD9+xQiA0SICAYYKCBAD69AmwwAGhZjCbdUrhIcMFCoQCDfgDSICwBsKEPaLixlKiRyg+MPoTiB2DYQaMPUA0rBGQLXb6aemX6lsJTOwSFSpmaNuhESdwDMri6A6bU01OHbHEDpujcgnr1cuXz589TqvYxbl1ix0mfoA6bFCnDR48d+OGydu3jw66fJ7SzelHIoQIaSbWcVunbrK8cb+GDbPnDx89RccMltsnTfS1dff85baX755rfq0o6bsn7xo3ae7W5bPHnLdvevyI1buXW6/15s1jtesn44UkddDkuf9D585dbn/xyKmP53qVPG06iujbpw/dMIXm5pk71xr6sRgwiDKPbv5MR10weNgyxhXhQOdNJJNQQ8p5Cp3DBzVyYFGJFc7w0849+tWj0Ijx6OKPLlVsR88xytQgRDHojKjQLgndsx0/2bwiSTGs6TWideDEk04/7GQzjA3iyKOOZCPuo6Q66MxDDzv4uKJMMo6Jcw12v0TxhC+zzNMPP/hwsswoue3W3CikLMPMLtthE44LlaCiCoUJzcMFLILwAMszzmDTggor7DCFjP6YgwoUUFATCaBUsjADEZmwJiMvz7gZxJD9IJPMDWTlIyKJ8ZQ6zXZFyjPEIXghSh11p/b/o0iO3CizzjaOjeqPK5mIA88+83xD5iWmmELZPujoo6w++TCbTxLBkhmLetTV+Oo01GmiyW/e+BAhL/HIaE4daHzChBHMIOEhDT0sgWhCwbQxhhRONPiNp41kQsu7+53jjSpD8oPMODlsA451P1p3T8D4QPODNvkMw9eI+aBDGSVSkjmOEuJos8068NzT3Cu+eAHPMGKSWUQonOhjj8vL6sNJKGB80Uo62HwTji294DIPheH6A0wYuMCSRoOp1LJJLm/Uots9u+wCNSti5NJFGWaQkZA1a3jjjzv5nJMHMOdEA8ciz5wxTDU1glnNPepEs4cevRCTjzj2VAONGtXlG3NyPfaMow841lgDTj7u2FOPPPLoo5Cu774bEAA7',
+        },
+      },
+      explanation: (
+        <ul>
+          <li>ssss</li>
+        </ul>
+      ),
+    },
+    {
+      title: '패스권 관리',
+      gif: {
+        pc: {
+          src: 'https://storage.googleapis.com/leehyeonjun.com/connection/pass_pc.gif',
+          placeholder:
+            'data:image/png;base64,R0lGODlhFAALAIYAAExpcfv7+/Hx8Pf39//9//z8/fPz9Pv7/f39/v7+/vr7+/z8/O7u7fHy8vr5+//+/vr3/Pr6+vz7+/Ly8vHz8/X19fLy8/v8/PPx9vf3+/b09/v6/OPk4/39/Pv2+Pr6+fb39uzs7fDv7/r5/O7u7vPz8/Lp7fz8/u/t8P3+/fT0+ffz+fX19vj29/v5+vPw9vP19vz7/PXz+Pv7/PHz9Pj5+Pr5+vn3/Pf1+PHx8fj3/Pn5+fDz8/39/ezr6/L19e3t7f/+/+jo6Pz9/fr5+fHw8Pn4+/Hw8fb29/L09O7v7vv3+e3t7Pn1+O/v7/Hw8vv7+vLv9vz7/u7x8fTz8v////Ly8f38/e/y8vP09PPy9/Dw8O3t8vbv8+vr7Pj39/r4/fj4+Pr6+/z7/e/u8/X19PLx9vH09PT09fz8+/Hx8v7+//7+/fb4+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH/C05FVFNDQVBFMi4wAwEAAAAh+QQFCgAAACwAAAAAFAALAAAH3IAJBCYcOR8sHg8Ji4tVLV1LCQsJPShFGioULmMZbQtjNzVfTSspV1UKWVUFR1lDBRYNaQUGOWk9aAU9kg07QTYlO1UBvVULDQPGPT0PFzAdI1pJaSNmPwEbMtcOUVUVVRIiwmU+EQlURQFVICQRCwJVOQlDNERSGUkRJzo/HydgZ8IggFBlwrAtbJCEcLLgiBclAQaEaLBgwZN4lHKEqSJGTZgEB7aUWVNgQpggMRKEacajAw4uZ9IYIYMFygYMU3bMeHGlhzEhFQJYYRJgQQkgOxIMYDBAaY8FgQAAOw==',
+        },
+
+        mobile: {
+          src: 'https://storage.googleapis.com/leehyeonjun.com/connection/pass_mobile.gif',
+          placeholder:
+            'data:image/png;base64,R0lGODlhFAAsAIcAAExpcff39+fb+Pb29sTExPHx8fTz9Pa92Pf2+fj4+PXy9/r6+vTz9fPz8/b29e7u7vLx9efn5/Dq+evr69PT0/Dw8PLw9P7+/vLx9Orq6vLy9N7e3u3l+eTk5OLi4tzc3PPv+MLCwvLv+Onp6ff1+b29vfLu+crKyv///9/f3/T09fTx+Ovs6/Pz9Nra2vPy9PPx+ODg4O7n+O/u7+7o+fj3+PHs+NfX1/Py9fX09fHs+fr5+vLv9/r5+enf+Pf49/j5+Pbx8/f3+Pj3+bW1tfrs8uvq6/f2+s7Ozuvr7OHg4Pz8/bGwsfLy8tHR0fn5+dPS0+jo6NLR0u/v79va2+zs7N3d3eHh4b69vfr7+769vvr6+fr8/OXl5ejp6fj39+zr6/f29/Lx8vj6+fv//aurq7S2tfv6+u3z8NTU1MO5vvT29f3+/vn8+/v9/dLS0tTV1fX19dPHze3t7fnB2/n4+fv9/Pn6+frk7v39/ff9+vr7+vf6+drZ2dvV1/Lp7fnc6vX29fru9PT09Pf4+OPj4+qwzPr7+fj5+fve7Pv6+/v7+9HZ1bS0tPz8/NDQ0O7t7szNzevf5Obm5gAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH/C05FVFNDQVBFMi4wAwEAAAAh+QQFCgAAACwAAAAAFAAsAAAI/wD56LGTJ4+jC4sCKFSYoOEYRIQSCALkB06fD06UZHnyJMGiAn3QGDrACBIeOmrMaDnB5MQijgkWNIDiRY6kSDOykGFz4cLBRQ2DPtnzhIsbRU/EgHlQIcwAhkEbCklQI0KFBBOsFNowJarXhk+kUHly0FGeJw0GqV0bh22TKQGwlKkSpUCFJoMaFCjQJC3HJwsWPLnxaMCctgEGqE08YMBfsAmmdJkQJcKkuoIB/91cYdKVCIViRJlQYPNjsHHiPGnbtkGDrwsWOQL6ZMqGJh1zf50y4UqKBE8+EHlwAbhpjgvShGgUIiHfOQ+Obw7saMGgBBE6FIpQIID0jg0DqP+e0GHChA9THBmXnuA63TlRMmQokNl0nY7XBzXZvzdO/b9bHLIFENcFZuB/fyFgAg06wHAdeN89cQcJNvggAw8vDNDAAG2t5aFaLbwwiAo4XDfAA00ksFAAKi7kQBwDFPCAdzeU4QIK3y3yxgmPlFACUAVU0URi3h03SIdNxJFAFxvEsMEHUSAImGCCDfJEBoVkEEEXKUTIUQDXUfZAFCNE4ViE7SVQwQMPzDHHDGE8Ucd9f90hYJoGLhKYdEOsIMIKCjxo2h0HLrDHERIIwAEILYB5ZGqQRhoHAxBogIEFBrCYQGOcNgZjY4F4p+IAdWxQAhIXTGmgZkskQQEBzamJeUWURR4n0yQdeMAiaFMs4ut608m2yHURfPbAFVXQBix4YD5RRQRtdpDBAnSyd90cE8wxghEs+PcXgu3VUAeLMCXwxRcNpRZVYh1NAdggVbRRRCJjnDFHBYIF4C5gDYzgn11ZBPFHFjk8UMUAMs1xZhwFINxWDz+ssYCGTTic4rfIZbZDxpllFhAAOw==',
+        },
+      },
+      explanation: (
+        <ul>
+          <li>ssss</li>
+        </ul>
+      ),
+    },
+
     {
       title: '지도 공통 컴포넌트 구현',
       gif: {
@@ -417,15 +481,50 @@ const DevProcessTimeline = async () => {
     },
     {
       title: '미들웨어로 token 검사 및 protect route 구현',
+      images: await getPlaceholderImage(
+        'https://storage.googleapis.com/leehyeonjun.com/connection/middleware/middleware.gif',
+      ),
       explanation: (
         <ul>
           <li>ssss</li>
         </ul>
       ),
-      troubleshooting: 'CDN 문제',
+      troubleshooting: 'CDN 문제 & 의사소통 문제',
     },
     {
       title: 'usePagiNation 공통 커스텀 훅 구현',
+      images: [
+        await getPlaceholderImage(
+          'https://storage.googleapis.com/leehyeonjun.com/connection/usePagiNation/GIF.gif',
+        ),
+        await getPlaceholderImage(
+          'https://storage.googleapis.com/leehyeonjun.com/connection/usePagiNation/JSDoc.png',
+        ),
+        await getPlaceholderImage(
+          'https://storage.googleapis.com/leehyeonjun.com/connection/usePagiNation/coupon.jpg',
+        ),
+        await getPlaceholderImage(
+          'https://storage.googleapis.com/leehyeonjun.com/connection/usePagiNation/coupon_user.jpg',
+        ),
+        await getPlaceholderImage(
+          'https://storage.googleapis.com/leehyeonjun.com/connection/usePagiNation/income.jpg',
+        ),
+        await getPlaceholderImage(
+          'https://storage.googleapis.com/leehyeonjun.com/connection/usePagiNation/member.jpg',
+        ),
+        await getPlaceholderImage(
+          'https://storage.googleapis.com/leehyeonjun.com/connection/usePagiNation/pass.jpg',
+        ),
+        await getPlaceholderImage(
+          'https://storage.googleapis.com/leehyeonjun.com/connection/usePagiNation/paymentHistory.jpg',
+        ),
+        await getPlaceholderImage(
+          'https://storage.googleapis.com/leehyeonjun.com/connection/usePagiNation/review.jpg',
+        ),
+        await getPlaceholderImage(
+          'https://storage.googleapis.com/leehyeonjun.com/connection/usePagiNation/review_user.jpg',
+        ),
+      ],
       explanation: (
         <ul>
           <li>ssss</li>
@@ -455,7 +554,7 @@ const DevProcessTimeline = async () => {
                   {explanation}
                 </>
               ) : images ? (
-                <div className="mx-auto h-[28rem] sm:aspect-video lg:h-[37.5rem]">
+                <div className="mx-auto h-[28rem] lg:h-[37.5rem] xl:aspect-[13/9]">
                   <Image
                     src={images.src}
                     alt="개발과정 이미지"
@@ -464,6 +563,7 @@ const DevProcessTimeline = async () => {
                     placeholder="blur"
                     className="size-full"
                     blurDataURL={images.placeholder}
+                    unoptimized={images.src.endsWith('.gif')}
                   />
                 </div>
               ) : null}
