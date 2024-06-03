@@ -3,6 +3,7 @@ import Link from 'next/link';
 import getPlaceholderImage from '@/utils/dynamicBlurDataUrl';
 import GifContainer from './GifContainer';
 import Carousel from '../../_components/carousel/Carousel';
+import Troubleshooting from '../../_components/Troubleshooting';
 
 const DevProcessTimeline = async () => {
   const imageGroups = [
@@ -48,7 +49,7 @@ const DevProcessTimeline = async () => {
       title: 'Storybook을 활용한 컴포넌트 문서화 및 UI 리뷰 간편화',
       images: imageResults[0],
       explanation: (
-        <ul className="flex list-disc flex-col gap-4 p-10 pt-4">
+        <ul>
           <li>
             디자이너와의 협업과 UI 리뷰를 간편화하기 위해{' '}
             <strong>Storybook을 도입</strong>하고{' '}
@@ -109,10 +110,38 @@ const DevProcessTimeline = async () => {
       },
       explanation: (
         <ul>
-          <li>ssss</li>
+          <li>
+            강사, 클래스, 패스권을 검색할 수 있는 필터를 포함하여 구현된
+            페이지입니다. 이 필터에는 전체 검색 지역, 장르, 평점, 가격, 지정
+            날짜, 인원, 진행 방식, 요일, 시간대 등이 포함되어 있으며, 특정
+            키워드로도 검색이 가능합니다.
+          </li>
+          <li>
+            <strong>Search Params</strong>를 이용하여 사용자가 선택한 특정
+            필터와 검색어를 기록, 페이지를 벗어났다가 다시 돌아와도 이전의{' '}
+            <strong>선택사항을 유지하도록 구현</strong>하였습니다.
+          </li>
+          <li>
+            <strong>서버 컴포넌트</strong>를 통해 초기 데이터를 받아와{' '}
+            <strong>초기 화면 로딩 속도를 개선</strong>하였고, 검색된 아이템들의{' '}
+            <strong>검색 엔진 최적화(SEO)를 향상시킬 수 있는 장점</strong>을
+            제공하였습니다.
+          </li>
         </ul>
       ),
-      troubleshooting: '뒤로가기 진행 시 보던 곳으로 이동 & 캐싱 문제',
+      troubleshooting: {
+        issue: 'ssss',
+        isMobile: true,
+        troubleSrc:
+          'https://storage.googleapis.com/leehyeonjun.com/connection/troubleshooting/%EC%9D%B4%EC%A0%84.mp4',
+        troubleShootingSrc:
+          'https://storage.googleapis.com/leehyeonjun.com/connection/troubleshooting/%EC%9D%B4%ED%9B%84.mp4',
+        explanation: (
+          <ul>
+            <li>ssss</li>
+          </ul>
+        ),
+      },
     },
     {
       title: '수강생 및 강사 리뷰 관리 페이지',
@@ -153,7 +182,9 @@ const DevProcessTimeline = async () => {
           <li>ssss</li>
         </ul>
       ),
-      troubleshooting: '좋아요 봤던 거 다시 들어가면 좋아요 안된거 처리',
+      troubleshooting: {
+        issue: '좋아요 봤던 거 다시 들어가면 좋아요 안된거 처리',
+      },
     },
     {
       title: '수강생 관리 페이지',
@@ -365,7 +396,9 @@ const DevProcessTimeline = async () => {
           <li>ssss</li>
         </ul>
       ),
-      troubleshooting: '각 섹션의 크기를 줄이기 위한 dynamic 처리?',
+      troubleshooting: {
+        issue: '각 섹션의 크기를 줄이기 위한 dynamic 처리?',
+      },
     },
     {
       title: 'PWA 연결 및 설치 방법 페이지',
@@ -450,7 +483,9 @@ const DevProcessTimeline = async () => {
           <li>ssss</li>
         </ul>
       ),
-      troubleshooting: '동적 메타 데이터 생성 2번 api 요청',
+      troubleshooting: {
+        issue: '동적 메타 데이터 생성 2번 api 요청',
+      },
     },
     {
       title: '강사 수정 페이지',
@@ -490,7 +525,9 @@ const DevProcessTimeline = async () => {
           <li>ssss</li>
         </ul>
       ),
-      troubleshooting: '보일러 플레이팅 많은 문제',
+      troubleshooting: {
+        issue: '보일러 플레이팅 많은 문제',
+      },
     },
     {
       title: '미들웨어로 token 검사 및 protect route 구현',
@@ -500,7 +537,9 @@ const DevProcessTimeline = async () => {
           <li>ssss</li>
         </ul>
       ),
-      troubleshooting: 'CDN 문제 & 의사소통 문제',
+      troubleshooting: {
+        issue: 'CDN 문제 & 의사소통 문제',
+      },
     },
     {
       title: 'usePagiNation 공통 커스텀 훅 구현',
@@ -520,10 +559,10 @@ const DevProcessTimeline = async () => {
         ({ title, images, gif, explanation, troubleshooting }) => (
           <div
             key={title}
-            className="mb-4 border-l border-solid border-dark-disabled pl-2"
+            className="mb-10 border-l border-solid border-dark-disabled pl-2"
           >
             <h3 className="mb-2 pb-2 text-xl sm:text-3xl ">{title}</h3>
-            <div className="relative mb-4 border-t border-solid pt-4 dark:border-dark-menu-hover">
+            <div className="relative mb-4 border-t border-solid pt-4 dark:border-dark-menu-hover [&>ul]:flex [&>ul]:list-disc [&>ul]:flex-col [&>ul]:gap-4 [&>ul]:py-4 [&>ul]:pl-5 [&>ul]:sm:px-10 [&>ul]:sm:py-4">
               {gif ? (
                 <GifContainer pc={gif.pc} mobile={gif.mobile} title={title}>
                   {explanation}
@@ -548,7 +587,7 @@ const DevProcessTimeline = async () => {
                 </div>
               ) : null}
             </div>
-            {troubleshooting && <h4>트러블 슈팅</h4>}
+            {troubleshooting && <Troubleshooting {...troubleshooting} />}
           </div>
         ),
       )}

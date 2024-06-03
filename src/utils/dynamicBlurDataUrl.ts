@@ -13,7 +13,11 @@ const getFileBufferLocal = (filepath: string) => {
 };
 
 const getFileBufferRemote = async (url: string) => {
-  const response = await fetch(url);
+  const cacheState = url.endsWith('.gif');
+
+  const response = await fetch(url, {
+    cache: cacheState ? 'no-cache' : 'default',
+  });
   return Buffer.from(await response.arrayBuffer());
 };
 

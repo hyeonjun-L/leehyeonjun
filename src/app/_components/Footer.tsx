@@ -12,8 +12,11 @@ const Footer = () => {
         <Link href="/blog">블로그</Link>
       </nav>
       <p>
-        ⓒ 2024 <Link href="https://github.com/hyeonjun-L">이현준</Link> All
-        rights reserved.
+        ⓒ 2024{' '}
+        <Link href="https://github.com/hyeonjun-L" target="_blank">
+          이현준
+        </Link>{' '}
+        All rights reserved.
       </p>
       <div className="flex flex-wrap justify-center gap-x-3">
         <p>
@@ -21,10 +24,20 @@ const Footer = () => {
         </p>
         <p>
           Powered By{' '}
-          <Link href="https://github.com/hyeonjun-L/leehyeonjun">@이현준</Link>.
+          <Link
+            href="https://github.com/hyeonjun-L/leehyeonjun"
+            target="_blank"
+          >
+            @이현준
+          </Link>
+          .
         </p>
         <p>
-          Icons by <Link href="https://icons8.kr/license">Icons8</Link>.
+          Icons by{' '}
+          <Link href="https://icons8.kr/license" target="_blank">
+            Icons8
+          </Link>
+          .
         </p>
       </div>
     </footer>

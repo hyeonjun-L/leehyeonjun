@@ -37,7 +37,7 @@ const GifContainer = ({ title, children, pc, mobile }: GifContainerProps) => {
         </button>
       </div>
       <figure
-        className={`sm:grid ${isMobile ? 'sm:grid-cols-[auto_1fr]' : ''} lg:grid-cols-[auto_1fr]`}
+        className={`sm:grid ${isMobile ? 'sm:grid-cols-[auto_1fr]' : ''} sm:mt-10 lg:mt-0 lg:grid-cols-[auto_1fr]`}
       >
         <div
           className={`${isMobile ? '' : 'hidden lg:block'} mx-auto aspect-[9/16] h-[28rem] sm:mx-0 sm:h-[37.5rem]`}
@@ -63,7 +63,9 @@ const GifContainer = ({ title, children, pc, mobile }: GifContainerProps) => {
           blurDataURL={pc.placeholder}
           unoptimized
         />
-        <figcaption className="my-4 lg:col-span-2">{children}</figcaption>
+        <figcaption className="mt-4 lg:col-span-2 [&>ul]:flex [&>ul]:list-disc [&>ul]:flex-col [&>ul]:gap-4 [&>ul]:py-4 [&>ul]:pl-5 [&>ul]:lg:px-10 [&>ul]:lg:py-4">
+          {children}
+        </figcaption>
       </figure>
     </>
   );
