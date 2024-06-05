@@ -130,16 +130,28 @@ const DevProcessTimeline = async () => {
         </ul>
       ),
       troubleshooting: {
-        issue: 'ssss',
+        issue:
+          '검색 아이템 페이지로 이동 후 기존 검색 페이지로 복원 시 무한 스크롤 아이템이 사라져 scrollRestoration이 되지 않는 문제',
         isMobile: true,
         troubleSrc:
           'https://storage.googleapis.com/leehyeonjun.com/connection/troubleshooting/%EC%9D%B4%EC%A0%84.mp4',
         troubleShootingSrc:
           'https://storage.googleapis.com/leehyeonjun.com/connection/troubleshooting/%EC%9D%B4%ED%9B%84.mp4',
         explanation: (
-          <ul>
-            <li>ssss</li>
-          </ul>
+          <p>
+            Next.js는 기본적으로 뒤로 가기 및 앞으로 가기 탐색 시 스크롤 위치를
+            자동으로 복원합니다. 그러나 기존에는 클라이언트 컴포넌트 내의
+            상태(state)에만 아이템을 저장했기 때문에, 검색 아이템 페이지로 이동
+            후 다시 돌아왔을 때 아이템이 사라져 스크롤 복원이 되지 않는 문제가
+            발생했습니다. 이를 해결하기 위해 react-query의{' '}
+            <strong>useInfiniteQuery</strong>를 사용하여 무한 스크롤을 구현하고,
+            검색 아이템을{' '}
+            <strong>
+              react-query에 캐싱하여 기존 페이지로 복원 시 기존 아이템이
+              유지되도록 변경
+            </strong>
+            했습니다.
+          </p>
         ),
       },
     },
@@ -159,7 +171,12 @@ const DevProcessTimeline = async () => {
       },
       explanation: (
         <ul>
-          <li>ssss</li>
+          <li>
+            강사일 때는 본인에게 작성된 전체 리뷰를 각종 필터를 이용해 편리하게
+            확인할 수 있습니다. 마찬가지로, 수강생 입장에서도 작성한 리뷰를 각
+            필터를 통해 손쉽게 확인할 수 있고, 참여한 클래스에 대한 리뷰를
+            작성할 수 있는 페이지입니다.
+          </li>
         </ul>
       ),
     },
@@ -179,11 +196,29 @@ const DevProcessTimeline = async () => {
       },
       explanation: (
         <ul>
-          <li>ssss</li>
+          <li>
+            강사 및 클래스의 좋아요 관련 기능 및 관심 강사 및 클래스 페이지
+          </li>
         </ul>
       ),
       troubleshooting: {
-        issue: '좋아요 봤던 거 다시 들어가면 좋아요 안된거 처리',
+        issue:
+          '강사 & 클래스 상세 페이지 방문 후 preview에서 관심 표시 진행 시 표시가 되지 않는 이슈',
+        isMobile: false,
+        troubleSrc:
+          'https://storage.googleapis.com/leehyeonjun.com/connection/like/trouble.mp4',
+        troubleShootingSrc:
+          'https://storage.googleapis.com/leehyeonjun.com/connection/like/troubleshooting.mp4',
+        explanation: (
+          <p>
+            강사 & 클래스 상세 페이지 방문 후 preview에서 관심 표시를 하면{' '}
+            <strong>Next.js의 fetch cache 기능 때문에</strong> 좋아요 표시가
+            되지 않는 문제가 발생했습니다. 이를 위해 관심 표시한 강사와 클래스의
+            id를 <strong>react-query의 전역 상태</strong>로 관리하고,{' '}
+            <strong>Like 컴포넌트가 이 전역 상태를 구독하여 동기화</strong>
+            함으로써 해결했습니다.
+          </p>
+        ),
       },
     },
     {
@@ -203,7 +238,21 @@ const DevProcessTimeline = async () => {
       },
       explanation: (
         <ul>
-          <li>ssss</li>
+          <li>
+            본인의 클래스를 수강 중인 회원을 관리할 수 있는 페이지입니다. 각종
+            필터를 사용하여 해당 회원의 정보를 확인할 수 있으며, 회원의 요청
+            사항, 회원에 대한 메모 작성, 전체 회원에게 알림 보내기 기능, 전체
+            회원 정보를 엑셀로 다운로드하는 기능을 제공합니다.
+          </li>
+          <li>
+            <strong>React Table 라이브러리를 활용</strong>하여 회원 정보 데이터
+            테이블을 쉽게 구성했으며,{' '}
+            <strong>React Table의 엑셀 내보내기 기능</strong>을 사용했습니다.
+          </li>
+          <li>
+            회원에 대한 메모를 작성할 때 서버 부담을 줄이기 위해{' '}
+            <strong>디바운스(debounce) 기능을 활용</strong>했습니다.
+          </li>
         </ul>
       ),
     },
@@ -224,7 +273,16 @@ const DevProcessTimeline = async () => {
       },
       explanation: (
         <ul>
-          <li>ssss</li>
+          <li>
+            유저가 쿠폰을 다운로드할 수 있는 기능과 다운로드 받은 쿠폰을 확인할
+            수 있는 관리 페이지, 그리고 쿠폰을 적용한 결제 기능을 구현했습니다.
+          </li>
+          <li>
+            결제 페이지에 접근 시, 유저가 보유 중인 중복 쿠폰과 중복 불가능 쿠폰
+            목록을 확인하고 계산 로직을 이용하여{' '}
+            <strong>최대 할인을 제공하는 쿠폰들을 자동으로 적용</strong>
+            하도록 구현했습니다.
+          </li>
         </ul>
       ),
     },
@@ -245,33 +303,23 @@ const DevProcessTimeline = async () => {
       },
       explanation: (
         <ul>
-          <li>ssss</li>
+          <li>
+            이 페이지에서는 강사가 자신의 클래스에 대한 쿠폰을 생성하고 수정할
+            수 있습니다.
+          </li>
+          <li>
+            react-hook-form을 사용하여 쿠폰의 폼 데이터를 효율적으로
+            관리하였습니다.
+          </li>
+          <li>
+            클래스 등록 섹션에도 쿠폰 생성 기능이 포함되어 있어, 이를 공통
+            컴포넌트로 구현하였습니다.
+          </li>
         </ul>
       ),
     },
     {
       title: '패스권 구매 및 사용',
-      gif: {
-        pc: {
-          src: 'https://storage.googleapis.com/leehyeonjun.com/connection/pass_payment_pc.gif',
-          placeholder:
-            'data:image/png;base64,R0lGODlhFAALAIYAAExpcfz7/Pj1+////vTz9P7+/fz6/fDl7f///ff0/Pz+/f7+/u3u7v////r6+/n5+fXy+/jx9fPy9P38/fny9vT09Pr5+fz5//z6+/v7/fr8+/bz/Pzz+P36/PPy8/35+/j5+Pf29+jo6f3+/vvz9/v7/Pf4+Pz6/PX19fv5//r3+fv4//Py8vj2/P3x9/r5/PTy8/Px9Pv5+/X19Pf09vrw+/v8+/r4/Pz4+dbW2P39+/v6/PPx8/n2/fzx9vv6/f7z+Pz8/P3+/fj2/frz9vz8/fr6/f79/vj2+Pb29v79/fv8/Pb19v37/Prx9f39/P73+vn5+vz7/vn3/f7z9/j3+fTz8/f1+Pj39+TY4Pv5+v39/vzw9vr6+vz3+vz7/fvx9vTz9v3x9vDw8Pr4+evp7Pf1/Pz9/fHx8Pj4+Pbz+/r3+Pj0/e3s7/by+/7//vn0/P39/fXr8/r3//Ly8vHx8QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH/C05FVFNDQVBFMi4wAwEAAAAh+QQFCgAAACwAAAAAFAALAAAH0IBnNVk5ZTFtYV87GV8ZP1JhB3JDdFtwEQ8NL1cSIiETDgEBRUVmbnNjWz0zaQ1VDBUmS0tJGgoFcSMlK3VbQ2kPAz8RQVAuOG9AHBhKVCcpvS1JXQ0/HiABSCxdMkwVRVoBF2i+UUEDRsQdJERCH05rTVwB0KoL9z88D0FrMDYBNKxMICOuV48j+ChM6OBDxYgPYLw0EXPiQqqD+AhYCJIGRZASWEIE6RJkRYUtUwaoNBCnQAEENwToeOLyzYIecRZs2JAgAYSeQIP2VMPmSSAAOw==',
-        },
-
-        mobile: {
-          src: 'https://storage.googleapis.com/leehyeonjun.com/connection/pass_payment_mobile.gif',
-          placeholder:
-            'data:image/png;base64,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',
-        },
-      },
-      explanation: (
-        <ul>
-          <li>ssss</li>
-        </ul>
-      ),
-    },
-    {
-      title: '패스권 관리',
       gif: {
         pc: {
           src: 'https://storage.googleapis.com/leehyeonjun.com/connection/pass_pc.gif',
@@ -287,11 +335,39 @@ const DevProcessTimeline = async () => {
       },
       explanation: (
         <ul>
-          <li>ssss</li>
+          <li>
+            사용자가 패스권을 구매하고, 구매한 패스권의 현재 정보를 확인할 수
+            있는 관리 페이지를 구현했습니다. 또한, 구매한 패스권을 사용하여
+            클래스를 등록하는 기능도 구현하였습니다.
+          </li>
+          <li>결제를 간편하게 진행하기 위해 토스페이먼츠를 도입했습니다.</li>
         </ul>
       ),
     },
+    {
+      title: '패스권 관리',
+      gif: {
+        pc: {
+          src: 'https://storage.googleapis.com/leehyeonjun.com/connection/pass_payment_pc.gif',
+          placeholder:
+            'data:image/png;base64,R0lGODlhFAALAIYAAExpcfz7/Pj1+////vTz9P7+/fz6/fDl7f///ff0/Pz+/f7+/u3u7v////r6+/n5+fXy+/jx9fPy9P38/fny9vT09Pr5+fz5//z6+/v7/fr8+/bz/Pzz+P36/PPy8/35+/j5+Pf29+jo6f3+/vvz9/v7/Pf4+Pz6/PX19fv5//r3+fv4//Py8vj2/P3x9/r5/PTy8/Px9Pv5+/X19Pf09vrw+/v8+/r4/Pz4+dbW2P39+/v6/PPx8/n2/fzx9vv6/f7z+Pz8/P3+/fj2/frz9vz8/fr6/f79/vj2+Pb29v79/fv8/Pb19v37/Prx9f39/P73+vn5+vz7/vn3/f7z9/j3+fTz8/f1+Pj39+TY4Pv5+v39/vzw9vr6+vz3+vz7/fvx9vTz9v3x9vDw8Pr4+evp7Pf1/Pz9/fHx8Pj4+Pbz+/r3+Pj0/e3s7/by+/7//vn0/P39/fXr8/r3//Ly8vHx8QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH/C05FVFNDQVBFMi4wAwEAAAAh+QQFCgAAACwAAAAAFAALAAAH0IBnNVk5ZTFtYV87GV8ZP1JhB3JDdFtwEQ8NL1cSIiETDgEBRUVmbnNjWz0zaQ1VDBUmS0tJGgoFcSMlK3VbQ2kPAz8RQVAuOG9AHBhKVCcpvS1JXQ0/HiABSCxdMkwVRVoBF2i+UUEDRsQdJERCH05rTVwB0KoL9z88D0FrMDYBNKxMICOuV48j+ChM6OBDxYgPYLw0EXPiQqqD+AhYCJIGRZASWEIE6RJkRYUtUwaoNBCnQAEENwToeOLyzYIecRZs2JAgAYSeQIP2VMPmSSAAOw==',
+        },
 
+        mobile: {
+          src: 'https://storage.googleapis.com/leehyeonjun.com/connection/pass_payment_mobile.gif',
+          placeholder:
+            'data:image/png;base64,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',
+        },
+      },
+      explanation: (
+        <ul>
+          <li>
+            이 페이지는 강사가 패스권을 생성하고 수정할 수 있으며, 패스권 정보도
+            각 필터에 따라서 조회할 수 있는 관리 페이지입니다.
+          </li>
+        </ul>
+      ),
+    },
     {
       title: '지도 공통 컴포넌트 구현',
       gif: {
@@ -309,12 +385,30 @@ const DevProcessTimeline = async () => {
       },
       explanation: (
         <ul>
-          <li>ssss</li>
+          <li>
+            네이버 지도 API와 Vworld API를 활용해 지도 공통 컴포넌트를
+            구현하였습니다.
+          </li>
+          <li>
+            특정 강의 장소가 있는 지도: Vworld API를 통해 특정 강의 장소의 좌표
+            값을 받아와 네이버 지도에 표시하였습니다. 또한, 네이버 지도 API가
+            출발지와 도착지 자동 입력 기능을 지원하지 않기 때문에,
+            InfoWindow에서 출발지와 도착지를 선택하면 네이버 지도 검색창에
+            자동으로 입력되도록 네이버 지도 searchParams를 분석하여
+            구현하였습니다.
+          </li>
+          <li>
+            강의 장소 협의가 되지 않은 지도: Vworld API에서 시, 군, 구의
+            Polyline 값을 받아와 네이버 지도에 표시하도록 구현하였습니다.
+            Polyline 데이터가 크기 때문에 빠른 렌더링을 위해 라우터 핸들러를
+            사용하여 Polyline 데이터를 사전에 처리하고 클라이언트 측으로
+            전송하였습니다.
+          </li>
         </ul>
       ),
     },
     {
-      title: '네이버 소셜 로그인 구현',
+      title: '네이버 소셜 로그인 및 회원가입 구현',
       gif: {
         pc: {
           src: 'https://storage.googleapis.com/leehyeonjun.com/connection/login_pc.gif',
@@ -330,7 +424,11 @@ const DevProcessTimeline = async () => {
       },
       explanation: (
         <ul>
-          <li>ssss</li>
+          <li>
+            네이버의 oauth2.0 api를 활용하여 소셜 로그인 및 회원가입 기능을
+            구현하였습니다. 이를 통해 사용자가 기존의 소셜 계정을 활용하여 더욱
+            빠르고 편리하게 서비스를 이용할 수 있도록 하였습니다.
+          </li>
         </ul>
       ),
     },
@@ -351,7 +449,19 @@ const DevProcessTimeline = async () => {
       },
       explanation: (
         <ul>
-          <li>ssss</li>
+          <li>
+            Socket.io를 이용하여 강사와 수강생 간의 실시간 채팅을 구현했습니다.
+            소켓 연결을 통해 상대방의 현재 활동 여부 및 최종 접속 시간을
+            파악하여 표시했습니다.
+          </li>
+          <li>
+            Socket.io와 react-query의 setQueryData를 이용해 채팅 전송 및 수신 시
+            채팅 카운트, 채팅 내용, 채팅방 목록 등을 동기화했습니다.
+          </li>
+          <li>
+            Framer Motion 라이브러리를 이용해 채팅 모달의 크기 및 위치를
+            자유롭게 수정할 수 있도록 구현했습니다.
+          </li>
         </ul>
       ),
     },
@@ -372,7 +482,16 @@ const DevProcessTimeline = async () => {
       },
       explanation: (
         <ul>
-          <li>ssss</li>
+          <li>
+            알림 이벤트를 Socket.io를 이용하여 관리하였습니다. 강사는 수강생이
+            수업을 신청하거나 채팅을 보낼 때 알림을 받게 되며, 수강생은 강사의
+            전체 공지사항, 수업 신청 알림, 관심 있는 강사의 새로운 클래스, 쿠폰
+            및 패스권의 만료 기한 등 다양한 알림을 받을 수 있습니다.
+          </li>
+          <li>
+            Socket.io와 react-query의 setQueryData를 활용하여 알림을
+            동기화하였습니다.
+          </li>
         </ul>
       ),
     },
@@ -393,11 +512,24 @@ const DevProcessTimeline = async () => {
       },
       explanation: (
         <ul>
-          <li>ssss</li>
+          <li>
+            클래스 등록을 위한 인터페이스를 제공합니다. 이는 사진 업로드,
+            카테고리 설정, 상세 설명, 일정 및 공지사항 작성, 장소 지정, 가격
+            설정 등 다섯 가지 주요 섹션으로 구성되어 있습니다. 사용자가 각 섹션
+            간 이동할 때, 입력한 정보는 자동으로 임시 저장되어 데이터 손실을
+            방지합니다.
+          </li>
+          <li>
+            react-hook-form 라이브러리를 도입하여 각 섹션의 데이터 관리 효율성을
+            극대화하였습니다. 이를 통해 사용자 경험을 개선하고, 폼 관리의
+            정확성과 속도를 향상시켰습니다.
+          </li>
         </ul>
       ),
       troubleshooting: {
-        issue: '각 섹션의 크기를 줄이기 위한 dynamic 처리?',
+        issue: '각 섹션의 파일 번들 크기가 과도하게 크다는 문제가 있었습니다.',
+        explanation:
+          'Dynamic Import 기술을 적용하여 필요한 컴포넌트만을 실시간으로 로드하도록 최적화하였습니다. 이 접근 방식은 전체 페이지의 로딩 시간을 단축시키고, 성능을 크게 향상시켰습니다. 사용자는 더 빠르고 원활한 인터페이스를 통해 클래스를 효율적으로 등록할 수 있게 되었습니다.',
       },
     },
     {
@@ -417,7 +549,19 @@ const DevProcessTimeline = async () => {
       },
       explanation: (
         <ul>
-          <li>ssss</li>
+          <li>
+            원활한 사용자 경험을 제공하기 위해 PWA(Progressive Web App) 기술을
+            도입했습니다.
+          </li>
+          <li>
+            사용자가 처음 접속할 때, display-mode: standalone을 통해 PWA의 설치
+            여부를 확인한 후, 설치되지 않았다면 PWA 설치를 유도하는 모달을
+            표시합니다. 만약 beforeinstallprompt 이벤트가 지원된다면, 앱 설치
+            버튼을 제공하고, 그렇지 않을 경우 상세한 설치 방법을 안내하는
+            페이지로 이동할 수 있는 버튼을 제공합니다. 이를 통해,
+            안드로이드(Android)와 iOS에서의 PWA 설치 방법을 사용자에게 명확히
+            안내하여 설치를 유도했습니다.
+          </li>
         </ul>
       ),
     },
@@ -438,9 +582,21 @@ const DevProcessTimeline = async () => {
       },
       explanation: (
         <ul>
-          <li>ssss</li>
+          <li>
+            웹 푸시 알림 기능을 구현하기 위해 FCM(Firebase Cloud Messaging)에
+            연결을 진행하였습니다.
+          </li>
+          <li>
+            Firebase의 Service Worker를 활용하여 웹 푸시 알림 기능을
+            구현하였습니다.
+          </li>
         </ul>
       ),
+      troubleshooting: {
+        issue: `Next.js의 public 폴더 내에서 환경 변수(env) 사용 시 'ReferenceError: process is not defined'라는 에러 발생`,
+        explanation:
+          'Next.js의 public 폴더 내에서 환경 변수를 사용할 때 발생하는 이슈로, Firebase의 Service Worker가 Next.js의 public 폴더 내에서 작동하기 때문에 발생하는 문제였습니다. 이 문제를 해결하기 위해 dotenv 패키지를 사용하여 빌드 시점에 process.env의 내용을 가져와 Firebase의 키 값을 안전하게 숨길 수 있게 되었습니다. 이 방법을 통해 Firebase 키를 효율적으로 관리하며 보안성을 높일 수 있었습니다.',
+      },
     },
     {
       title: '강사 등록 페이지',
@@ -459,7 +615,18 @@ const DevProcessTimeline = async () => {
       },
       explanation: (
         <ul>
-          <li>ssss</li>
+          <li>
+            이 페이지는 강사 등록을 위해 설계되었으며, 인증과 소개 두 가지
+            섹션으로 구분됩니다.
+          </li>
+          <li>
+            인증 섹션은 추후 사업자 등록을 완료한 후 PASS 시스템과 연동될
+            예정입니다.
+          </li>
+          <li>
+            react-hook-form을 사용하여 각 섹션 데이터를 효율적으로
+            관리하였습니다.
+          </li>
         </ul>
       ),
     },
@@ -480,7 +647,16 @@ const DevProcessTimeline = async () => {
       },
       explanation: (
         <ul>
-          <li>ssss</li>
+          <li>
+            이 페이지는 강사에 대한 정보를 제공하며, 강사의 주된 수업 지역,
+            가르치는 장르, 소속 기관, 인스타그램 게시물, 자기소개, 경력, 현재
+            진행 중인 강의, 판매 중인 패스권, 그리고 수강 후기 등을 확인할 수
+            있습니다.
+          </li>
+          <li>
+            SEO 최적화를 위해 Next.js의 동적 메타 데이터 생성
+            기능(generateMetadata)을 활용하였습니다.
+          </li>
         </ul>
       ),
       troubleshooting: {
@@ -504,7 +680,7 @@ const DevProcessTimeline = async () => {
       },
       explanation: (
         <ul>
-          <li>ssss</li>
+          <li>이 페이지는 강사가 본인의 소개와 정보를 수정할 수 있습니다.</li>
         </ul>
       ),
     },
@@ -513,7 +689,21 @@ const DevProcessTimeline = async () => {
       images: imageResults[1],
       explanation: (
         <ul>
-          <li>ssss</li>
+          <li>
+            커넥션 프로젝트에서 사용되는 다양한 캐러셀을 위한 공통 컴포넌트를
+            직접 개발하였습니다.
+          </li>
+          <li>
+            커넥션 프로젝트에서 이미지 캐러셀의 사용이 빈번하므로, 이미지
+            최적화를 위해 캐러셀 컴포넌트가 priority 값을 받아 해당 값에 맞는
+            이미지 요소만을 우선 렌더링하고, 캐러셀이 활성화되면 나머지 이미지의
+            렌더링을 시작하는 방식으로 구현하여 초기 렌더링 속도를
+            향상시켰습니다.
+          </li>
+          <li>
+            JSDoc을 작성하고 스토리북을 구축하여 다른 개발자들이 쉽게 사용할 수
+            있도록 문서화를 진행하였습니다.
+          </li>
         </ul>
       ),
     },
@@ -522,7 +712,12 @@ const DevProcessTimeline = async () => {
       images: imageResults[2][0],
       explanation: (
         <ul>
-          <li>ssss</li>
+          <li>
+            accessToken이 만료되거나 유효하지 않을 때, refresh Token을 사용하여
+            accessToken 재발급을 시도하는 로직을 구현했습니다. 재발급에 성공하면
+            실패한 API 요청을 다시 시도하고, 재발급에 실패하면 로그인 페이지로
+            이동하도록 처리했습니다.
+          </li>
         </ul>
       ),
       troubleshooting: {
@@ -530,11 +725,16 @@ const DevProcessTimeline = async () => {
       },
     },
     {
-      title: '미들웨어로 token 검사 및 protect route 구현',
+      title: '미들웨어로 token 검증 및 protect route 구현',
       images: imageResults[3][0],
       explanation: (
         <ul>
-          <li>ssss</li>
+          <li>
+            Next.js의 미들웨어를 이용하여 accessToken을 검증하는 로직을
+            구현하였습니다. 검증에 실패할 경우, refresh Token을 이용하여 토큰을
+            재발급하는 과정을 진행하였습니다. 또한, 토큰을 검증하여 각
+            경로(route)에 대한 접근 가능 여부를 판단하는 로직도 구현하였습니다.
+          </li>
         </ul>
       ),
       troubleshooting: {
@@ -546,7 +746,27 @@ const DevProcessTimeline = async () => {
       images: imageResults[4],
       explanation: (
         <ul>
-          <li>ssss</li>
+          <li>
+            해당 프로젝트에서는 Pagination 기능을 자주 사용하고 있으며, 백엔드의
+            pagination API는 커서 페이징 방식을 채택하고 있습니다. 특정
+            페이지(예: 4페이지)로 직접 이동할 경우, 이전 페이지의 첫 번째 항목
+            ID와 마지막 항목 ID가 필요합니다. 이 때문에 새로고침, 뒤로 가기,
+            앞으로 가기 등의 브라우저 이벤트를 통해 페이지네이션 기능이 있는
+            페이지로 돌아올 때, 4번째 페이지로 재진입하는 데 문제가
+            발생했습니다. 이 문제를 해결하기 위해 Pagination에 특화된 공통
+            커스텀 훅을 개발했습니다.
+          </li>
+          <li>
+            해당 훅을 사용하면, 초기 데이터는 서버 사이드 렌더링(SSR)으로
+            처리되며, 페이지네이션 옵션과 페이지 번호를 searchParams에
+            저장합니다. 이를 통해 새로고침, 뒤로 가기, 앞으로 가기 등의 브라우저
+            이벤트를 통해 페이지네이션 기능이 있는 페이지로 돌아올 때, 사용자가
+            설정한 옵션과 페이지 상태를 유지할 수 있도록 구현되었습니다.
+          </li>
+          <li>
+            JSDoc을 활용해 문서화를 진행함으로써 다른 개발자들이 이 훅을 보다
+            쉽게 사용할 수 있게 하였습니다.
+          </li>
         </ul>
       ),
     },
@@ -573,21 +793,31 @@ const DevProcessTimeline = async () => {
                   {explanation}
                 </>
               ) : images ? (
-                <div className="mx-auto h-[28rem] lg:h-[37.5rem] xl:aspect-[13/9]">
-                  <Image
-                    src={images.src}
-                    alt="개발과정 이미지"
-                    width={images.width}
-                    height={images.height}
-                    placeholder="blur"
-                    className="size-full"
-                    blurDataURL={images.placeholder}
-                    unoptimized={images.src.endsWith('.gif')}
-                  />
-                </div>
+                <>
+                  <div className="mx-auto h-[28rem] lg:h-[37.5rem] xl:aspect-[13/9]">
+                    <Image
+                      src={images.src}
+                      alt="개발과정 이미지"
+                      width={images.width}
+                      height={images.height}
+                      placeholder="blur"
+                      className="size-full"
+                      blurDataURL={images.placeholder}
+                      unoptimized={images.src.endsWith('.gif')}
+                    />
+                  </div>
+                  {explanation}
+                </>
               ) : null}
             </div>
-            {troubleshooting && <Troubleshooting {...troubleshooting} />}
+            {troubleshooting && (
+              <>
+                <Troubleshooting {...troubleshooting} />{' '}
+                <div className="mt-10 pl-5 lg:pl-10">
+                  {troubleshooting.explanation}
+                </div>
+              </>
+            )}
           </div>
         ),
       )}

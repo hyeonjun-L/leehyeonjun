@@ -17,12 +17,16 @@ const Troubleshooting = (props: TroubleshootingProps) => {
       <h4 className="text-lg sm:text-2xl">트러블 슈팅</h4>
       <p className="my-5">이슈: {props.issue}</p>
       {'isMobile' in props && (
-        <div className="flex flex-col items-center justify-evenly gap-12 sm:flex-row sm:gap-0">
+        <div
+          className={`flex flex-col items-center justify-evenly ${props.isMobile ? 'gap-12 sm:flex-row sm:gap-0' : 'gap-3 lg:flex-row'}`}
+        >
           <VideoFigure
             isMobile={props.isMobile}
             troubleSrc={props.troubleSrc}
           />
-          <LongArrowSvg className=" hidden size-28 fill-white lg:block" />
+          {props.isMobile && (
+            <LongArrowSvg className=" hidden size-28 fill-white lg:block" />
+          )}
           <VideoFigure
             isMobile={props.isMobile}
             troubleShootingSrc={props.troubleShootingSrc}
@@ -46,10 +50,10 @@ type VideoFigureProps =
 const VideoFigure = (props: VideoFigureProps) => {
   return (
     <figure
-      className={`${props.isMobile ? 'h-[37.5rem]' : 'h-72'} sm:w-[45%] lg:w-auto`}
+      className={`${props.isMobile ? 'h-[37.5rem] sm:w-[45%] lg:w-auto' : ''}`}
     >
       <video
-        className={`${props.isMobile ? 'aspect-[9/16]' : 'aspect-video'} size-full bg-white`}
+        className={`${props.isMobile ? 'aspect-[9/16] size-full bg-white' : 'aspect-video h-96'} `}
         poster={'troubleSrc' in props ? trouble.src : troubleshooting.src}
         controls
         preload="none"
