@@ -95,3 +95,5 @@ export { default as ArrowSVG } from './arrow.svg';
 export { default as MobileSVG } from './mobile.svg';
 
 export { default as PcSVG } from './pc.svg';
+
+export { default as LongArrowSvg } from './longArrow.svg';
