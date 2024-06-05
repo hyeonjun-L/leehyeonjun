@@ -529,7 +529,7 @@ const DevProcessTimeline = async () => {
       troubleshooting: {
         issue: '각 섹션의 파일 번들 크기가 과도하게 크다는 문제가 있었습니다.',
         explanation:
-          'Dynamic Import 기술을 적용하여 필요한 컴포넌트만을 실시간으로 로드하도록 최적화하였습니다. 이 접근 방식은 전체 페이지의 로딩 시간을 단축시키고, 성능을 크게 향상시켰습니다. 사용자는 더 빠르고 원활한 인터페이스를 통해 클래스를 효율적으로 등록할 수 있게 되었습니다.',
+          'Dynamic Import 기술을 적용하여 필요한 섹션만을 실시간으로 로드하도록 최적화하였습니다. 이 접근 방식은 전체 페이지의 로딩 시간을 단축시키고, 성능을 크게 향상시켰습니다. 사용자는 더 빠르고 원활한 인터페이스를 통해 클래스를 효율적으로 등록할 수 있게 되었습니다.',
       },
     },
     {
@@ -718,11 +718,18 @@ const DevProcessTimeline = async () => {
             실패한 API 요청을 다시 시도하고, 재발급에 실패하면 로그인 페이지로
             이동하도록 처리했습니다.
           </li>
+          <li>
+            React Query를 활용해 API 요청 상태를 관리하며, 401 오류 발생 시
+            자동으로 토큰 재발급을 시도하고 관련 에러를 처리하는 로직을 포함하고
+            있습니다. 이를 통해 사용자 인증 실패 또는 세션 만료 시 자연스러운
+            사용자 경험을 제공했습니다.
+          </li>
         </ul>
       ),
-      troubleshooting: {
-        issue: '보일러 플레이팅 많은 문제',
-      },
+      // troubleshooting: {
+      //   issue: '보일러 플레이팅 많은 문제',
+      //   explanation: '모든 api 요청마다 401 에러(jwt token error) 발생 시 상기 재발급 로직을 실행하기 때문에 ',
+      // },
     },
     {
       title: '미들웨어로 token 검증 및 protect route 구현',
@@ -738,7 +745,9 @@ const DevProcessTimeline = async () => {
         </ul>
       ),
       troubleshooting: {
-        issue: 'CDN 문제 & 의사소통 문제',
+        issue:
+          'Next.js 미들웨어에서 API 요청 시 "unhandledRejection: TypeError: Cannot delete property \'Symbol(set-cookie)\'" 오류 발생',
+        explanation: `해당 오류는 Next.js 미들웨어에서 API 요청을 처리하는 과정에서 'set-cookie' 속성을 잘못 처리함으로써 발생하였습니다. 이 오류를 해결하기 위해, 리프레시 토큰을 포함한 요청을 서버로 보내고, 서버에서 온 응답의 'set-cookie' 값을 정확히 추출하여 새로운 토큰을 안전하게 재발급 받았습니다. 이 과정에서 'credentials: include' 옵션을 사용해 인증 정보를 요청에 포함시켜, 응답으로부터 새로운 액세스 토큰 및 리프레시 토큰을 제대로 파싱하고, 이들 토큰을 사용자 또는 강사의 액세스 토큰으로 구분하여 처리했습니다. 이렇게 재발급 받은 토큰들은 최종적으로 클라이언트에 JSON 형태로 반환되었습니다. 이러한 절차를 통해 'set-cookie' 속성의 잘못된 처리로 인해 발생한 오류를 성공적으로 해결할 수 있었습니다.`,
       },
     },
     {
