@@ -308,12 +308,12 @@ const DevProcessTimeline = async () => {
             수 있습니다.
           </li>
           <li>
-            react-hook-form을 사용하여 쿠폰의 폼 데이터를 효율적으로
-            관리하였습니다.
+            <strong>react-hook-form</strong>을 사용하여 쿠폰의 폼 데이터를
+            효율적으로 관리하였습니다.
           </li>
           <li>
-            클래스 등록 섹션에도 쿠폰 생성 기능이 포함되어 있어, 이를 공통
-            컴포넌트로 구현하였습니다.
+            클래스 등록 섹션에도 쿠폰 생성 기능이 포함되어 있어, 이를{' '}
+            <strong>공통 컴포넌트</strong>로 구현하였습니다.
           </li>
         </ul>
       ),
@@ -340,7 +340,10 @@ const DevProcessTimeline = async () => {
             있는 관리 페이지를 구현했습니다. 또한, 구매한 패스권을 사용하여
             클래스를 등록하는 기능도 구현하였습니다.
           </li>
-          <li>결제를 간편하게 진행하기 위해 토스페이먼츠를 도입했습니다.</li>
+          <li>
+            결제를 간편하게 진행하기 위해 <strong>토스페이먼츠를 도입</strong>
+            했습니다.
+          </li>
         </ul>
       ),
     },
@@ -391,18 +394,21 @@ const DevProcessTimeline = async () => {
           </li>
           <li>
             특정 강의 장소가 있는 지도: Vworld API를 통해 특정 강의 장소의 좌표
-            값을 받아와 네이버 지도에 표시하였습니다. 또한, 네이버 지도 API가
-            출발지와 도착지 자동 입력 기능을 지원하지 않기 때문에,
-            InfoWindow에서 출발지와 도착지를 선택하면 네이버 지도 검색창에
-            자동으로 입력되도록 네이버 지도 searchParams를 분석하여
-            구현하였습니다.
+            값을 받아와 네이버 지도에 표시하였습니다. 또한,{' '}
+            <strong>
+              네이버 지도 API가 출발지와 도착지 자동 입력 기능을 지원하지 않기
+              때문에, InfoWindow에서 출발지와 도착지를 선택하면 네이버 지도
+              검색창에 자동으로 입력되도록 네이버 지도 searchParams를 분석하여
+              구현
+            </strong>
+            하였습니다.
           </li>
           <li>
             강의 장소 협의가 되지 않은 지도: Vworld API에서 시, 군, 구의
             Polyline 값을 받아와 네이버 지도에 표시하도록 구현하였습니다.
-            Polyline 데이터가 크기 때문에 빠른 렌더링을 위해 라우터 핸들러를
-            사용하여 Polyline 데이터를 사전에 처리하고 클라이언트 측으로
-            전송하였습니다.
+            Polyline 데이터가 크기 때문에 빠른 렌더링을 위해
+            <strong> Next.js 라우터 핸들러를 사용</strong>하여 Polyline 데이터를
+            사전에 처리하고 클라이언트 측으로 전송 하였습니다.
           </li>
         </ul>
       ),
@@ -425,9 +431,10 @@ const DevProcessTimeline = async () => {
       explanation: (
         <ul>
           <li>
-            네이버의 oauth2.0 api를 활용하여 소셜 로그인 및 회원가입 기능을
-            구현하였습니다. 이를 통해 사용자가 기존의 소셜 계정을 활용하여 더욱
-            빠르고 편리하게 서비스를 이용할 수 있도록 하였습니다.
+            <strong>네이버의 oauth2.0 api를 활용</strong>하여 소셜 로그인 및
+            회원가입 기능을 구현하였습니다. 이를 통해 사용자가 기존의 소셜
+            계정을 활용하여 더욱 빠르고 편리하게 서비스를 이용할 수 있도록
+            하였습니다.
           </li>
         </ul>
       ),
@@ -455,12 +462,20 @@ const DevProcessTimeline = async () => {
             파악하여 표시했습니다.
           </li>
           <li>
-            Socket.io와 react-query의 setQueryData를 이용해 채팅 전송 및 수신 시
-            채팅 카운트, 채팅 내용, 채팅방 목록 등을 동기화했습니다.
+            <strong>Socket.io</strong>와 <strong>react-query</strong>의{' '}
+            <strong>setQueryData</strong>를 이용해{' '}
+            <strong>
+              채팅 전송 및 수신 시 채팅 카운트, 채팅 내용, 채팅방 목록 등을
+              동기화
+            </strong>
+            했습니다.
           </li>
           <li>
-            Framer Motion 라이브러리를 이용해 채팅 모달의 크기 및 위치를
-            자유롭게 수정할 수 있도록 구현했습니다.
+            <strong>Framer Motion 라이브러리를 이용</strong>해{' '}
+            <strong>
+              채팅 모달의 크기 및 위치를 자유롭게 수정할 수 있도록 구현
+            </strong>
+            했습니다.
           </li>
         </ul>
       ),
@@ -489,8 +504,10 @@ const DevProcessTimeline = async () => {
             및 패스권의 만료 기한 등 다양한 알림을 받을 수 있습니다.
           </li>
           <li>
-            Socket.io와 react-query의 setQueryData를 활용하여 알림을
-            동기화하였습니다.
+            <strong>
+              Socket.io와 react-query의 setQueryData를 활용하여 알림을 동기화
+            </strong>
+            하였습니다.
           </li>
         </ul>
       ),
@@ -520,16 +537,28 @@ const DevProcessTimeline = async () => {
             방지합니다.
           </li>
           <li>
-            react-hook-form 라이브러리를 도입하여 각 섹션의 데이터 관리 효율성을
-            극대화하였습니다. 이를 통해 사용자 경험을 개선하고, 폼 관리의
-            정확성과 속도를 향상시켰습니다.
+            <strong>
+              react-hook-form 라이브러리를 도입하여 각 섹션의 데이터 관리
+              효율성을 극대화
+            </strong>
+            하였습니다. 이를 통해 사용자 경험을 개선하고, 폼 관리의 정확성과
+            속도를 향상시켰습니다.
           </li>
         </ul>
       ),
       troubleshooting: {
         issue: '각 섹션의 파일 번들 크기가 과도하게 크다는 문제가 있었습니다.',
-        explanation:
-          'Dynamic Import 기술을 적용하여 필요한 섹션만을 실시간으로 로드하도록 최적화하였습니다. 이 접근 방식은 전체 페이지의 로딩 시간을 단축시키고, 성능을 크게 향상시켰습니다. 사용자는 더 빠르고 원활한 인터페이스를 통해 클래스를 효율적으로 등록할 수 있게 되었습니다.',
+        explanation: (
+          <p>
+            <strong>
+              Dynamic Import 기술을 적용하여 필요한 섹션만을 실시간으로
+              로드하도록 최적화
+            </strong>
+            하였습니다. 이 접근 방식은 전체 페이지의 로딩 시간을 단축시키고,
+            성능을 크게 향상시켰습니다. 사용자는 더 빠르고 원활한 인터페이스를
+            통해 클래스를 효율적으로 등록할 수 있게 되었습니다.
+          </p>
+        ),
       },
     },
     {
@@ -550,17 +579,22 @@ const DevProcessTimeline = async () => {
       explanation: (
         <ul>
           <li>
-            원활한 사용자 경험을 제공하기 위해 PWA(Progressive Web App) 기술을
-            도입했습니다.
+            원활한 사용자 경험을 제공하기 위해{' '}
+            <strong>PWA(Progressive Web App) 기술을 도입</strong>했습니다.
           </li>
           <li>
-            사용자가 처음 접속할 때, display-mode: standalone을 통해 PWA의 설치
-            여부를 확인한 후, 설치되지 않았다면 PWA 설치를 유도하는 모달을
-            표시합니다. 만약 beforeinstallprompt 이벤트가 지원된다면, 앱 설치
-            버튼을 제공하고, 그렇지 않을 경우 상세한 설치 방법을 안내하는
-            페이지로 이동할 수 있는 버튼을 제공합니다. 이를 통해,
-            안드로이드(Android)와 iOS에서의 PWA 설치 방법을 사용자에게 명확히
-            안내하여 설치를 유도했습니다.
+            사용자가 처음 접속할 때,{' '}
+            <strong>
+              display-mode: standalone을 통해 PWA의 설치 여부를 확인
+            </strong>
+            한 후, 설치되지 않았다면 PWA 설치를 유도하는 모달을 표시합니다. 만약
+            <strong>
+              beforeinstallprompt 이벤트가 지원된다면, 앱 설치 버튼을 제공하고,
+              그렇지 않을 경우 상세한 설치 방법을 안내하는 페이지로 이동할 수
+              있는 버튼을 제공
+            </strong>
+            합니다. 이를 통해, 안드로이드(Android)와 iOS에서의 PWA 설치 방법을
+            사용자에게 명확히 안내하여 설치를 유도했습니다.
           </li>
         </ul>
       ),
@@ -583,19 +617,35 @@ const DevProcessTimeline = async () => {
       explanation: (
         <ul>
           <li>
-            웹 푸시 알림 기능을 구현하기 위해 FCM(Firebase Cloud Messaging)에
-            연결을 진행하였습니다.
+            웹 푸시 알림 기능을 구현하기 위해{' '}
+            <strong>FCM(Firebase Cloud Messaging)에 연결을 진행</strong>
+            하였습니다.
           </li>
           <li>
-            Firebase의 Service Worker를 활용하여 웹 푸시 알림 기능을
-            구현하였습니다.
+            <strong>
+              Firebase의 Service Worker를 활용하여 웹 푸시 알림 기능을 구현
+            </strong>
+            하였습니다.
           </li>
         </ul>
       ),
       troubleshooting: {
         issue: `Next.js의 public 폴더 내에서 환경 변수(env) 사용 시 'ReferenceError: process is not defined'라는 에러 발생`,
-        explanation:
-          'Next.js의 public 폴더 내에서 환경 변수를 사용할 때 발생하는 이슈로, Firebase의 Service Worker가 Next.js의 public 폴더 내에서 작동하기 때문에 발생하는 문제였습니다. 이 문제를 해결하기 위해 dotenv 패키지를 사용하여 빌드 시점에 process.env의 내용을 가져와 Firebase의 키 값을 안전하게 숨길 수 있게 되었습니다. 이 방법을 통해 Firebase 키를 효율적으로 관리하며 보안성을 높일 수 있었습니다.',
+        explanation: (
+          <p>
+            <strong>
+              Next.js의 public 폴더 내에서 환경 변수를 사용할 때 발생하는 이슈
+            </strong>
+            로, Firebase의 Service Worker가 Next.js의 public 폴더 내에서
+            작동하기 때문에 발생하는 문제였습니다. 이 문제를 해결하기 위해{' '}
+            <strong>
+              dotenv 패키지를 사용하여 빌드 시점에 process.env의 내용을 가져와
+              Firebase의 키 값을 안전하게 숨길 수 있게 되었습니다.
+            </strong>{' '}
+            이 방법을 통해 Firebase 키를 효율적으로 관리하며 보안성을 높일 수
+            있었습니다.
+          </p>
+        ),
       },
     },
     {
@@ -654,13 +704,40 @@ const DevProcessTimeline = async () => {
             있습니다.
           </li>
           <li>
-            SEO 최적화를 위해 Next.js의 동적 메타 데이터 생성
-            기능(generateMetadata)을 활용하였습니다.
+            <strong>
+              SEO 최적화를 위해 Next.js의 동적 메타 데이터 생성
+              기능(generateMetadata)을 활용
+            </strong>
+            하였습니다.
           </li>
         </ul>
       ),
       troubleshooting: {
-        issue: '동적 메타 데이터 생성 2번 api 요청',
+        issue:
+          'Next.js에서 동적 메타 데이터 생성 시 중복 API 요청으로 인한 서버 리소스 낭비',
+        explanation: (
+          <p>
+            Next.js에서 동적 메타 데이터를 생성하는 과정에서,{' '}
+            <strong>
+              generateMetadata 함수와 Page 컴포넌트가 각각 별도로 API 요청을
+              수행하게 되었습니다. 이로 인해 동일한 API 요청이 두 번 발생하여
+              서버 리소스의 낭비가 발생
+            </strong>
+            했습니다. 이러한 문제를 해결하기 위해{' '}
+            <strong>
+              React Cache를 사용하여 fetch 요청의 결과를 캐시하고 동일한
+              데이터를 재사용하는 방법을 도입
+            </strong>
+            했습니다. 이 방법을 통해 단 한 번의 요청으로 제품 정보를 획득하고,
+            해당 정보를 페이지와 generateMetadata 함수에 모두 전달할 수 있게
+            되었습니다. 이러한 개선을 통해{' '}
+            <strong>
+              불필요한 중복 요청을 방지하고 응답 속도를 개선함으로써,
+              클라이언트에게 보다 빠르고 효율적인 데이터 제공이 가능
+            </strong>
+            해졌습니다.
+          </p>
+        ),
       },
     },
     {
@@ -695,14 +772,17 @@ const DevProcessTimeline = async () => {
           </li>
           <li>
             커넥션 프로젝트에서 이미지 캐러셀의 사용이 빈번하므로, 이미지
-            최적화를 위해 캐러셀 컴포넌트가 priority 값을 받아 해당 값에 맞는
-            이미지 요소만을 우선 렌더링하고, 캐러셀이 활성화되면 나머지 이미지의
-            렌더링을 시작하는 방식으로 구현하여 초기 렌더링 속도를
-            향상시켰습니다.
+            최적화를 위해 캐러셀 컴포넌트가{' '}
+            <strong>
+              priority 값을 받아 해당 값에 맞는 이미지 요소만을 우선 렌더링하고,
+              캐러셀이 활성화되면 나머지 이미지의 렌더링을 시작하는 방식으로
+              구현하여 초기 렌더링 속도를 향상
+            </strong>
+            시켰습니다.
           </li>
           <li>
-            JSDoc을 작성하고 스토리북을 구축하여 다른 개발자들이 쉽게 사용할 수
-            있도록 문서화를 진행하였습니다.
+            <strong>JSDoc을 작성하고 스토리북을 구축</strong>하여 다른
+            개발자들이 쉽게 사용할 수 있도록 문서화를 진행하였습니다.
           </li>
         </ul>
       ),
@@ -719,9 +799,11 @@ const DevProcessTimeline = async () => {
             이동하도록 처리했습니다.
           </li>
           <li>
-            React Query를 활용해 API 요청 상태를 관리하며, 401 오류 발생 시
-            자동으로 토큰 재발급을 시도하고 관련 에러를 처리하는 로직을 포함하고
-            있습니다. 이를 통해 사용자 인증 실패 또는 세션 만료 시 자연스러운
+            <strong>
+              React Query를 활용해 API 요청 상태를 관리하며, 401 오류 발생 시
+              자동으로 토큰 재발급을 시도하고 관련 에러를 처리하는 로직을 구현
+            </strong>
+            했습니다. 이를 통해 사용자 인증 실패 또는 세션 만료 시 자연스러운
             사용자 경험을 제공했습니다.
           </li>
         </ul>
@@ -747,7 +829,27 @@ const DevProcessTimeline = async () => {
       troubleshooting: {
         issue:
           'Next.js 미들웨어에서 API 요청 시 "unhandledRejection: TypeError: Cannot delete property \'Symbol(set-cookie)\'" 오류 발생',
-        explanation: `해당 오류는 Next.js 미들웨어에서 API 요청을 처리하는 과정에서 'set-cookie' 속성을 잘못 처리함으로써 발생하였습니다. 이 오류를 해결하기 위해, 리프레시 토큰을 포함한 요청을 서버로 보내고, 서버에서 온 응답의 'set-cookie' 값을 정확히 추출하여 새로운 토큰을 안전하게 재발급 받았습니다. 이 과정에서 'credentials: include' 옵션을 사용해 인증 정보를 요청에 포함시켜, 응답으로부터 새로운 액세스 토큰 및 리프레시 토큰을 제대로 파싱하고, 이들 토큰을 사용자 또는 강사의 액세스 토큰으로 구분하여 처리했습니다. 이렇게 재발급 받은 토큰들은 최종적으로 클라이언트에 JSON 형태로 반환되었습니다. 이러한 절차를 통해 'set-cookie' 속성의 잘못된 처리로 인해 발생한 오류를 성공적으로 해결할 수 있었습니다.`,
+        explanation: (
+          <p>
+            해당 오류는{' '}
+            <strong>
+              Next.js 미들웨어에서 API 요청을 처리하는 과정에서
+              &apos;set-cookie&apos; 속성을 잘못 처리함으로써 발생
+            </strong>
+            하였습니다. 이 오류를 해결하기 위해, 리프레시 토큰을 포함한 요청을
+            서버로 보내고, 서버에서 온 응답의 &apos;set-cookie&apos; 값을 정확히
+            추출하여 새로운 토큰을 안전하게 재발급 받았습니다. 이 과정에서{' '}
+            <strong>
+              &apos;credentials: include&apos; 옵션을 사용해 인증 정보를 요청에
+              포함시켜, 응답으로부터 새로운 액세스 토큰 및 리프레시 토큰을
+              제대로 파싱하고, 이들 토큰을 사용자 또는 강사의 액세스 토큰으로
+              구분하여 처리했습니다. 이렇게 재발급 받은 토큰들은 최종적으로
+              클라이언트에 JSON 형태로 반환
+            </strong>
+            되었습니다. 이러한 절차를 통해 &apos;set-cookie&apos; 속성의 잘못된
+            처리로 인해 발생한 오류를 성공적으로 해결할 수 있었습니다.
+          </p>
+        ),
       },
     },
     {
@@ -757,20 +859,26 @@ const DevProcessTimeline = async () => {
         <ul>
           <li>
             해당 프로젝트에서는 Pagination 기능을 자주 사용하고 있으며, 백엔드의
-            pagination API는 커서 페이징 방식을 채택하고 있습니다. 특정
-            페이지(예: 4페이지)로 직접 이동할 경우, 이전 페이지의 첫 번째 항목
-            ID와 마지막 항목 ID가 필요합니다. 이 때문에 새로고침, 뒤로 가기,
-            앞으로 가기 등의 브라우저 이벤트를 통해 페이지네이션 기능이 있는
-            페이지로 돌아올 때, 4번째 페이지로 재진입하는 데 문제가
+            pagination API는 <strong>커서 페이징 방식을 채택</strong>하고
+            있습니다. 특정 페이지(예: 4페이지)로 직접 이동할 경우, 이전 페이지의
+            첫 번째 항목 ID와 마지막 항목 ID가 필요합니다. 이 때문에 새로고침,
+            뒤로 가기, 앞으로 가기 등의 브라우저 이벤트를 통해 페이지네이션
+            기능이 있는 페이지로 돌아올 때, 4번째 페이지로 재진입하는 데 문제가
             발생했습니다. 이 문제를 해결하기 위해 Pagination에 특화된 공통
             커스텀 훅을 개발했습니다.
           </li>
           <li>
-            해당 훅을 사용하면, 초기 데이터는 서버 사이드 렌더링(SSR)으로
-            처리되며, 페이지네이션 옵션과 페이지 번호를 searchParams에
-            저장합니다. 이를 통해 새로고침, 뒤로 가기, 앞으로 가기 등의 브라우저
-            이벤트를 통해 페이지네이션 기능이 있는 페이지로 돌아올 때, 사용자가
-            설정한 옵션과 페이지 상태를 유지할 수 있도록 구현되었습니다.
+            해당 훅을 사용하면, 초기 데이터는{' '}
+            <strong>
+              서버 사이드 렌더링(SSR)으로 처리되며, 페이지네이션 옵션과 페이지
+              번호를 searchParams에 저장
+            </strong>
+            합니다. 이를 통해 새로고침, 뒤로 가기, 앞으로 가기 등의{' '}
+            <strong>
+              브라우저 이벤트를 통해 페이지네이션 기능이 있는 페이지로 돌아올
+              때, 사용자가 설정한 옵션과 페이지 상태를 유지할 수 있도록 구현
+            </strong>
+            되었습니다.
           </li>
           <li>
             JSDoc을 활용해 문서화를 진행함으로써 다른 개발자들이 이 훅을 보다

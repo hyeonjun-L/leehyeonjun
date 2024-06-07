@@ -195,11 +195,8 @@ const page = () => {
         </div>
       </Explanation>
       <Skill skillList={SKILLS} />
-      {/* <Design link={DESIGN_LINK} /> */}
       <DevProcessTimeline />
-      <section>
-        <h2 className="text-4xl font-semibold">느낀점 & 아쉬운점</h2>
-      </section>
+      <Design link={DESIGN_LINK} />
     </div>
   );
 };
