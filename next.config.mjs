@@ -1,10 +1,13 @@
 /** @type {import('next').NextConfig} */
+import nextMDX from '@next/mdx';
+import rehypeCodeTitles from 'rehype-code-titles';
+import rehypePrism from 'rehype-prism-plus';
 
-const withMDX = require('@next/mdx')({
+const withMDX = nextMDX({
   extension: /\.mdx?$/,
   options: {
-    remarkPlugins: [require('remark-prism')],
-    rehypePlugins: [],
+    remarkPlugins: [],
+    rehypePlugins: [rehypeCodeTitles, rehypePrism],
   },
 });
 
@@ -30,4 +33,4 @@ const nextConfig = {
   },
 };
 
-module.exports = withMDX(nextConfig);
+export default withMDX(nextConfig);
