@@ -1,4 +1,3 @@
-import getPlaceholderImage from '@/utils/dynamicBlurDataUrl';
 import Image from 'next/image';
 import { Fragment } from 'react';
 

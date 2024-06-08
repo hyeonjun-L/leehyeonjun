@@ -26,12 +26,12 @@ import {
   VercelSVG,
   ViteSVG,
   ZustandSVG,
-  // JavaScriptSVG,
-  // WebpackSVG,
+  JavaScriptSVG,
+  WebpackSVG,
 } from '@/icons/index';
 import connectionImage from '@/images/connection/connection_main.png';
 import connectionHealthImage from '@/images/connection-health/connection-health.png';
-// import editorImage from '@/images/editor/editor.jpg';
+import editorImage from '@/images/editor/editor.jpg';
 // import haruImage from '@/images/haru/haru.jpg';
 
 const Project = () => {
@@ -71,8 +71,8 @@ const Project = () => {
           대부분 처음 사용해 본 기술 스택과 구현해 본 기능들로 구성된
           프로젝트였습니다. 이 프로젝트를 통해{' '}
           <strong>SSR(Server-Side Rendering)</strong> 환경에 대해 배울 수
-          있었으며, <strong>Next.js 14</strong>를 적극적으로 공부하고 활용해 볼
-          기회가 되었습니다. 또한 <strong>React-Query</strong>와{' '}
+          있었으며, <strong>Next.js (App router)</strong>를 적극적으로 공부하고
+          활용해 볼 기회가 되었습니다. 또한 <strong>React-Query</strong>와{' '}
           <strong>React-Hook-Form</strong> 등 개발의 편의를 돕는 여러
           라이브러리도 활용해 볼 수 있었습니다.
           <br />
@@ -215,8 +215,11 @@ const Project = () => {
           제공합니다.
           <br />
           <br />
-          Prompt-er Day Seoul 2023 해커톤에서 200팀이 넘는 참가 팀 중 상위 40팀
-          안에 들어 예선을 통과하는 성과를 이루었습니다.
+          Prompt-er Day Seoul 2023 해커톤에서{' '}
+          <strong>
+            200팀이 넘는 참가 팀 중 상위 40팀 안에 들어 예선을 통과
+          </strong>
+          하는 성과를 이루었습니다.
         </div>
       ),
       role: (
@@ -226,7 +229,7 @@ const Project = () => {
           있었고,{' '}
           <strong>JavaScript의 비동기 처리와 고차 함수에 대한 지식</strong>을
           숙지할 수 있었습니다. <strong>UI/UX의 중요성</strong>에 대해 깊이
-          이해하게 되었고,
+          이해하게 되었고,{' '}
           <strong>사용자 중심의 서비스 개발에 대한 인식</strong>을 높일 수
           있었습니다.
         </div>
@@ -296,54 +299,62 @@ const Project = () => {
         },
       ],
     },
-    // {
-    //   title: 'Online Editor',
-    //   explanation: '온라인 에디터',
-    //   personnel: '(개인 프로젝트)',
-    //   period: '2023.06.27 ~ 2023.07.17',
-    //   image: editorImage,
-    //   mainColor: 'border-[#2ca9bc]',
-    //   imageAlt: 'online editor',
-    //   webSite: 'https://project-online-editor.vercel.app/',
-    //   github: 'https://github.com/hyeonjun-L/Project_Notion_VanillaJS-',
-    //   figma: '',
-    //   developmentProcess: '/portfolio/online-editor',
-    //   detailExplanation: (
-    //     <div>
-    //       글 작성, 수정, 삭제를 할 수 있는 온라인 에디터를 순수 JavaScript를
-    //       이용해 컴포넌트 방식으로 구현한 개인 프로젝트
-    //     </div>
-    //   ),
-    //   role: (
-    //     <ul className="flex flex-col gap-2">
-    //       <li>
-    //         용이한 상태 관리를 위해 싱글톤 패턴을 이용한 전역 Store를 만들어
-    //         사용
-    //       </li>
-    //       <li>
-    //         글 자동 저장 기능 구현 시 api 호출 회수 감소를 줄이기 위해 keyup
-    //         이벤트 핸들러에 debounce를 사용
-    //       </li>
-    //     </ul>
-    //   ),
-    //   skills: [
-    //     {
-    //       svg: <JavaScriptSVG className="size-5" />,
-    //       name: 'JavaScript',
-    //       bg: 'bg-[#F7DF1E]',
-    //     },
-    //     {
-    //       svg: <WebpackSVG className="size-5" />,
-    //       name: 'Webpack',
-    //       bg: 'bg-[#8DD6F9]',
-    //     },
-    //     {
-    //       svg: <VercelSVG className="size-5" />,
-    //       name: 'Vercel',
-    //       bg: 'bg-[#000000]',
-    //     },
-    //   ],
-    // },
+    {
+      title: 'Online Editor',
+      explanation: '온라인 에디터',
+      personnel: '(개인 프로젝트)',
+      period: '2023.06.27 ~ 2023.07.17',
+      image: editorImage,
+      mainColor: 'border-[#2ca9bc]',
+      imageAlt: 'online editor',
+      webSite: 'https://project-online-editor.vercel.app/',
+      github: 'https://github.com/hyeonjun-L/Project_Notion_VanillaJS-',
+      figma: '',
+      developmentProcess: '',
+      detailExplanation: (
+        <div>
+          글 작성, 수정, 삭제를 할 수 있는 온라인 에디터를{' '}
+          <strong>순수 JavaScript를 이용해 컴포넌트 방식으로 구현</strong>한
+          개인 프로젝트
+        </div>
+      ),
+      role: (
+        <div>
+          <strong>
+            싱글톤 패턴을 적용해 만든 전역 Store를 통한 상태 관리 기법
+          </strong>
+          을 배우며, 애플리케이션 상태를 효율적으로 관리하는 방법에 대해 이해할
+          수 있었습니다.
+          <br />
+          <br />글 자동 저장 기능의 구현 과정에서{' '}
+          <strong>debounce 함수를 활용</strong>해 비동기 처리의 성능을
+          최적화하는 방법을 익혔습니다. 이를 통해 사용자 입력 처리와 API 호출의
+          최적화 방법에 대한 지식을 획득하였습니다.
+          <br />
+          <br />
+          <strong>Webpack을 사용하여 번들링 과정을 설정</strong>하는 경험은 모던
+          웹 애플리케이션의 개발 및 배포 과정에서 필수적인 자원들을 효율적으로
+          관리하고 최적화하는 방법에 대해 배우게 됐습니다.
+        </div>
+      ),
+      skills: [
+        {
+          svg: <JavaScriptSVG className="size-5" />,
+          name: 'JavaScript',
+          bg: 'bg-[#F7DF1E]',
+        },
+        {
+          svg: <WebpackSVG className="size-5" />,
+          name: 'Webpack',
+          bg: 'bg-[#8DD6F9]',
+        },
+        {
+          svg: <VercelSVG className="size-5" />,
+          name: 'Vercel',
+          bg: 'bg-[#000000]',
+        },
+      ],
+    },
     // {
     //   title: 'HARU',
     //   explanation: '친구들과 공유가 가능한 캘린더',
@@ -460,12 +471,14 @@ const Project = () => {
                     Design
                   </Link>
                 )}
-                <Link
-                  className="hover:text-dark-text"
-                  href={developmentProcess}
-                >
-                  Detail
-                </Link>
+                {developmentProcess && (
+                  <Link
+                    className="hover:text-dark-text"
+                    href={developmentProcess}
+                  >
+                    Detail
+                  </Link>
+                )}
               </div>
               <Image
                 src={image}
@@ -479,7 +492,7 @@ const Project = () => {
               <h4>2.배운 점</h4>
               {role}
               <h4>3.사용 기술</h4>
-              <ul className="flex flex-wrap gap-2 text-white">
+              <ul className="mb-8 flex flex-wrap gap-2 text-white">
                 {skills.map(({ svg, name, bg }) => (
                   <li
                     className={`flex items-center gap-2 p-1 ${bg}`}
@@ -490,12 +503,14 @@ const Project = () => {
                   </li>
                 ))}
               </ul>
-              <Link
-                href={developmentProcess}
-                className="my-8 underline underline-offset-4 hover:text-dark-text"
-              >
-                {title} 프로젝트 내용 자세히 보러 가기
-              </Link>
+              {developmentProcess && (
+                <Link
+                  href={developmentProcess}
+                  className="mb-8 underline underline-offset-4 hover:text-dark-text"
+                >
+                  {title} 프로젝트 내용 자세히 보러 가기
+                </Link>
+              )}
               {/* <h4>4.프로젝트를 진행하며 경험하고 체득한 부분</h4>
               {learned} */}
             </div>
