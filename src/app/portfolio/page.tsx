@@ -1,8 +1,8 @@
 import connectionImage from '@/images/connection/connection_main.png';
 import connectionHealthImage from '@/images/connection-health/connection-health.png';
-import editorImage from '@/images/editor/editor.jpg';
-import haruImage from '@/images/haru/haru.jpg';
 import Project from './_components/Project';
+// import editorImage from '@/images/editor/editor.jpg';
+// import haruImage from '@/images/haru/haru.jpg';
 
 const page = () => {
   const PROJECT_LIST = [

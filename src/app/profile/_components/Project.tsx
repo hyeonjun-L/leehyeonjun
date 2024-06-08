@@ -8,7 +8,6 @@ import {
   FirebaseSVG,
   FramerMotionSVG,
   GitHubActionsSVG,
-  JavaScriptSVG,
   JestSVG,
   NaverMapSVG,
   NextSVG,
@@ -26,13 +25,14 @@ import {
   TypeScriptSVG,
   VercelSVG,
   ViteSVG,
-  WebpackSVG,
   ZustandSVG,
+  // JavaScriptSVG,
+  // WebpackSVG,
 } from '@/icons/index';
 import connectionImage from '@/images/connection/connection_main.png';
 import connectionHealthImage from '@/images/connection-health/connection-health.png';
-import editorImage from '@/images/editor/editor.jpg';
-import haruImage from '@/images/haru/haru.jpg';
+// import editorImage from '@/images/editor/editor.jpg';
+// import haruImage from '@/images/haru/haru.jpg';
 
 const Project = () => {
   const PROJECT = [
@@ -83,8 +83,12 @@ const Project = () => {
             Emotion에서 Tailwind로, Recoil에서 Zustand로 전환하거나
             React-query를 중간에 도입하는 등의 변경 사항
           </strong>
-          이 있었는데, 이로 인해 마이그레이션이 반복되며 프로젝트 개발에 상당한
-          시간이 소요되는 아쉬움이 있었습니다.
+          이 있었습니다. 이러한 변경으로 인해 마이그레이션이 반복되어 프로젝트
+          개발에 상당한 시간이 소요되었고, 이는{' '}
+          <strong>
+            프로젝트 시작 전 철저한 기획과 기술 스택 선정의 중요성
+          </strong>
+          을 깨닫게 해주었습니다.
         </div>
       ),
       skills: [
@@ -194,7 +198,7 @@ const Project = () => {
       mainColor: 'border-[#12DDCE]',
       imageAlt: 'connection health',
       webSite: 'https://prompterday-frontend.vercel.app/',
-      github: 'https://github.com/Eunseo-jo/prompterday-frontend',
+      github: 'https://github.com/connection-prompterday/prompterday-frontend',
       figma:
         'https://www.figma.com/design/57fx1eyB2NXD2iVwSFn2rp/%EC%BB%A4%EB%84%A5%EC%85%98_%ED%95%B4%EC%BB%A4%ED%86%A4',
       developmentProcess: '/portfolio/connection-health',
@@ -216,11 +220,28 @@ const Project = () => {
         </div>
       ),
       role: (
-        <ul className="flex flex-col gap-2">
-          <li>이미지에서 원재료명 추출 OCR 기능 구현</li>
-          <li>이미지 cropper 기능 구현</li>
-          <li>원재료명 GPT로 가공처리 로딩 애니메이션 구현</li>
-        </ul>
+        <div>
+          <strong>React의 라우팅</strong>과{' '}
+          <strong>CSR(Client-Side Rendering)</strong>에 대한 이해를 깊게 할 수
+          있었고,{' '}
+          <strong>JavaScript의 비동기 처리와 고차 함수에 대한 지식</strong>을
+          숙지할 수 있었습니다. <strong>UI/UX의 중요성</strong>에 대해 깊이
+          이해하게 되었고,
+          <strong>사용자 중심의 서비스 개발에 대한 인식</strong>을 높일 수
+          있었습니다.
+        </div>
+
+        // <ul className="flex flex-col gap-2">
+        //   <li>이미지에서 원재료명 추출 OCR 기능 구현</li>
+        //   <li>이미지 cropper 기능 구현</li>
+        //   <li>원재료명 GPT로 가공처리 로딩 애니메이션 구현</li>
+        // </ul>
+
+        // 이미지에서 원재료명을 추출하는 OCR 기능과 이미지 크롭(crop) 기능을
+        //   구현했습니다. 또한, 이미지에서 OCR 기능을 통해 추출한 텍스트 중에서
+        //   원재료명만을 추출하는 과정에서 API 응답 시간이 오래 걸린다는 단점을
+        //   발견했습니다. 이를 보완하기 위해 사용자의 대기 시간을 줄이고자
+        //   애니메이션을 도입했습니다.
       ),
       skills: [
         {
@@ -455,7 +476,7 @@ const Project = () => {
             <div className="flex flex-col gap-3 border-l border-solid border-dark-disabled px-8  [&>div]:pl-5 [&>h4]:mt-4 [&>h4]:text-xl [&>ul]:pl-5">
               <h4>1.설명</h4>
               {detailExplanation}
-              <h4>2.배운 점 & 아쉬운 점</h4>
+              <h4>2.배운 점</h4>
               {role}
               <h4>3.사용 기술</h4>
               <ul className="flex flex-wrap gap-2 text-white">
