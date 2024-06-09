@@ -1,3 +1,4 @@
+import { Url } from 'next/dist/shared/lib/router/router';
 import Image, { StaticImageData } from 'next/image';
 import Link from 'next/link';
 import { ArrowSVG } from '@/icons/index';
@@ -7,7 +8,8 @@ interface ProjectProps {
   alt: string;
   explanation: string;
   webLink: string;
-  detailLink: string;
+  detailLink?: string;
+  gitLink?: string;
 }
 
 const Project = ({
@@ -16,6 +18,7 @@ const Project = ({
   explanation,
   webLink,
   detailLink,
+  gitLink,
 }: ProjectProps) => {
   return (
     <figure className="group relative max-h-96 min-h-56 overflow-hidden rounded-lg border border-solid border-dark-body sm:min-h-[348px]">
@@ -36,11 +39,12 @@ const Project = ({
           <ArrowSVG className="size-4 dark:fill-white" />
         </Link>
         <Link
-          href={detailLink}
+          href={(detailLink as Url) || (gitLink as Url)}
           className="flex translate-y-96 items-center gap-2 rounded-full border border-solid border-black p-2 duration-300 group-hover:translate-y-0 hover:bg-White-anchor-hover sm:p-4 dark:border-white dark:hover:bg-dark-activity"
           aria-label="해당 프로젝트 개발 내용 보기"
+          target={detailLink ? '_self' : '_blank'}
         >
-          개발 내용 보기
+          {detailLink ? '개발 내용 보기' : '깃 허브 보기'}
           <ArrowSVG className="size-4 dark:fill-white" />
         </Link>
       </figcaption>

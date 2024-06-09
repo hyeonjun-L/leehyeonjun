@@ -1,0 +1,74 @@
+pre[class*='language-'] {
+  color: theme('colors.zinc.100');
+  margin-top: 1rem !important;
+}
+
+.token.property,
+.token.operator,
+.token.combinator {
+  color: theme('colors.zinc.400');
+}
+
+.code-highlight {
+  float: left;
+  min-width: 100%;
+}
+
+.code-line {
+  display: block;
+  padding-left: 10px;
+  padding-right: 14px;
+  margin-left: -16px;
+  margin-right: -16px;
+  border-left: 4px solid rgba(0, 0, 0, 0);
+  line-height: 1.5rem;
+}
+
+.code-line.inserted {
+  background-color: theme('colors.emerald.900');
+}
+
+.code-line.deleted {
+  background-color: theme('colors.red.900');
+}
+
+.highlight-line {
+  margin-left: -14px;
+  margin-right: -16px;
+  background-color: theme('colors.zinc.800');
+  border-left: 2px solid theme('colors.amber.400');
+  display: block !important;
+  border-radius: 0 !important;
+}
+
+.line-number::before {
+  display: inline-block;
+  width: 1rem;
+  text-align: right;
+  margin-right: 16px;
+  margin-left: -8px;
+  color: theme('colors.zinc.500');
+  content: attr(line);
+}
+
+.rehype-code-title {
+  margin: 0 !important;
+  display: inline-flex;
+  position: relative;
+  top: 1rem;
+  background: theme('colors.zinc.900');
+  color: theme('colors.zinc.100');
+  font-family: theme('fontFamily.mono');
+  padding: 0.25rem 1.5rem;
+  border-radius: 0.5rem 0.5rem 0 0;
+  border-top: 4px solid theme('colors.indigo.600');
+  font-size: 0.8rem;
+}
+
+.code-line.inserted {
+  background-color: theme('colors.emerald.900');
+}
+
+.code-line.deleted {
+  background-color: theme('colors.red.900');
+}

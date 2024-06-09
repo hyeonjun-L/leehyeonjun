@@ -1,8 +1,8 @@
 import connectionImage from '@/images/connection/connection_main.png';
 import connectionHealthImage from '@/images/connection-health/connection-health.png';
 import editorImage from '@/images/editor/editor.jpg';
-import haruImage from '@/images/haru/haru.jpg';
 import Project from './_components/Project';
+// import haruImage from '@/images/haru/haru.jpg';
 
 const page = () => {
   const PROJECT_LIST = [
@@ -28,20 +28,20 @@ const page = () => {
       explanation:
         '글 작성, 수정, 삭제를 할 수 있는 온라인 에디터를 순수 JavaScript를 이용해 컴포넌트 방식으로 구현한 개인 프로젝트',
       webLink: 'https://project-online-editor.vercel.app',
-      detailLink: '/portfolio/online-editor',
+      gitLink: 'https://github.com/hyeonjun-L/online-editor',
     },
-    {
-      src: haruImage,
-      alt: '하루 이미지',
-      explanation:
-        '친구들과 일정 및 일기를 공유할 수 있는 캘린더 서비스 입니다. 각 날짜별로 일정과 일기를 기록하고, 친구들의 일정과 일기를 확인할 수 있는 기능을 제공합니다. 또한, 댓글과 좋아요 기능을 통해 친구들과 소통할 수 있습니다.',
-      webLink: 'https://5term-mini-front.vercel.app/',
-      detailLink: '/portfolio/haru',
-    },
+    // {
+    //   src: haruImage,
+    //   alt: '하루 이미지',
+    //   explanation:
+    //     '친구들과 일정 및 일기를 공유할 수 있는 캘린더 서비스 입니다. 각 날짜별로 일정과 일기를 기록하고, 친구들의 일정과 일기를 확인할 수 있는 기능을 제공합니다. 또한, 댓글과 좋아요 기능을 통해 친구들과 소통할 수 있습니다.',
+    //   webLink: 'https://5term-mini-front.vercel.app/',
+    //   detailLink: '/portfolio/haru',
+    // },
   ];
 
   return (
-    <section className="mx-auto grid w-full max-w-6xl gap-12 p-4 sm:p-16 lg:grid-cols-2">
+    <section className="mx-auto grid h-dvh w-full max-w-6xl gap-12 p-4 sm:p-16 lg:grid-cols-2">
       {PROJECT_LIST.map((info) => (
         <Project key={info.alt} {...info} />
       ))}

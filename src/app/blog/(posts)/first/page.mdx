@@ -14,8 +14,32 @@ Here is an image:
 
 There is a code snippet below:
 
-```js
-export function myComponent() {
-  return <p>test</p>;
+```jsx:index.jsx {1-5} showLineNumbers
+export async function getStaticProps({ params: { slug } }) {
+  const { content, data } = await getContentItem(slug, 'articles');
+
+  const mdxSource = await serialize(content, {
+    components,
+    mdxOptions: {
+      remarkPlugins: [remarkGfm, remarkMdxCodeMeta],
+      rehypePlugins: [rehypePrism, rehypeCodeTitles],
+    },
+    scope: data,
+  });
+
+  return {
+    props: {
+      raw: content,
+      meta: { ...data, slug },
+      mdxSource,
+    },
+  };
 }
+```
+
+```diff:diff
+
++ Added line
+
+- Deleted line
 ```
