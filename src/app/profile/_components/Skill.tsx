@@ -1,5 +1,5 @@
 import {
-  AxiosSVG,
+  // AxiosSVG,
   EslintSVG,
   FramerMotionSVG,
   GitHubActionsSVG,
