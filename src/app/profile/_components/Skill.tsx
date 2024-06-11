@@ -106,12 +106,12 @@ const Skill = () => {
           detail:
             'React 애플리케이션에서 여러 컴포넌트 간에 공유되고 상태 간에 서로 의존적인 관계를 가지는 복잡한 상태 관리를 Recoil을 이용하여 효율적으로 처리 한 경험이 있습니다.',
         },
-        {
-          svg: <AxiosSVG className="size-6 [&>path]:fill-[#5A29E4] " />,
-          title: 'Axios',
-          detail:
-            '비동기 HTTP 요청을 효율적으로 관리하고, 요청과 응답 데이터의 변환, 요청 취소 등 복잡한 작업을 할 수 있습니다.',
-        },
+        // {
+        //   svg: <AxiosSVG className="size-6 [&>path]:fill-[#5A29E4] " />,
+        //   title: 'Axios',
+        //   detail:
+        //     '비동기 HTTP 요청을 효율적으로 관리하고, 요청과 응답 데이터의 변환, 요청 취소 등 복잡한 작업을 할 수 있습니다.',
+        // },
         {
           svg: (
             <SocketIoSVG className="size-6 [&>path]:fill-[#010101] [&>path]:dark:fill-[#fff]" />

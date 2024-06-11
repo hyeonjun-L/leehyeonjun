@@ -1,5 +1,11 @@
+import { Metadata } from 'next';
 import Link from 'next/link';
 import { getPosts } from '@/utils/posts';
+
+export const metadata: Metadata = {
+  title: '이현준 | 블로그',
+  description: '이현준 블로그 메인 페이지',
+};
 
 const page = async ({}: { params: { slug: string } }) => {
   const posts = await getPosts();

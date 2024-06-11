@@ -1,5 +1,4 @@
-import { logo } from '@/images/connection-health';
-import Explanation from '../_components/Explanation';
+import { Metadata } from 'next';
 import Link from 'next/link';
 import {
   AxiosSVG,
@@ -13,9 +12,16 @@ import {
   VercelSVG,
   ViteSVG,
 } from '@/icons/index';
-import Skill from '../_components/Skill';
-import Design from '../_components/Design';
+import { logo } from '@/images/connection-health';
 import DevProcessTimeline from './_components/DevProcessTimeline';
+import Design from '../_components/Design';
+import Explanation from '../_components/Explanation';
+import Skill from '../_components/Skill';
+
+export const metadata: Metadata = {
+  title: '이현준 | 커넥션 건강',
+  description: '이현준 커넥션 건강 프로젝트 자세히 보기 페이지',
+};
 
 const page = () => {
   const EXPLANATION = {
