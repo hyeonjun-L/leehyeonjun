@@ -52,6 +52,10 @@ export default function RootLayout({
       }
     >
       <head>
+        <meta
+          name="naver-site-verification"
+          content="b9297bed53014d32edd615ee741712e2f9846cd3"
+        />
         <link
           rel="stylesheet"
           href="https://unpkg.com/dracula-prism/dist/css/dracula-prism.css"
