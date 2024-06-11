@@ -1,8 +1,14 @@
+import { Metadata } from 'next';
 import connectionImage from '@/images/connection/connection_main.png';
 import connectionHealthImage from '@/images/connection-health/connection-health.png';
 import editorImage from '@/images/editor/editor.jpg';
 import Project from './_components/Project';
 // import haruImage from '@/images/haru/haru.jpg';
+
+export const metadata: Metadata = {
+  title: '이현준 | 포트폴리오',
+  description: '이현준 포트폴리오 보기 페이지',
+};
 
 const page = () => {
   const PROJECT_LIST = [

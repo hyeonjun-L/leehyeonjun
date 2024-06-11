@@ -19,8 +19,19 @@ const consola = localFont({
 });
 
 export const metadata: Metadata = {
-  title: 'duckoo',
-  description: 'duckoo의 블로그',
+  title: '이현준',
+  description: '이현준 홈페이지',
+  keywords: [
+    '이현준',
+    '프로필',
+    '포트폴리오',
+    '블로그',
+    '프론트엔드',
+    '개발자',
+  ],
+  authors: [{ name: '이현준' }],
+  publisher: '이현준',
+  referrer: 'origin-when-cross-origin',
 };
 
 export default function RootLayout({

@@ -1,3 +1,4 @@
+import { Metadata } from 'next';
 import { cookies } from 'next/headers';
 import AboutMe from './_components/AboutMe';
 import Career from './_components/Career';
@@ -6,6 +7,11 @@ import Education from './_components/Education';
 import Experience from './_components/Experience';
 import Project from './_components/Project';
 import Skill from './_components/Skill';
+
+export const metadata: Metadata = {
+  title: '이현준 | 프로필',
+  description: '이현준 자세히 보기 페이지',
+};
 
 const page = () => {
   const cookieStore = cookies();
