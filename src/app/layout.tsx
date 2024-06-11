@@ -1,3 +1,4 @@
+import { GoogleAnalytics, GoogleTagManager } from '@next/third-parties/google';
 import './styles/globals.css';
 import './styles/carousel.css';
 import localFont from 'next/font/local';
@@ -80,6 +81,12 @@ export default function RootLayout({
           </NprogressBarProvider>
         </body>
       </AnchorViewProvider>
+      {process.env.NEXT_PUBLIC_GTM_ID && (
+        <GoogleTagManager gtmId={process.env.NEXT_PUBLIC_GTM_ID} />
+      )}
+      {process.env.NEXT_PUBLIC_GA_ID && (
+        <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID} />
+      )}
     </html>
   );
 }
