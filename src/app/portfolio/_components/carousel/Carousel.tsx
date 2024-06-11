@@ -1,5 +1,5 @@
 'use client';
-import { EmblaOptionsType } from 'embla-carousel';
+// import { EmblaOptionsType } from 'embla-carousel';
 import useEmblaCarousel from 'embla-carousel-react';
 import Image from 'next/image';
 import {
