@@ -119,6 +119,13 @@ const AnchorNav = () => {
       observer.observe(heading);
     });
 
+    if (window.location.hash) {
+      const element = document.querySelector(window.location.hash);
+      if (element) {
+        element.scrollIntoView();
+      }
+    }
+
     return () => {
       allHeadings.forEach((heading) => {
         observer.unobserve(heading);
