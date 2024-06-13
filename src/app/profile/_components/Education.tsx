@@ -9,7 +9,7 @@ const Education = () => {
             <p>(2017.03 ~ 2024.02)</p>
           </div>
           <p>컴퓨터전자공학 / 정보통신공학 (학사졸업)</p>
-          <p>학점: 4.3/4.5</p>
+          <p>학점: 4.1/4.5</p>
         </div>
         <ul className="flex list-disc flex-col gap-1 pl-5 text-lg sm:pl-0">
           <li>성적 우수상 2회 수상</li>
