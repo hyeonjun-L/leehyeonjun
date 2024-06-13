@@ -372,6 +372,29 @@ const DevProcessTimeline = async () => {
       ),
     },
     {
+      title: '회원 정보 수정',
+      gif: {
+        pc: {
+          src: 'https://storage.googleapis.com/leehyeonjun.com/connection/myInfo_pc.gif',
+          placeholder:
+            'data:image/png;base64,R0lGODlhFAALAIcAAExpcfbx/Pbz8vby/Pb3+PHq+/Pz9ff39vXu7////v7///////Py9/39/f39/Pf39+na5Onl7/fy+vLr/PDv8fDp++DRzvz8/fPy8vf0/OrEqO7u7v38/vLx8/j1/fj0/OLg4v7+/9fX2Orm7/Lp5fXz+PPz8/z7/v37/v3+/fX0+PX19fvy/fHr/Pv+/vfx/PXy+PPw+uXHuvfv8vTCju/f5uvq6vLw9f3v2+nm8PPy9fn5+fbz+vn4+fXx/O/u7/j4+Pj2+vr4+/r5+cl7Rfz8//n1/e3u8vPr/+/v7/Dw7/z7/fXy/P/+/uno5/Lu+NWsl/Tt/+zv8fj1/PLq9vf1+vf0/fj49+3p8+rn7/Hu8/Xy+ezo6PPs//Dz9vv7+/Ly9P38/fHx8vn5+Obm5fn3+/Xz9/X29e7u7ff4+fb39fHq/PTw+v7+/uzt7Pj0/e3r8/b0+fXx9fz6/fn6+e/o+/Ts6fDq+/Lu9/Lt+/z6/vfz/O3t7/f0++7k5Ono6+7t7Ovj6/Xw+v7+/fHp/PPt//Xx+/Lt+O/w7+/r9fb19gAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH/C05FVFNDQVBFMi4wAwEAAAAh+QQFCgAAACwAAAAAFAALAAAI5gBZQBABwkAHCj3CLDmxpOGSEHL82IEjgUQHDihUHClyoeGchkH+/OGjJ0sGAQ+aKECgAQeBHQ8WpGhQBoMSNQuyeEijyMECC0RoOEnyI8mKQVUy9OHxYcSHMUPahNABRYYUGxs2fEnQp06BCkgivLlxZkEDIS68iHkAxESSK1vWTCgQReyFBm3awNBipkSVOCUYxImxpsWdQhGmNEmQYAEYNHQGMW6cYIpcuiN8MLEyYMATPE+eGBo9Og+hNRW65DBCBYshNoIOJRoQoHbtAXtyvwi0gAsZN4AQXTkwuXiCJgtm1AgIADs=',
+        },
+        mobile: {
+          src: 'https://storage.googleapis.com/leehyeonjun.com/connection/myInfo_mobile.gif',
+          placeholder:
+            'data:image/png;base64,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',
+        },
+      },
+      explanation: (
+        <ul>
+          <li>
+            이 페이지는 회원의 프로필, 닉네임, 이메일, 휴대폰 번호의 정보를
+            수정할 수 있는 페이지 입니다.
+          </li>
+        </ul>
+      ),
+    },
+    {
       title: '지도 공통 컴포넌트 구현',
       gif: {
         pc: {
@@ -404,11 +427,15 @@ const DevProcessTimeline = async () => {
             하였습니다.
           </li>
           <li>
-            강의 장소 협의가 되지 않은 지도: Vworld API에서 시, 군, 구의
-            Polyline 값을 받아와 네이버 지도에 표시하도록 구현하였습니다.
-            Polyline 데이터가 크기 때문에 빠른 렌더링을 위해
+            협의되지 않은 강의 장소의 지도: Vworld API에서 시, 군, 구의 Polyline
+            값을 받아와 네이버 지도에 표시하도록 구현하였습니다.
             <strong> Next.js 라우터 핸들러를 사용</strong>하여 Polyline 데이터를
-            사전에 처리하고 클라이언트 측으로 전송 하였습니다.
+            사전에 처리하고 클라이언트 측으로 전송 하였습니다. 또한 장소 위치가
+            여러 곳으로 설정될 떄{' '}
+            <strong>
+              Promise.all을 사용하여 Polyline 데이터를 가져오는 요청 시간을 단축
+            </strong>
+            하였습니다.
           </li>
         </ul>
       ),

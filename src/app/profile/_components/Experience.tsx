@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { Fragment } from 'react';
 
 const Experience = () => {
@@ -24,7 +25,15 @@ const Experience = () => {
       period: '(2023.3 ~ 2023.7)',
       historyInformation: [
         'JavaScript, TypeScript, React 학습',
-        'Tech-Talk 발표를 통한 프레젠테이션 능력 향상 및 CS 지식 습득',
+        <>
+          <Link
+            href="/https://www.youtube.com/watch?v=w0XsvOrLkcg"
+            className="underline underline-offset-4"
+          >
+            Tech-Talk
+          </Link>{' '}
+          발표를 통한 프레젠테이션 능력 향상 및 CS 지식 습득
+        </>,
         '멘토링, 협업, 팀프로젝트를 통한 소프트스킬 증진',
       ],
     },
