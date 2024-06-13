@@ -120,7 +120,8 @@ const AnchorNav = () => {
     });
 
     if (window.location.hash) {
-      const element = document.querySelector(window.location.hash);
+      const decodedHash = decodeURIComponent(window.location.hash);
+      const element = document.querySelector(decodedHash);
       if (element) {
         element.scrollIntoView();
       }
