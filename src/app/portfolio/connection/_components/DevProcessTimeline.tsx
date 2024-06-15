@@ -54,8 +54,8 @@ const DevProcessTimeline = async () => {
             디자이너와의 협업과 UI 리뷰를 간편화하기 위해{' '}
             <strong>Storybook을 도입</strong>하고{' '}
             <strong>공통 컴포넌트를 문서화</strong>하였습니다. 이를 통해 각
-            컴포넌트의 상태를 시각적으로 확인하고 테스트할 수 있게 되었으며,
-            <strong>디자이너와의 원할한 의사소통</strong>이 가능하게 되었습니다.
+            컴포넌트의 상태를 시각적으로 확인하고 테스트할 수 있게 되었으며,{' '}
+            <strong>디자이너와의 원활한 의사소통</strong>이 가능하게 되었습니다.
             또한, 컴포넌트의 기능과 사용 방법에 대한 명확한 가이드라인을
             제공함으로{' '}
             <strong>
@@ -113,7 +113,7 @@ const DevProcessTimeline = async () => {
           <li>
             강사, 클래스, 패스권을 검색할 수 있는 필터를 포함하여 구현된
             페이지입니다. 이 필터에는 전체 검색 지역, 장르, 평점, 가격, 지정
-            날짜, 인원, 진행 방식, 요일, 시간대 등이 포함되어 있으며, 특정
+            날짜, 인원, 진행 방식, 요일, 시간대가 포함되어 있으며, 특정
             키워드로도 검색이 가능합니다.
           </li>
           <li>
@@ -123,7 +123,7 @@ const DevProcessTimeline = async () => {
           </li>
           <li>
             <strong>서버 컴포넌트</strong>를 통해 초기 데이터를 받아와{' '}
-            <strong>초기 화면 로딩 속도를 개선</strong>하였고, 검색된 아이템들의{' '}
+            <strong>TTV(Time To view)를 개선</strong>하였고, 검색된 아이템들의{' '}
             <strong>검색 엔진 최적화(SEO)를 향상시킬 수 있는 장점</strong>을
             제공하였습니다.
           </li>
@@ -147,7 +147,7 @@ const DevProcessTimeline = async () => {
             <strong>useInfiniteQuery</strong>를 사용하여 무한 스크롤을 구현하고,
             검색 아이템을{' '}
             <strong>
-              react-query에 캐싱하여 기존 페이지로 복원 시 기존 아이템이
+              react-query에 캐싱 하여 기존 페이지로 복원 시 기존 아이템이
               유지되도록 변경
             </strong>
             했습니다.
@@ -274,8 +274,8 @@ const DevProcessTimeline = async () => {
       explanation: (
         <ul>
           <li>
-            유저가 쿠폰을 다운로드할 수 있는 기능과 다운로드 받은 쿠폰을 확인할
-            수 있는 관리 페이지, 그리고 쿠폰을 적용한 결제 기능을 구현했습니다.
+            유저가 쿠폰을 다운로드할 수 있는 기능과 다운로드한 쿠폰을 확인할 수
+            있는 관리 페이지, 그리고 쿠폰을 적용한 결제 기능을 구현했습니다.
           </li>
           <li>
             결제 페이지에 접근 시, 유저가 보유 중인 중복 쿠폰과 중복 불가능 쿠폰
@@ -341,7 +341,7 @@ const DevProcessTimeline = async () => {
             클래스를 등록하는 기능도 구현하였습니다.
           </li>
           <li>
-            결제를 간편하게 진행하기 위해 <strong>토스페이먼츠를 도입</strong>
+            결제를 간편하게 진행하기 위해 <strong>토스 페이먼츠를 도입</strong>
             했습니다.
           </li>
         </ul>
@@ -372,6 +372,38 @@ const DevProcessTimeline = async () => {
       ),
     },
     {
+      title: '헤더 컴포넌트',
+      troubleshooting: {
+        issue:
+          '헤더 컴포넌트의 프로필이 페이지 이동 및 새로고침 시 Hydration Delay 동안 비로그인 상태처럼 보이는 문제',
+        isMobile: false,
+        troubleSrc:
+          'https://storage.googleapis.com/leehyeonjun.com/connection/header/trouble.mp4',
+        troubleShootingSrc:
+          'https://storage.googleapis.com/leehyeonjun.com/connection/header/troubleshooting.mp4',
+        explanation: (
+          <p>
+            Zustand Store에 유저 정보를 저장하고, 해당 유저 정보를 프로필
+            컴포넌트가 구독하여 조건부 렌더링을 수행합니다. 이로 인해{' '}
+            <strong>
+              pre-rendering 단계에서는 로그인 이전 상태로 보이게 되고,
+              hydration이 완료된 후에야 Zustand 유저 Store가 업데이트되면서
+              Hydration Delay 동안 비로그인 상태
+            </strong>
+            처럼 보이게 됩니다.
+            <br />
+            <br />이 문제를 해결하기 위해, 프로필 컴포넌트가 Zustand 상태에
+            의존하지 않도록 하고{' '}
+            <strong>
+              서버 컴포넌트에서 유저 정보를 props로 전달받아 프로필 컴포넌트도
+              pre-rendering이 되도록 구현
+            </strong>
+            했습니다.
+          </p>
+        ),
+      },
+    },
+    {
       title: '회원 정보 수정',
       gif: {
         pc: {
@@ -388,8 +420,13 @@ const DevProcessTimeline = async () => {
       explanation: (
         <ul>
           <li>
-            이 페이지는 회원의 프로필, 닉네임, 이메일, 휴대폰 번호의 정보를
-            수정할 수 있는 페이지 입니다.
+            이 페이지에서는 회원의 프로필, 닉네임, 이메일, 휴대폰 번호 정보를
+            수정할 수 있습니다.
+          </li>
+          <li>
+            프로필 변경 시 어색하지 않고 자연스러운 변경 옵션이 나타나도록 하기
+            위해서 <strong>Framer Motion</strong>을 활용해 부드럽고 자연스러운
+            애니메이션을 구현했습니다.
           </li>
         </ul>
       ),
@@ -430,8 +467,8 @@ const DevProcessTimeline = async () => {
             협의되지 않은 강의 장소의 지도: Vworld API에서 시, 군, 구의 Polyline
             값을 받아와 네이버 지도에 표시하도록 구현하였습니다.
             <strong> Next.js 라우터 핸들러를 사용</strong>하여 Polyline 데이터를
-            사전에 처리하고 클라이언트 측으로 전송 하였습니다. 또한 장소 위치가
-            여러 곳으로 설정될 떄{' '}
+            사전에 처리하고 클라이언트 측으로 전송하였습니다. 또한 장소 위치가
+            여러 곳으로 설정될 때{' '}
             <strong>
               Promise.all을 사용하여 Polyline 데이터를 가져오는 요청 시간을 단축
             </strong>
@@ -559,9 +596,12 @@ const DevProcessTimeline = async () => {
           <li>
             클래스 등록을 위한 인터페이스를 제공합니다. 이는 사진 업로드,
             카테고리 설정, 상세 설명, 일정 및 공지사항 작성, 장소 지정, 가격
-            설정 등 다섯 가지 주요 섹션으로 구성되어 있습니다. 사용자가 각 섹션
-            간 이동할 때, 입력한 정보는 자동으로 임시 저장되어 데이터 손실을
-            방지합니다.
+            설정 등 다섯 가지 주요 섹션으로 구성되어 있습니다.{' '}
+            <strong>
+              사용자가 각 섹션 간 이동할 때, 입력한 정보는 자동으로 임시
+              저장되어 데이터 손실을 방지
+            </strong>
+            합니다.
           </li>
           <li>
             <strong>
@@ -614,14 +654,14 @@ const DevProcessTimeline = async () => {
             <strong>
               display-mode: standalone을 통해 PWA의 설치 여부를 확인
             </strong>
-            한 후, 설치되지 않았다면 PWA 설치를 유도하는 모달을 표시합니다. 만약
+            한 후, 설치되지 않았다면 PWA 설치를 유도하는 모달을 표시합니다. 만약{' '}
             <strong>
               beforeinstallprompt 이벤트가 지원된다면, 앱 설치 버튼을 제공하고,
               그렇지 않을 경우 상세한 설치 방법을 안내하는 페이지로 이동할 수
               있는 버튼을 제공
             </strong>
-            합니다. 이를 통해, 안드로이드(Android)와 iOS에서의 PWA 설치 방법을
-            사용자에게 명확히 안내하여 설치를 유도했습니다.
+            합니다. 이를 통해, 안드로이드와 iOS에서의 PWA 설치 방법을 사용자에게
+            명확히 안내하여 설치를 유도했습니다.
           </li>
         </ul>
       ),
@@ -667,7 +707,7 @@ const DevProcessTimeline = async () => {
             작동하기 때문에 발생하는 문제였습니다. 이 문제를 해결하기 위해{' '}
             <strong>
               dotenv 패키지를 사용하여 빌드 시점에 process.env의 내용을 가져와
-              Firebase의 키 값을 안전하게 숨길 수 있게 되었습니다.
+              Firebase의 키값을 안전하게 숨길 수 있게 되었습니다.
             </strong>{' '}
             이 방법을 통해 Firebase 키를 효율적으로 관리하며 보안성을 높일 수
             있었습니다.
@@ -727,7 +767,7 @@ const DevProcessTimeline = async () => {
           <li>
             이 페이지는 강사에 대한 정보를 제공하며, 강사의 주된 수업 지역,
             가르치는 장르, 소속 기관, 인스타그램 게시물, 자기소개, 경력, 현재
-            진행 중인 강의, 판매 중인 패스권, 그리고 수강 후기 등을 확인할 수
+            진행 중인 강의, 판매 중인 패스권, 그리고 수강 후기를 확인할 수
             있습니다.
           </li>
           <li>
@@ -755,14 +795,9 @@ const DevProcessTimeline = async () => {
               React Cache를 사용하여 fetch 요청의 결과를 캐시하고 동일한
               데이터를 재사용하는 방법을 도입
             </strong>
-            했습니다. 이 방법을 통해 단 한 번의 요청으로 제품 정보를 획득하고,
-            해당 정보를 페이지와 generateMetadata 함수에 모두 전달할 수 있게
-            되었습니다. 이러한 개선을 통해{' '}
-            <strong>
-              불필요한 중복 요청을 방지하고 응답 속도를 개선함으로써,
-              클라이언트에게 보다 빠르고 효율적인 데이터 제공이 가능
-            </strong>
-            해졌습니다.
+            했습니다. 이 방법을 통해 단 한 번의 요청으로 데이터를 획득하고, 해당
+            데이터를 페이지와 generateMetadata 함수에 모두 전달할 수 있게
+            되었습니다.
           </p>
         ),
       },
@@ -798,13 +833,14 @@ const DevProcessTimeline = async () => {
             직접 개발하였습니다.
           </li>
           <li>
-            커넥션 프로젝트에서 이미지 캐러셀의 사용이 빈번하므로, 이미지
-            최적화를 위해 캐러셀 컴포넌트가{' '}
+            이미지 캐러셀의 사용이 빈번하므로, 이미지 최적화를 위해 캐러셀
+            컴포넌트가{' '}
             <strong>
-              priority 값을 받아 해당 값에 맞는 이미지 요소만을 우선 렌더링하고,
-              캐러셀이 활성화되면 나머지 이미지의 렌더링을 시작하는 방식으로
-              구현하여 초기 렌더링 속도를 향상
+              priority 값을 받아 해당 값에 맞는 이미지 요소만 우선 렌더링하고,
+              캐러셀이 활성화되면 나머지 이미지를 렌더링 하는 방식으로 구현
             </strong>
+            했습니다. 이를 통해 <strong>초기 렌더링 속도를 향상</strong>시키고{' '}
+            <strong>리소스 사용을 감소</strong>
             시켰습니다.
           </li>
           <li>
@@ -841,43 +877,24 @@ const DevProcessTimeline = async () => {
       // },
     },
     {
-      title: '미들웨어로 token 검증 및 protect route 구현',
+      title: '미들웨어로 token 검증 및 protected route 구현',
       images: imageResults[3][0],
       explanation: (
         <ul>
           <li>
-            Next.js의 미들웨어를 이용하여 accessToken을 검증하는 로직을
-            구현하였습니다. 검증에 실패할 경우, refresh Token을 이용하여 토큰을
-            재발급하는 과정을 진행하였습니다. 또한, 토큰을 검증하여 각
-            경로(route)에 대한 접근 가능 여부를 판단하는 로직도 구현하였습니다.
+            Next.js의{' '}
+            <strong>
+              미들웨어를 이용하여 accessToken을 검증하는 로직을 구현
+            </strong>
+            했으며, 검증에 실패할 경우{' '}
+            <strong>
+              refreshToken을 이용하여 accessToken을 재발급하는 과정을 진행
+            </strong>
+            하였습니다. 또한, 토큰을 검증하여 각 경로(route)에 대한 접근 가능
+            여부를 판단하는 <strong>protected route도 구현</strong>하였습니다.
           </li>
         </ul>
       ),
-      troubleshooting: {
-        issue:
-          'Next.js 미들웨어에서 API 요청 시 "unhandledRejection: TypeError: Cannot delete property \'Symbol(set-cookie)\'" 오류 발생',
-        explanation: (
-          <p>
-            해당 오류는{' '}
-            <strong>
-              Next.js 미들웨어에서 API 요청을 처리하는 과정에서
-              &apos;set-cookie&apos; 속성을 잘못 처리함으로써 발생
-            </strong>
-            하였습니다. 이 오류를 해결하기 위해, 리프레시 토큰을 포함한 요청을
-            서버로 보내고, 서버에서 온 응답의 &apos;set-cookie&apos; 값을 정확히
-            추출하여 새로운 토큰을 안전하게 재발급 받았습니다. 이 과정에서{' '}
-            <strong>
-              &apos;credentials: include&apos; 옵션을 사용해 인증 정보를 요청에
-              포함시켜, 응답으로부터 새로운 액세스 토큰 및 리프레시 토큰을
-              제대로 파싱하고, 이들 토큰을 사용자 또는 강사의 액세스 토큰으로
-              구분하여 처리했습니다. 이렇게 재발급 받은 토큰들은 최종적으로
-              클라이언트에 JSON 형태로 반환
-            </strong>
-            되었습니다. 이러한 절차를 통해 &apos;set-cookie&apos; 속성의 잘못된
-            처리로 인해 발생한 오류를 성공적으로 해결할 수 있었습니다.
-          </p>
-        ),
-      },
     },
     {
       title: 'usePagiNation 공통 커스텀 훅 구현',
@@ -886,7 +903,7 @@ const DevProcessTimeline = async () => {
         <ul>
           <li>
             해당 프로젝트에서는 Pagination 기능을 자주 사용하고 있으며, 백엔드의
-            pagination API는 <strong>커서 페이징 방식을 채택</strong>하고
+            Pagination API는 <strong>커서 페이징 방식을 채택</strong>하고
             있습니다. 특정 페이지(예: 4페이지)로 직접 이동할 경우, 이전 페이지의
             첫 번째 항목 ID와 마지막 항목 ID가 필요합니다. 이 때문에 새로고침,
             뒤로 가기, 앞으로 가기 등의 브라우저 이벤트를 통해 페이지네이션
@@ -896,9 +913,9 @@ const DevProcessTimeline = async () => {
           </li>
           <li>
             해당 훅을 사용하면, 초기 데이터는{' '}
+            <strong>SSR로 처리되어, pre-rendering의 이점</strong>을 챙기고
             <strong>
-              서버 사이드 렌더링(SSR)으로 처리되며, 페이지네이션 옵션과 페이지
-              번호를 searchParams에 저장
+              페이지네이션 옵션과 페이지 번호를 searchParams에 저장
             </strong>
             합니다. 이를 통해 새로고침, 뒤로 가기, 앞으로 가기 등의{' '}
             <strong>

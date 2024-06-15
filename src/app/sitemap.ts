@@ -6,7 +6,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const posts = allPosts.map((post) => ({
     url: `https://www.leehyeonjun.com/blog/${post.slug}`,
-    lastModified: post.publishDate,
+    lastModified: new Date(post.publishDate).toISOString().split('T')[0],
   }));
 
   const routes = [
@@ -17,7 +17,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     '/portfolio/connection',
     '/portfolio/connection-health',
   ].map((route) => ({
-    url: `https://www.leehyeonjun.com/${route}`,
+    url: `https://www.leehyeonjun.com${route}`,
     lastModified: new Date().toISOString().split('T')[0],
   }));
 
