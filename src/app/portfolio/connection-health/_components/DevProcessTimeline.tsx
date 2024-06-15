@@ -4,7 +4,7 @@ import { Fragment } from 'react';
 const DevProcessTimeline = async () => {
   const PROCESS_TIME_LINE = [
     {
-      title: '이미지 크롭(crop) 기능',
+      title: '이미지 크롭 기능',
       images: {
         src: 'https://storage.googleapis.com/leehyeonjun.com/connection-health/%EC%84%B1%EB%B6%84%EB%B6%84%EC%84%9D.gif',
         placeholder:
@@ -16,17 +16,15 @@ const DevProcessTimeline = async () => {
         <ul>
           <li>
             사용자가 이미지를 업로드하고, 해당 이미지에서 원재료 정보를 포함하는
-            부분만을 선택하여 크롭하는 기능을 제공합니다. 이 과정에서 이미지를
+            부분만을 선택하여 크롭하는 기능을 제공했습니다. 이 과정에서 이미지를
             자유롭게 회전시키거나 원하는 영역을 정확히 지정하여 크롭할 수
-            있습니다. 특히,{' '}
+            있습니다.{' '}
             <strong>
               이미지를 조정하는 과정에서 사용자의 연속적인 입력(예: 회전 조절)에
               대응하여 성능 저하 없이 빠르게 반응할 수 있도록 디바운스(debounce)
               기법을 사용
             </strong>
-            했습니다. 디바운스는 짧은 시간 동안 반복되는 함수 호출을 최적화하여,
-            마지막 함수 호출 후 일정 시간이 지난 후에만 함수가 실행되도록
-            함으로써, 불필요한 처리를 줄이고 성능을 향상시켰습니다.
+            해 불필요한 처리를 줄이고 성능을 향상시켰습니다.
           </li>
           <li>
             이 기능은 사용자가 제품 구매 후 원재료 명을 수동으로 입력하는 대신
