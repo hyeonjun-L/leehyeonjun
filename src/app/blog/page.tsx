@@ -1,7 +1,8 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { getPosts } from '@/utils/posts';
-import Categories from './_components/categories';
+import Categories from './_components/Categories';
+import SearchPost from './_components/SearchPost';
 
 export const metadata: Metadata = {
   title: '이현준 | 블로그',
@@ -13,14 +14,17 @@ const page = async ({
 }: {
   searchParams: { [key: string]: string };
 }) => {
-  const { categorie } = searchParams;
+  const { categorie, q } = searchParams;
   const posts = await getPosts();
 
   return (
     <main className="min-h-dvh w-full gap-3 p-4 lg:flex xl:p-8">
       <Categories selectCategorie={categorie} posts={posts} />
       <section className="mx-auto mt-5 lg:mt-0">
-        <h1>Next.js MDX Blog</h1>
+        <div className="flex items-center justify-between py-3">
+          <h1>이현준 블로그</h1>
+          <SearchPost />
+        </div>
         <button className="border border-solid border-white p-3">
           <ol>
             {posts.map(({ slug, title, publishDate, categories }) => (
