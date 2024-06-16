@@ -1,14 +1,13 @@
 import { readdir } from 'fs/promises';
 import path from 'path';
-import { categories } from '../constants/constants';
-
-type Category = (typeof categories)[number];
 
 export interface Post {
   slug: string;
   title: string;
+  description: string;
   publishDate: string;
-  categories: Category[];
+  posterImage: string;
+  categories: string[];
 }
 
 export async function getPosts(): Promise<Post[]> {
