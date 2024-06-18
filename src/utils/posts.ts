@@ -1,14 +1,6 @@
+import { Post } from '@/types/types';
 import { readdir } from 'fs/promises';
 import path from 'path';
-
-export interface Post {
-  slug: string;
-  title: string;
-  description: string;
-  publishDate: string;
-  posterImage: string;
-  categories: string[];
-}
 
 export async function getPosts(): Promise<Post[]> {
   const postPath = path.resolve(process.cwd(), 'src', 'app', 'blog', '(posts)');
