@@ -14,12 +14,36 @@ const page = async ({
 }: {
   searchParams: { [key: string]: string };
 }) => {
-  const { categorie, q } = searchParams;
-  const posts = await getPosts();
+  const { categorie, q: query } = searchParams;
+  const postList = await getPosts();
+
+  const getFilteredPosts = () => {
+    const lowerQuery = query.toLowerCase();
+
+    const filteredPosts = postList.filter(
+      ({ title, description, categories }) => {
+        const lowerTitle = title.toLowerCase();
+        const lowerDescription = description.toLowerCase();
+        const lowerCategories = categories.map((category) =>
+          category.toLowerCase(),
+        );
+
+        return (
+          lowerTitle.includes(lowerQuery) ||
+          lowerDescription.includes(lowerQuery) ||
+          lowerCategories.some((category) => category.includes(lowerQuery))
+        );
+      },
+    );
+
+    return filteredPosts;
+  };
+
+  const posts = query ? getFilteredPosts() : postList;
 
   return (
     <main className="min-h-dvh w-full gap-3 p-4 lg:flex xl:p-8">
-      <Categories selectCategorie={categorie} posts={posts} />
+      <Categories selectCategorie={categorie} posts={postList} />
       <section className="mx-auto mt-5 lg:mt-0">
         <div className="flex items-center justify-between py-3">
           <h1>이현준 블로그</h1>

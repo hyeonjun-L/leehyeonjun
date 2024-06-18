@@ -2,13 +2,18 @@
 import { useRouter } from 'next/navigation';
 import { ChangeEvent } from 'react';
 import { SearchSVG } from '@/icons/index';
+import debounce from '@/utils/debounce';
 
 const SearchPost = () => {
   const router = useRouter();
 
+  const debouncedSearch = debounce((searchTerm?: string) => {
+    router.push(searchTerm ? `/blog?q=${searchTerm}` : '/blog');
+  }, 500);
+
   const handleSearch = (e: ChangeEvent<HTMLInputElement>) => {
     const searchTerm = e.target.value;
-    router.push(`/blog?q=${searchTerm}`);
+    debouncedSearch(searchTerm);
   };
 
   return (
