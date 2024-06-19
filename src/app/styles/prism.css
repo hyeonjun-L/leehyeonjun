@@ -1,6 +1,7 @@
 pre[class*='language-'] {
   color: theme('colors.zinc.100');
   margin-top: 1rem !important;
+  border-radius: 0px !important;
 }
 
 .token.property,

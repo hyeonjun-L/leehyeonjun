@@ -1,8 +1,4 @@
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function layout({ children }: { children: React.ReactNode }) {
   return (
     <section className="prose max-w-none p-3 dark:prose-invert lg:p-8">
       {children}

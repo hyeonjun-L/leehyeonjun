@@ -23,8 +23,8 @@ const AnchorNav = () => {
     return text.replace(/\s+/g, '-').toLowerCase();
   };
 
-  const resetViewHeadings = () => {
-    setViewHeadings([]);
+  const resetViewHeadings = (heading?: Headings) => {
+    setViewHeadings(heading ? [heading] : []);
   };
 
   const addViewHeadings = (prevHeadings: Headings[], newHeading: Headings) => {
@@ -124,6 +124,14 @@ const AnchorNav = () => {
       const element = document.querySelector(decodedHash);
       if (element) {
         element.scrollIntoView();
+
+        setViewHeadings([
+          {
+            id: element.id,
+            text: (element as HTMLElement).innerText,
+            level: Number(element.nodeName.slice(1)),
+          },
+        ]);
       }
     }
 
@@ -155,7 +163,9 @@ const AnchorNav = () => {
                 >
                   <Link
                     href={`#${id}`}
-                    onClick={resetViewHeadings}
+                    onClick={() =>
+                      resetViewHeadings({ text, id, level: currentLevel })
+                    }
                     className={`${ANCHOR_HEADER_MARGIN[--currentLevel]} relative line-clamp-2 max-w-full break-words dark:hover:text-white`}
                     replace
                   >

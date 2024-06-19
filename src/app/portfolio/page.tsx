@@ -47,7 +47,7 @@ const page = () => {
   ];
 
   return (
-    <section className="mx-auto mb-5 grid h-dvh w-full max-w-6xl gap-12 p-4 sm:p-16 lg:grid-cols-2">
+    <section className="mx-auto mb-5 grid w-full max-w-6xl gap-12 p-4 sm:p-16 lg:grid-cols-2">
       {PROJECT_LIST.map((info) => (
         <Project key={info.alt} {...info} />
       ))}

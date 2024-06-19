@@ -1,0 +1,500 @@
+export const metadata = {
+  title: '@next/mdx로 블로그 만들기 (App router)',
+  description: '@next/mdx를 이용해 블로그 만드는 여정',
+  publishDate: '2024-06-18T00:00:00Z',
+  posterImage:
+    'https://storage.googleapis.com/leehyeonjun.com/Next_mdx%EB%A1%9C_%EB%B8%94%EB%A1%9C%EA%B7%B8_%EB%A7%8C%EB%93%A4%EA%B8%B0/next%2Bmdx.png',
+  categories: ['Next'],
+};
+
+<BlogTitle {...metadata} />
+
+> ## MDX?
+>
+> MDX는 Markdown과 JSX를 결합한 포맷입니다. 기존의 Markdown 문법을 그대로 사용하면서도 React 컴포넌트를 포함할 수 있도록 해줍니다.
+
+## @next/mdx 패키지 사용이유
+
+<Link href="https://www.npmjs.com/package/next-contentlayer/v/0.0.18" target="_blank">next-contentlayer</Link>의 경우, 커뮤니티 지원이 1년 전부터 끊겨 유지보수 및 업데이트가 원활하지 않습니다.
+
+<Link href="https://www.npmjs.com/package/next-mdx-remote/v/0.5.1" target="_blank">next-mdx-remote</Link>는 MDX 파일을 유연하게 처리할 수 있고 커스터마이징이 용이한 장점이 있지만, MDX 파일을
+원격 소스에서 가져와서 처리해야 하는 경우가 있어 로컬에서 처리하기 어려울 수 있습니다.
+또한, next-mdx-remote는 export 문을 지원하지 않아 MDX 콘텐츠 내에서 문자열 등을 재사용하기
+어렵습니다.
+
+반면, <Link href="https://www.npmjs.com/package/@next/mdx" target="_blank">@next/mdx</Link>는 Next.js에 기본적으로 포함된 MDX 처리 솔루션으로, Next.js와의 통합이 원활하고 안정적입니다. 또한 저는 MDX 파일을 다른 곳에 호스팅할 필요가 없기 때문에, 원격 소스에서 가져올 필요도 없었습니다.
+
+따라서 고려할 때 @next/mdx 패키지를 사용하기로 결정했습니다.
+
+## 초기 설정
+
+```
+npm install @next/mdx @mdx-js/loader @mdx-js/react
+npm install -D @types/mdx
+```
+
+npm과 Typescript를 사용한다고 가정하에 다음 명령을 실행 합니다.
+
+```tsx:next.config.mjs
+  import nextMDX from '@next/mdx';
+
+  const withMDX = nextMDX({
+    extension: /\.mdx?$/,
+    options: {
+      remarkPlugins: [],
+      rehypePlugins: [],
+    },
+  });
+
+  const nextConfig = {
+    pageExtensions: ['js', 'jsx', 'md', 'mdx', 'ts', 'tsx'],
+    reactStrictMode: true,
+  };
+
+  export default withMDX(nextConfig);
+```
+
+MDX를 사용하기 위해 next.config.js 파일을 업데이트 합니다. (<Link href='https://nextjs.org/docs/app/building-your-application/configuring/mdx#nextmdx' target="_blank">공식문서</Link>)
+
+```tsx:src/mdx-components.tsx
+  import type { MDXComponents } from 'mdx/types';
+
+  export function useMDXComponents(components: MDXComponents): MDXComponents {
+    return {
+      ...components,
+    };
+  }
+```
+> 알아두세요: App Router와 함께 MDX를 사용하려면 mdx-components.tsx가 필요하며, 이를 사용하지 않으면 작동하지 않습니다.
+
+`src/mdx-components.tsx`를 생성 합니다. 해당 mdx-components는 사용자 지정 MDX 구성 요소를 정의하게 되지만, <Link href='/blog/next_mdx_blog#usemdxcomponents9'>하단</Link>에서 더 설명 드리겠습니다.
+
+
+## 첫 게시물 생성
+
+```md:폴더구조
+  src/
+    ┗ app/
+      ┗ blog/
+          ┗ (posts)/
+            ┗ first
+              ┗ page.mdx
+```
+
+이제 프로젝트에 MDX 지원이 되므로 .mdx 파일을 생성하면 됩니다. 저는 URL에 영향을 주지 않고 경로를 구성하기 위해 관련 경로를 함께 유지하고, 게시물들의 레이아웃을 표준화하는 데 도움이 되는 Next.js의 <Link href='https://nextjs.org/docs/app/building-your-application/routing/route-groups' target='_blank'>경로 그룹</Link>을 사용했습니다.
+
+```markdown:page.mdx
+  # Welcome to my MDX page!
+  
+  This is some **bold** and _italics_ text.
+  
+  This is a list in markdown:
+  
+  - One
+  - Two
+  - Three
+  
+  Checkout my React component:
+```
+
+해당 경로에 게시물을 생성하고 /blog/first에 접속했을 때, 해당 마크다운이 표시되면 성공입니다!
+
+## 게시물 메타데이터 추가
+
+```tsx:first/page.mdx
+export const metadata = {
+  title: 'first',
+  description: 'Hello World Page',
+  publishDate: '2024-01-01T00:00:00Z',
+  posterImage:
+    'https://storage.googleapis.com/leehyeonjun.com/Next_mdx%EB%A1%9C_%EB%B8%94%EB%A1%9C%EA%B7%B8_%EB%A7%8C%EB%93%A4%EA%B8%B0/next%2Bmdx.png',
+  categories: [
+    'React',
+    'Next',
+  ],
+};
+```
+
+Next.js에서는 위와 같이 메타데이터를 추가할 수 있습니다. 메타데이터를 추가하면 게시물의 제목, 설명, 게시일 등을 설정할 수 있어 보다 체계적인 관리가 가능합니다.
+
+상기 메타데이터를 추가하면 페이지의 제목이 'first'로 변경되는 것을 확인할 수 있는데, 
+이는 메타데이터 객체를 내보낼 경우 Next.js에서 자동으로 읽히는 <Link href='https://nextjs.org/docs/app/api-reference/functions/generate-metadata#metadata-fields' target='_blank'>메타데이터 필드</Link>가 있기 때문입니다.
+
+## 블로그 게시물들 메타데이터 추출
+
+블로그에 작성한 게시물들을 나열하기 위해서는 메타데이터를 추출해서 표시 할수 있어야 합니다. 우리는 서버 컴포넌트를 사용할 수 있고 @next/mdx 패키지를 사용한 방식을 사용하기 때문에, MDX 파일에 직접 접근할 수 있습니다.
+ 따라서 다음과 같이 getPosts 함수를 생성할 수 있습니다.
+
+```ts:posts.ts {6, 8-10, 12-17, 19} showLineNumbers
+import { Post } from '@/types/types';
+import { readdir } from 'fs/promises';
+import path from 'path';
+
+export async function getPosts(): Promise<Post[]> {
+  const postPath = path.resolve(process.cwd(), 'src', 'app', 'blog', '(posts)');
+
+  const slugs = (await readdir(postPath, { withFileTypes: true })).filter(
+    (dirent) => dirent.isDirectory(),
+  );
+
+  const posts = await Promise.all(
+    slugs.map(async ({ name }) => {
+      const { metadata } = await import(`../app/blog/(posts)/${name}/page.mdx`);
+      return { slug: name, ...metadata };
+    }),
+  );
+
+  posts.sort((a, b) => +new Date(b.publishDate) - +new Date(a.publishDate));
+
+  return posts;
+}
+```
+
+- line(6) : postPath 변수는 현재 작업 디렉토리를 기준으로 블로그 게시물들이 있는 경로를 설정합니다.
+
+- line(8~10) : readdir 함수를 사용하여 해당 경로의 디렉토리 목록을 가져오고, 디렉토리인 항목만 필터링합니다.
+
+- line(12~17) : Promise.all을 사용하여 각 디렉토리 내의 page.mdx 파일을 동적으로 임포트하고, 해당 파일의 메타데이터를 추출하여 배열에 저장합니다.
+
+- line(19) : 게시물들을 게시일을 기준으로 내림차순 정렬합니다.
+
+```tsx:blog/page.tsx showLineNumbers
+  const page = async () => {
+    const postList = await getPosts();
+
+    console.log(postList)
+
+    return null
+  };
+
+  export default page;
+```
+
+```markdown:console.log(postList)
+[
+  {
+    slug: 'first',
+    title: 'first',
+    description: 'Hello World Page',
+    publishDate: '2024-01-01T00:00:00Z',
+    posterImage: 'https://storage.googleapis.com/leehyeonjun.com/connection/storybook/4.jpg',
+    categories: [ 'React', 'Next' ]
+  }
+]
+```
+
+상기 getPosts 함수를 호출하여 다음과 같은 메타데이터가 출력된다면 성공입니다. 이 데이터를 활용해 게시물을 나열하면 됩니다.
+
+## 마크다운 스타일링
+
+저는 서버 컴포넌트에서 CSS를 사용하기 위해 zero-runtime 특성이 있는 Tailwind CSS를 선택했습니다.
+
+```
+  npm i @tailwindcss/typography
+```
+
+따라서 Tailwind CSS를 사용한다는 가정하에, 위 명령어를 이용해 <Link href='https://www.npmjs.com/package/@tailwindcss/typography' target='__blank'>@tailwindcss/typography</Link>를 다운로드합니다.
+
+다음으로, Tailwind CSS 설정 파일(tailwind.config.ts)에 플러그인을 등록합니다.
+
+```ts:tailwind.config.ts showLineNumbers
+import type { Config } from 'tailwindcss';
+
+const config: Config = {
+  darkMode: 'selector',
+  content: ['./src/app/**/*.{js,ts,jsx,tsx,mdx}'],
+  theme: {},
+  plugins: [
+    require('@tailwindcss/typography'),
+  ],
+};
+
+export default config;
+```
+
+이제 @tailwindcss/typography 플러그인이 tailwind.config.ts에 등록되었습니다. 다음으로, 레이아웃 컴포넌트에서 이를 활용해봅시다.
+
+```tsx:blog/(posts)/layout.tsx showLineNumbers
+export default function layout({ children }: { children: React.ReactNode }) {
+  return (
+    <section className="prose dark:prose-invert">
+      {children}
+    </section>
+  );
+}
+```
+
+위 코드에서는 prose와 다크 모드에서의 반전 스타일인 prose-invert 클래스를 사용해 마크다운 콘텐츠를 스타일링합니다. 더 자세한 스타일링 <Link href='https://www.npmjs.com/package/@tailwindcss/typography' target='__blank'>@tailwindcss/typography</Link>를 참조하여 적용할 수 있습니다.
+
+### 코드블럭 스타일링
+
+코드 블럭을 스타일링하기 위해 아래 명령어를 통해 패키지를 설치합니다.
+
+```
+  npm i rehype-code-titles rehype-prism-plus
+```
+
+<Link href='https://www.npmjs.com/package/rehype-prism-plus' target='__blank'>rehype-prism-plus</Link>는 줄 번호와 줄 강조 표시를 가능하게 하며 
+<Link href='https://www.npmjs.com/package/rehype-code-titles' target='__blank'>rehype-code-titles</Link>는 코드 블록에 제목을 추가할 수 있습니다.
+
+
+```js:next.config.mjs {2-3, 9} showLineNumbers
+import nextMDX from '@next/mdx';
+import rehypeCodeTitles from 'rehype-code-titles';
+import rehypePrism from 'rehype-prism-plus';
+
+const withMDX = nextMDX({
+  extension: /\.mdx?$/,
+  options: {
+    remarkPlugins: [],
+    rehypePlugins: [rehypeCodeTitles, rehypePrism],
+  },
+});
+
+const nextConfig = {
+  pageExtensions: ['js', 'jsx', 'md', 'mdx', 'ts', 'tsx'],
+  reactStrictMode: true,
+};
+
+export default withMDX(nextConfig);
+```
+
+next.config.mjs에 위에서 설치한 rehype 플러그인을 적용 합니다. 
+
+> React는 본래 Markdown을 이해하지 못합니다. 따라서 Markdown을 HTML로 변환해야 합니다. 이 작업은 remark와 rehype를 사용하여 수행할 수 있습니다. 하지만 @next/mdx 패키지를 사용할 때는 직접적으로 remark나 rehype를 사용할 필요가 없습니다. @next/mdx가 내부적으로 이 모든 작업을 처리해주기 때문입니다.
+> 그러나 @next/mdx의 플러그인 시스템을 통해 추가적인 기능을 제공할 수 있습니다.
+
+- remarkPlugins : remark 플러그인은 Markdown 구문을 변환하는 데 사용됩니다. 예를 들어, 머리말이나 표와 같은 Markdown 기능을 추가하거나 변환할 수 있습니다
+
+- rehypePlugins : rehype 플러그인은 HTML 구문을 변환하는 데 사용됩니다. 위에서는 rehype-code-titles와 rehype-prism-plus가 사용되어 코드 블럭에 제목을 추가하고, 구문 강조와 줄 번호 기능을 제공합니다.
+
+```css:app/styles/globals.css
+  @tailwind base;
+  @tailwind components;
+  @tailwind utilities;
+  @import './prism.css';
+```
+
+다음과 같이 프리즘 스타일을 가져오는 사용자 정의 파일이 있습니다.
+
+사용자 정의 `prism.css` 파일은 아래와 같으며, 해당 <Link href='https://github.com/timlrx/rehype-prism-plus#styling' target='__blank'>rehype-prism-plus 스타일 가이드</Link>를 확인해 본인 스타일에 맞게 스타일링 하면됩니다.
+
+```css:app/styles/prism.css
+  pre[class*='language-'] {
+    color: theme('colors.zinc.100');
+    margin-top: 1rem !important;
+    border-radius: 0px !important;
+  }
+
+  .token.property,
+  .token.operator,
+  .token.combinator {
+    color: theme('colors.zinc.400');
+  }
+
+  .code-highlight {
+    float: left;
+    min-width: 100%;
+  }
+
+  .code-line {
+    display: block;
+    padding-left: 10px;
+    padding-right: 14px;
+    margin-left: -16px;
+    margin-right: -16px;
+    border-left: 4px solid rgba(0, 0, 0, 0);
+    line-height: 1.5rem;
+  }
+
+  .code-line.inserted {
+    background-color: theme('colors.emerald.900');
+  }
+
+  .code-line.deleted {
+    background-color: theme('colors.red.900');
+  }
+
+  .highlight-line {
+    margin-left: -14px;
+    margin-right: -16px;
+    background-color: theme('colors.zinc.800');
+    border-left: 2px solid theme('colors.amber.400');
+    display: block !important;
+    border-radius: 0 !important;
+  }
+
+  .line-number::before {
+    display: inline-block;
+    width: 1rem;
+    text-align: right;
+    margin-right: 16px;
+    margin-left: -8px;
+    color: theme('colors.zinc.500');
+    content: attr(line);
+  }
+
+  .rehype-code-title {
+    margin: 0 !important;
+    display: inline-flex;
+    position: relative;
+    top: 1rem;
+    background: theme('colors.zinc.900');
+    color: theme('colors.zinc.100');
+    font-family: theme('fontFamily.mono');
+    padding: 0.25rem 1.5rem;
+    border-radius: 0.5rem 0.5rem 0 0;
+    border-top: 4px solid theme('colors.indigo.600');
+    font-size: 0.8rem;
+  }
+
+  .code-line.inserted {
+    background-color: theme('colors.emerald.900');
+  }
+
+  .code-line.deleted {
+    background-color: theme('colors.red.900');
+  }
+```
+
+### 코드 블럭 스타일링 방법
+
+```markdown:MDX
+
+'''markdown:MDX
+
+'''
+
+```
+
+해당 코드 블럭에서 `:` 뒤에 오는 MDX는 코드 블럭의 제목이 됩니다.
+
+```markdown:MDX showLineNumbers
+
+'''markdown:MDX showLineNumbers
+
+'''
+
+```
+
+`showLineNumbers`를 추가하면 코드 블럭에 줄 번호를 표시할 수 있습니다.
+
+```markdown:MDX {4, 6-7} showLineNumbers
+
+'''markdown:MDX {2, 4-5} showLineNumbers
+
+  highlight line!
+
+  highlight line 3
+  highlight line 4
+
+'''
+
+```
+
+또한 {4, 6-7}과 같은 형식을 사용하여 여러 줄을 강조 표시할 수 있습니다. 예를 들어, 위 코드에서는 4번째 줄과 6-7번째 줄을 강조 표시합니다.
+
+
+
+## useMDXComponents 사용자 지정 MDX 구성 요소
+
+```tsx:src/mdx-components.tsx showLineNumbers
+import type { MDXComponents } from 'mdx/types';
+
+export function useMDXComponents(components: MDXComponents): MDXComponents {
+  return {
+    ...components,
+  };
+}
+```
+
+MDX가 자동으로 렌더링하는 기본 구성 요소 대신 사용자 지정 구성 요소를 사용하려는 경우가 있을 수 있습니다.
+
+예를 들어, 블로그의 제목을 정의하는 커스텀 훅을 구현할 수 있습니다.
+
+```tsx:blog/_components/BlogTitle.tsx showLineNumbers
+  import { Post } from '@/types/types';
+  import getPlaceholderImage from '@/utils/dynamicBlurDataUrl';
+  import Image from 'next/image';
+
+  const BlogTitle = async ({
+    title,
+    publishDate,
+    categories,
+    posterImage,
+  }: Post) => {
+    const { src, width, height, placeholder } =
+      await getPlaceholderImage(posterImage);
+
+    return (
+      <header>
+        <h1 className="mb-0">{title}</h1>
+        <div className="flex gap-3">
+          <p>{new Date(publishDate).toLocaleDateString()}</p>
+          <p>
+            ({categories.map((categorie, i) => `${i ? ', ' : ''}${categorie}`)})
+          </p>
+        </div>
+        <hr className="mt-0" />
+        <div className="mx-auto aspect-video md:w-2/3">
+          <Image
+            src={src}
+            alt={`${title} 포스터 이미지`}
+            width={width}
+            height={height}
+            placeholder="blur"
+            blurDataURL={placeholder}
+            className="size-full"
+          />
+        </div>
+      </header>
+    );
+  };
+
+  export default BlogTitle;
+```
+
+위와 같은 방식으로 블로그 상단에 들어가는 요소를 만들어서 매번 중복으로 동일한 제목을 만드는 대신, 커스텀 컴포넌트를 사용할 수 있습니다.
+
+```tsx:src/mdx-components.tsx showLineNumbers
+import type { MDXComponents } from 'mdx/types';
+import BlogTitle from './app/blog/_components/BlogTitle';
+import Link from 'next/link';
+
+export function useMDXComponents(components: MDXComponents): MDXComponents {
+  return {
+    Link,
+    BlogTitle,
+    ...components,
+  };
+}
+```
+
+해당 컴포넌트를 구현한 후, useMDXComponents에 업데이트하면 됩니다. 또한, 이미 존재하는 next의 Link 태그와 같은 태그도 이 방법으로 업데이트할 수 있습니다.
+
+```tsx:page.mdx
+
+export const metadata = {
+  title: 'first',
+  description: 'Hello World Page',
+  publishDate: '2024-01-01T00:00:00Z',
+  posterImage:
+    'https://storage.googleapis.com/leehyeonjun.com/Next_mdx%EB%A1%9C_%EB%B8%94%EB%A1%9C%EA%B7%B8_%EB%A7%8C%EB%93%A4%EA%B8%B0/next%2Bmdx.png',
+  categories: [
+    'React',
+    'Next',
+  ],
+};
+
+<BlogTitle {...metadata} />
+
+```
+
+이후, 위와 같은 방식으로 사용하면 됩니다.
+
+<ReferenceList
+  references={[
+    'https://www.alexchantastic.com/building-a-blog-with-next-and-mdx',
+    'https://www.tybarho.com/articles/improving-mdx-code-editor-theme-highlight-line-numbers',
+  ]}
+/>
