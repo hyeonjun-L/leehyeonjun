@@ -7,7 +7,7 @@ const ReferenceList = ({ references }: { references: string[] }) => {
       <ul>
         {references.map((reference) => (
           <li key={reference}>
-            <Link href={reference} target="_blank">
+            <Link href={reference} target="_blank" className="break-words">
               {reference}
             </Link>
           </li>
