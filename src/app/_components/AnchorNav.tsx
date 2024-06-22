@@ -1,46 +1,36 @@
 'use client';
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { Fragment, useContext, useEffect, useState } from 'react';
-import { HIDE_PATH } from '@/constants/constants';
-import { DoubleArrowSVG } from '@/icons/index';
+import { Fragment, useContext, useEffect, useRef, useState } from 'react';
 import { Context } from '../Provider';
 import { Headings } from '@/types/types';
+import { usePathname } from 'next/navigation';
+import { HIDE_PATH } from '@/constants/constants';
+import Link from 'next/link';
+import { DoubleArrowSVG } from '@/icons/index';
 
 const AnchorNav = () => {
+  const ANCHOR_HEADER_MARGIN = [
+    '',
+    'pl-4',
+    'pl-8',
+    'pl-12',
+    'pl-16',
+    'pl-20',
+  ] as const;
+
   const { anchorView, changeAnchorView } = useContext(Context);
   const [headings, setHeadings] = useState<Headings[]>([]);
-  const [viewHeadings, setViewHeadings] = useState<Headings[]>([]);
+  const [viewHeadings, setViewHeadings] = useState<{
+    view: Headings[];
+    keep: boolean;
+  }>({ view: [], keep: false });
   const pathname = usePathname();
-
-  const viewHeading = viewHeadings.reduce(
-    (acc, heading) => (acc.level < heading.level ? acc : heading),
-    { level: 7, text: '', id: '' },
-  );
 
   const generateIdFromText = (text: string) => {
     return text.replace(/\s+/g, '-').toLowerCase();
   };
 
-  const resetViewHeadings = (heading?: Headings) => {
-    setViewHeadings(heading ? [heading] : []);
-  };
-
-  const addViewHeadings = (prevHeadings: Headings[], newHeading: Headings) => {
-    const exists = prevHeadings.some(({ id }) => id === newHeading.id);
-    if (!exists) {
-      return [...prevHeadings, { ...newHeading }];
-    }
-    return prevHeadings;
-  };
-
-  useEffect(() => {
-    resetViewHeadings();
-    let unremoveHeading = false;
-
-    const allHeadings = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
-
+  const createHeadings = (allHeadings: NodeListOf<Element>) => {
     const newHeadings: Headings[] = Array.from(allHeadings).map(
       (heading: Element, index) => {
         const element = heading as HTMLElement;
@@ -54,64 +44,87 @@ const AnchorNav = () => {
       },
     );
 
+    return newHeadings;
+  };
+
+  const viewHeading = viewHeadings.view.reduce(
+    (acc, heading) => (acc.level <= heading.level ? acc : heading),
+    { level: 7, text: '', id: '' },
+  );
+
+  const addViewHeadings = (newHeading: Headings) => {
+    setViewHeadings(({ view, keep }) => {
+      const exists = view.some(({ id }) => id === newHeading.id);
+
+      if (!exists) {
+        if (keep) {
+          return { view: [{ ...newHeading }], keep: false };
+        }
+        return { view: [...view, { ...newHeading }], keep: false };
+      }
+      return { view, keep };
+    });
+  };
+
+  const removeViewHeadings = (
+    removeHeading: Headings,
+    scrollUp: boolean,
+    newHeadings: Headings[],
+  ) => {
+    setViewHeadings(({ view }) => {
+      if (view.length > 1) {
+        return {
+          view: view.filter((heading) => heading.id !== removeHeading.id),
+          keep: false,
+        };
+      } else {
+        if (scrollUp) {
+          return { view, keep: true };
+        } else {
+          const prevIndx =
+            newHeadings.findIndex(({ id }) => id === view[0].id) - 1;
+          return { view: [{ ...newHeadings[prevIndx] }], keep: true };
+        }
+      }
+    });
+  };
+
+  useEffect(() => {
+    const allHeadings = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
+    const newHeadings = createHeadings(allHeadings);
+
     setHeadings(newHeadings);
+    setViewHeadings({ view: [], keep: false });
 
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           const { target, isIntersecting, boundingClientRect, rootBounds } =
             entry;
-          const headingText = (target as HTMLElement).innerText;
-          const headingLevel = Number(target.nodeName.slice(1));
-          const headingId = target.id;
+          const heading = {
+            level: Number(target.nodeName.slice(1)),
+            id: target.id,
+            text: (target as HTMLElement).innerText,
+          };
+
+          const isTopBoundaryExceeded =
+            rootBounds && boundingClientRect.top < rootBounds.top;
 
           if (isIntersecting) {
-            setViewHeadings((prevHeadings) => {
-              const newHeadings = addViewHeadings(prevHeadings, {
-                id: headingId,
-                text: headingText,
-                level: headingLevel,
-              });
-
-              if (unremoveHeading) {
-                unremoveHeading = false;
-                return newHeadings.splice(1);
-              }
-
-              return newHeadings;
-            });
+            console.log('add event');
+            // 헤더 나타날때
+            addViewHeadings(heading);
           } else {
-            setViewHeadings((prevHeadings) => {
-              const newHeadings = prevHeadings.filter(
-                ({ id }) => id !== headingId,
-              );
-
-              const isTopBoundaryExceeded =
-                rootBounds && boundingClientRect.top < rootBounds.top;
-
-              if (isTopBoundaryExceeded) {
-                if (newHeadings.length === 0) {
-                  unremoveHeading = true;
-                }
-                return newHeadings.length === 0 ? prevHeadings : newHeadings;
-              } else {
-                const prevIndex =
-                  newHeadings.findIndex(({ id }) => id === headingId) - 1;
-
-                return newHeadings.length === 0 || !isTopBoundaryExceeded
-                  ? newHeadings
-                  : prevIndex >= 0
-                    ? [prevHeadings[prevIndex]]
-                    : [];
-              }
-            });
+            console.log('remove event');
+            // 헤더 사라 질때
+            removeViewHeadings(heading, !!isTopBoundaryExceeded, newHeadings);
           }
         });
       },
       {
         root: null,
         rootMargin: '0px',
-        threshold: 0.1,
+        threshold: 1,
       },
     );
 
@@ -119,30 +132,12 @@ const AnchorNav = () => {
       observer.observe(heading);
     });
 
-    if (window.location.hash) {
-      const decodedHash = decodeURIComponent(window.location.hash);
-      const element = document.querySelector(decodedHash);
-      if (element) {
-        element.scrollIntoView();
-
-        setViewHeadings([
-          {
-            id: element.id,
-            text: (element as HTMLElement).innerText,
-            level: Number(element.nodeName.slice(1)),
-          },
-        ]);
-      }
-    }
-
     return () => {
       allHeadings.forEach((heading) => {
         observer.unobserve(heading);
       });
     };
   }, [pathname]);
-
-  const ANCHOR_HEADER_MARGIN = ['', 'pl-4', 'pl-8', 'pl-12', 'pl-16', 'pl-20'];
 
   return (
     <>
@@ -159,12 +154,15 @@ const AnchorNav = () => {
               <Fragment key={index}>
                 <div
                   className={`flex w-full has-[:hover]:bg-White-anchor-hover dark:has-[:hover]:bg-dark-anchor-hover
-                ${viewHeading.id === id ? 'bg-White-anchor-active dark:bg-dark-anchor-active' : ''}`}
+                  ${viewHeading?.id === id ? 'bg-White-anchor-active dark:bg-dark-anchor-active' : ''}`}
                 >
                   <Link
                     href={`#${id}`}
                     onClick={() =>
-                      resetViewHeadings({ text, id, level: currentLevel })
+                      setViewHeadings({
+                        view: [{ text, id, level: currentLevel }],
+                        keep: false,
+                      })
                     }
                     className={`${ANCHOR_HEADER_MARGIN[--currentLevel]} relative line-clamp-2 max-w-full break-words dark:hover:text-white`}
                     replace
