@@ -1,9 +1,9 @@
 'use client';
 
-import { Fragment, useContext, useEffect, useRef, useState } from 'react';
+import { Fragment, useContext, useEffect, useState } from 'react';
 import { Context } from '../Provider';
 import { Headings } from '@/types/types';
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { HIDE_PATH } from '@/constants/constants';
 import Link from 'next/link';
 import { DoubleArrowSVG } from '@/icons/index';
@@ -25,6 +25,7 @@ const AnchorNav = () => {
     keep: boolean;
   }>({ view: [], keep: false });
   const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   const generateIdFromText = (text: string) => {
     return text.replace(/\s+/g, '-').toLowerCase();
@@ -68,7 +69,7 @@ const AnchorNav = () => {
 
   const removeViewHeadings = (
     removeHeading: Headings,
-    scrollUp: boolean,
+    scrollDown: boolean,
     newHeadings: Headings[],
   ) => {
     setViewHeadings(({ view }) => {
@@ -78,7 +79,7 @@ const AnchorNav = () => {
           keep: false,
         };
       } else {
-        if (scrollUp) {
+        if (scrollDown) {
           return { view, keep: true };
         } else {
           const prevIndx =
@@ -92,9 +93,9 @@ const AnchorNav = () => {
   useEffect(() => {
     const allHeadings = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
     const newHeadings = createHeadings(allHeadings);
+    setViewHeadings({ view: [], keep: false });
 
     setHeadings(newHeadings);
-    setViewHeadings({ view: [], keep: false });
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -111,12 +112,8 @@ const AnchorNav = () => {
             rootBounds && boundingClientRect.top < rootBounds.top;
 
           if (isIntersecting) {
-            console.log('add event');
-            // 헤더 나타날때
             addViewHeadings(heading);
           } else {
-            console.log('remove event');
-            // 헤더 사라 질때
             removeViewHeadings(heading, !!isTopBoundaryExceeded, newHeadings);
           }
         });
@@ -139,6 +136,16 @@ const AnchorNav = () => {
     };
   }, [pathname]);
 
+  useEffect(() => {
+    if (window.location.hash) {
+      const decodedHash = decodeURIComponent(window.location.hash);
+      const element = document.getElementById(decodedHash.substring(1));
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+  }, [searchParams]);
+
   return (
     <>
       <aside
@@ -158,12 +165,7 @@ const AnchorNav = () => {
                 >
                   <Link
                     href={`#${id}`}
-                    onClick={() =>
-                      setViewHeadings({
-                        view: [{ text, id, level: currentLevel }],
-                        keep: false,
-                      })
-                    }
+                    scroll={false}
                     className={`${ANCHOR_HEADER_MARGIN[--currentLevel]} relative line-clamp-2 max-w-full break-words dark:hover:text-white`}
                     replace
                   >

@@ -62,7 +62,7 @@ export default function RootLayout({
           href="https://unpkg.com/dracula-prism/dist/css/dracula-prism.css"
         />
       </head>
-      <ConsoleLog />
+      {process.env.NODE_ENV !== 'development' && <ConsoleLog />}
       <AnchorViewProvider>
         <body
           className={`${consola.className} relative flex h-dvh flex-col bg-white sm:flex-row dark:bg-dark-body `}
