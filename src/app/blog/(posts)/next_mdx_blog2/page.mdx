@@ -1,0 +1,513 @@
+export const metadata = {
+  title: '@next/mdx로 블로그 만들기 2 (App router)',
+  description: 'Anchor Navigation 구현, blurDataURL 기능 활용, Parallel Routes 및 Intercepting Routes 기능을 통한 모달 구현',
+  publishDate: '2024-06-23T00:00:00Z',
+  posterImage:
+    'https://storage.googleapis.com/leehyeonjun.com/Next_mdx%EB%A1%9C_%EB%B8%94%EB%A1%9C%EA%B7%B8_%EB%A7%8C%EB%93%A4%EA%B8%B0/next%2Bmdx.png',
+  categories: ['Next'],
+};
+
+<BlogTitle {...metadata} />
+
+## Anchor Navigation 구현
+
+> ### Anchor Navigation?
+>
+> 웹 페이지 내에서 특정 위치로 빠르게 이동할 수 있도록 도와주는 기능을 의미합니다. 이는 주로 긴 페이지에서 사용자가 원하는 정보를 빠르게 찾을 수 있도록 하기 위해 사용됩니다. Anchor Navigation을 구현하면 페이지의 특정 섹션으로 이동할 수 있는 링크를 제공하여 사용자의 편의성을 높일 수 있습니다.
+
+### Anchor Navigation 기본 구현
+
+Anchor Navigation 의 기본적인 기능을 구현하기 위해서는 아래와 같이 작성하면 됩니다.
+
+```tsx:AnchorNav.tsx {14-16, 18-33, 35-40, 42-49} showLineNumbers
+  'use client';
+
+  import { useEffect, useState } from 'react';
+
+  interface Heading {
+    level: number;
+    text: string;
+    id: string;
+  }
+
+  const AnchorNav = () => {
+    const [headings, setHeadings] = useState<Heading[]>([]);
+
+    const generateIdFromText = (text: string) => {
+      return text.replace(/\s+/g, '-').toLowerCase();
+    };
+
+    const createHeadings = (allHeadings: NodeListOf<Element>) => {
+      const newHeadings: Heading[] = Array.from(allHeadings).map(
+        (heading: Element, index) => {
+          const element = heading as HTMLElement;
+          const id = generateIdFromText(element.innerText + index);
+          element.setAttribute('id', id);
+          return {
+            level: Number(element.localName.slice(1)),
+            text: element.innerText,
+            id,
+          };
+        },
+      );
+
+      return newHeadings;
+    };
+
+    useEffect(() => {
+      const allHeadings = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
+      const newHeadings = createHeadings(allHeadings);
+
+      setHeadings(newHeadings);
+    }, []);
+
+    return (
+      <div className="flex flex-col">
+        {headings.map(({ level: currentLevel, text, id }, index) => (
+          <Link href={`#${id}`} replace>
+            {text}
+          </Link>
+        ))}
+      </div>
+    );
+};
+
+export default AnchorNav;
+```
+
+- line(14~16) : generateIdFromText 함수는 텍스트로부터 ID를 생성합니다. 공백을 대시(-)로 바꾸고 소문자로 변환합니다. 
+
+- line(18~33) : 모든 헤딩 요소를 순회하며 헤딩 객체를 생성합니다. 각 헤딩 요소에 ID를 부여합니다.
+
+- line(35-40) : 모든 헤딩 요소를 찾고, 이들로부터 헤딩 객체를 생성하여 상태에 저장합니다.
+
+- line(42-49) : 생성된 헤딩 객체를 기반으로 앵커 링크를 렌더링합니다. 각 링크는 href 속성에 해당 헤딩 요소의 ID를 설정하여 해당 섹션으로 이동할 수 있도록 합니다.
+
+
+### 현재 보고있는 헤딩 표시
+
+페이지의 헤딩 요소들을 동적으로 추적하고, 사용자가 스크롤을 통해 해당 헤딩 요소에 도달하면 이를 강조 표시하는 기능을 제공하도록 구현 합니다.
+
+```tsx:AnchorNav.tsx {15-20, 43-46, 48-60, 62-83, 85-128, 130-138, 150} showLineNumbers
+'use client';
+
+import Link from 'next/link';
+import { usePathname, useSearchParams } from 'next/navigation';
+import { Fragment, useEffect, useState } from 'react';
+
+interface Heading {
+  level: number;
+  text: string;
+  id: string;
+}
+
+const AnchorNav = () => {
+  const [headings, setHeadings] = useState<Heading[]>([]);
+  const [viewHeadings, setViewHeadings] = useState<{
+    view: Heading[];
+    keep: boolean;
+  }>({ view: [], keep: false });
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const generateIdFromText = (text: string) => {
+    return text.replace(/\s+/g, '-').toLowerCase();
+  };
+
+  const createHeadings = (allHeadings: NodeListOf<Element>) => {
+    const newHeadings: Heading[] = Array.from(allHeadings).map(
+      (heading: Element, index) => {
+        const element = heading as HTMLElement;
+        const id = generateIdFromText(element.innerText + index);
+        element.setAttribute('id', id);
+        return {
+          level: Number(element.localName.slice(1)),
+          text: element.innerText,
+          id,
+        };
+      },
+    );
+
+    return newHeadings;
+  };
+
+  const viewHeading = viewHeadings.view.reduce(
+    (acc, heading) => (acc.level <= heading.level ? acc : heading),
+    { level: 7, text: '', id: '' },
+  );
+
+  const addViewHeadings = (newHeading: Heading) => {
+    setViewHeadings(({ view, keep }) => {
+      const exists = view.some(({ id }) => id === newHeading.id);
+
+      if (!exists) {
+        if (keep) {
+          return { view: [{ ...newHeading }], keep: false };
+        }
+        return { view: [...view, { ...newHeading }], keep: false };
+      }
+      return { view, keep };
+    });
+  };
+
+  const removeViewHeadings = (
+    removeHeading: Heading,
+    scrollDown: boolean,
+    newHeadings: Heading[],
+  ) => {
+    setViewHeadings(({ view }) => {
+      if (view.length > 1) {
+        return {
+          view: view.filter((heading) => heading.id !== removeHeading.id),
+          keep: false,
+        };
+      } else {
+        if (scrollDown) {
+          return { view, keep: true };
+        } else {
+          const prevIndx =
+            newHeadings.findIndex(({ id }) => id === view[0].id) - 1;
+          return { view: [{ ...newHeadings[prevIndx] }], keep: true };
+        }
+      }
+    });
+  };
+
+  useEffect(() => {
+    const allHeadings = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
+    const newHeadings = createHeadings(allHeadings);
+    setViewHeadings({ view: [], keep: false });
+    setHeadings(newHeadings);
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          const { target, isIntersecting, boundingClientRect, rootBounds } =
+            entry;
+          const heading = {
+            level: Number(target.nodeName.slice(1)),
+            id: target.id,
+            text: (target as HTMLElement).innerText,
+          };
+
+          const isTopBoundaryExceeded =
+            rootBounds && boundingClientRect.top < rootBounds.top;
+
+          if (isIntersecting) {
+            addViewHeadings(heading);
+          } else {
+            removeViewHeadings(heading, !!isTopBoundaryExceeded, newHeadings);
+          }
+        });
+      },
+      {
+        root: null,
+        rootMargin: '0px',
+        threshold: 1,
+      },
+    );
+
+    allHeadings.forEach((heading) => {
+      observer.observe(heading);
+    });
+
+    return () => {
+      allHeadings.forEach((heading) => {
+        observer.unobserve(heading);
+      });
+    };
+  }, [pathname]);
+
+  useEffect(() => {
+    if (window.location.hash) {
+      const decodedHash = decodeURIComponent(window.location.hash);
+      const element = document.getElementById(decodedHash.substring(1));
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+  }, [searchParams]);
+
+  return (
+    <div className="flex flex-col">
+      {headings.map(({ level: currentLevel, text, id }, index) => {
+        const beforeLevel = headings[index - 1]?.level;
+        const hasHigherPrevLevel = beforeLevel && beforeLevel !== currentLevel;
+
+        return (
+          <Fragment key={index}>
+            <div
+              className={`flex w-full has-[:hover]:bg-White-anchor-hover dark:has-[:hover]:bg-dark-anchor-hover
+                ${viewHeading?.id === id ? 'bg-White-anchor-active dark:bg-dark-anchor-active' : ''}`}
+            >
+              <Link href={`#${id}`} scroll={false} replace>
+                {hasHigherPrevLevel && (
+                  <span className="absolute -translate-x-5">┗</span>
+                )}
+                {text}
+              </Link>
+            </div>
+            {headings.length - 1 === index && <br />}
+          </Fragment>
+        );
+      })}
+    </div>
+  );
+};
+
+export default AnchorNav;
+```
+
+- line(15~20) : viewHeadings로 현재 뷰에서 보이는 headings을 상태로 저장합니다. 또한 pathname과 searchParams를 사용하여 페이지 변경시 viewHeadings 초기화, 링크 클릭 시 searchParams로 이동하도록 호츌 합니다.
+
+- line(43~46) :  viewHeadings에서 여러 개의 headings을 보고 있을 때, 가장 높은 레벨의 heading을 강조 표시하기 위해 reduce를 사용하여 필터링합니다. 이를 통해 사용자가 현재 보고 있는 섹션의 주요 heading을 명확히 인지할 수 있습니다.
+
+- line(48~60) : addViewHeadings 함수는 heading이 나타날 때 viewHeadings에 추가합니다. 이때 exists를 사용하여 이미 존재하는 heading이면 더하지 않습니다. 또한 keep 옵션이 true인 경우, 이전 heading을 제거하고 새로운 heading을 추가합니다. 이를 통해 사용자가 스크롤 시 현재 위치를 정확히 파악할 수 있습니다.
+
+- line(62~83) : removeViewHeadings 함수는 보고 있는 heading이 1개 이상일 경우 해당 heading을 제거합니다. 하지만 그렇지 않은 경우, 해당 heading 요소를 제거하지 않고 keep 옵션을 true로 설정합니다. 이때 스크롤을 내릴 때 사라지는 이벤트는 해당 heading을 유지하지만, 스크롤을 올릴 때 사라지는 이벤트는 이전 heading을 불러옵니다.
+
+- line(85~128) : IntersectionObserver를 사용하여 사용자가 스크롤할 때 뷰포트에 들어오는 heading 요소들을 감지합니다. heading 요소가 뷰포트에 들어오면 addViewHeadings 함수가 호출되어 해당 heading을 viewHeadings 상태에 추가합니다. 뷰포트에서 벗어나면 removeViewHeadings 함수가 호출되어 해당 heading을 viewHeadings 상태에서 제거하거나 특정 조건에 따라 유지합니다. 이를 통해 스크롤 시 동적인 headings 상태를 관리합니다.
+
+- line(130~138) : hash 값이 존재하는 경우, 해당 hash 값을 사용하여 해당 id를 가진 요소로 스크롤을 이동시킵니다.
+
+- line(150) : viewHeading 값을 이용해 강조 표시를 진행합니다. 이를 통해 사용자가 현재 보고 있는 섹션을 명확하게 인지할 수 있도록 합니다.
+
+> #### keep 옵션이 필요한 이유
+<BlurImage imageURL='https://storage.googleapis.com/leehyeonjun.com/Next_mdx%EB%A1%9C_%EB%B8%94%EB%A1%9C%EA%B7%B8_%EB%A7%8C%EB%93%A4%EA%B8%B02/heading-remove.png' title={metadata.title}/>
+
+상기 이미지는 heading이 사라지는 경우를 설명합니다. 사용자가 스크롤을 내릴 때 heading은 화면 위쪽으로 사라지게 되고, 사용자는 사라진 heading에 관련된 내용을 보게 됩니다. 따라서 anchor navigation에서는 사라진 heading을 사용자가 여전히 보고 있는 것으로 표시해야 합니다. 이를 위해 heading을 삭제하지 않고 keep 옵션을 true로 설정하여 addViewHeadings 함수에서 keep 값이 true인 경우 이전 heading 값을 제거합니다.
+
+마찬가지로, 사용자가 스크롤을 올릴 때 heading은 화면 아래쪽으로 사라지게 되며, 사용자는 이전 heading을 다시 보게 됩니다. 이 경우에도 이전 heading을 불러와 저장한 후, keep 옵션을 true로 설정합니다. 이를 통해 스크롤 방향에 따라 적절하게 heading 상태를 관리할 수 있습니다.
+
+## Next.js Image blurDataURL를 사용한 이미지 로딩 구현
+
+Next.js의 Image 컴포넌트는 로딩 중 또는 로딩 후 레이아웃 깜박임을 방지하고, 지능적인 리사이징을 통해 이미지 로딩 시간을 줄여 주는 장점들이 있습니다. 
+또한, Image 컴포넌트에서는 고유 기능인 블러 처리된 데이터를 사용한 로더 효과를 사용할 수 있습니다.
+
+저는 해당 사이트에서 포트폴리오와 같은 이미지를 많이 사용하는 페이지를 개발하는 동안 이미지 로딩과 관련된 성능 문제를 발견했습니다.
+
+<BlurImage imageURL='https://storage.googleapis.com/leehyeonjun.com/Next_mdx%EB%A1%9C_%EB%B8%94%EB%A1%9C%EA%B7%B8_%EB%A7%8C%EB%93%A4%EA%B8%B02/blurBefore.gif' title={metadata.title}/>
+
+인터넷 속도가 느린 경우, 클라이언트가 이미지를 다운로드하는 동안 공백이 렌더링되고 있습니다. 이 과정을 통해 공백 대신 흐릿한 로더를 표시하도록 해서 사용자 경험을 향상시킬 수 있습니다.
+
+### getPlaceholderImage 함수 구현
+
+```markdown
+
+  npm install sharp
+
+```
+
+블러 버전을 생성하기 위해 <Link href='https://www.npmjs.com/package/sharp'>sharp</Link> 라이브러리를 사용할 것입니다. 이 라이브러리는 버퍼(Buffer)를 입력으로 받아 이미지의 리사이즈된 버퍼를 반환합니다. 리사이즈된 버퍼로부터 next/image에서 지원하는 base64 형식을 생성할 것입니다.
+
+```tsx:dynamicBlurDataUrl.ts showLineNumbers
+'use server';
+import { promises as fs } from 'fs';
+import path from 'path';
+import sharp from 'sharp';
+
+const bufferToBase64 = (buffer: Buffer) => {
+  return `data:image/png;base64,${buffer.toString('base64')}`;
+};
+
+const getFileBufferLocal = (filepath: string) => {
+  const realFilepath = path.join(process.cwd(), 'public', filepath);
+  return fs.readFile(realFilepath);
+};
+
+const getFileBufferRemote = async (url: string) => {
+  const response = await fetch(url);
+  return Buffer.from(await response.arrayBuffer());
+};
+
+const getFileBuffer = (src: string) => {
+  const isRemote = src.startsWith('http');
+  return isRemote ? getFileBufferRemote(src) : getFileBufferLocal(src);
+};
+
+const getPlaceholderImage = async (filepath: string) => {
+  try {
+    const originalBuffer = await getFileBuffer(filepath);
+    const sharpInstance = sharp(originalBuffer);
+    const resizedBuffer = await sharpInstance.resize(20).toBuffer();
+    const metadata = await sharpInstance.metadata();
+
+    return {
+      src: filepath,
+      width: metadata.width,
+      height: metadata.height,
+      placeholder: bufferToBase64(resizedBuffer),
+    };
+  } catch (error) {
+    console.error(error);
+    return {
+      src: filepath,
+      width: 1000,
+      height: 1000,
+      placeholder:
+        'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mOsa2yqBwAFCAICLICSyQAAAABJRU5ErkJggg==',
+    };
+  }
+};
+
+export default getPlaceholderImage;
+
+```
+
+- bufferToBase64 함수: 버퍼를 base64 형식의 문자열로 변환합니다. 이는 이미지 데이터를 base64로 인코딩하여 웹에서 쉽게 사용할 수 있게 합니다.
+
+- getFileBufferLocal 함수: 로컬 파일 시스템에서 파일을 읽어 버퍼로 반환합니다. path.join을 사용하여 현재 작업 디렉토리의 'public' 폴더에서 파일을 찾습니다.
+
+- getFileBufferRemote 함수: 원격 URL에서 파일을 읽어 버퍼로 반환하는 비동기 함수입니다.
+
+- getFileBuffer 함수: 주어진 경로가 로컬 파일 경로인지 원격 URL인지 판단하여 적절한 함수를 호출합니다.
+
+- getPlaceholderImage 함수: 주어진 파일 경로로부터 블러 처리된 이미지 데이터를 생성하는 함수입니다. 파일 버퍼를 가져와 sharp 라이브러리를 사용해 이미지를 리사이즈하고, 메타데이터를 가져와 최종적으로 base64 형식의 블러 이미지를 반환합니다. 오류가 발생하면 기본 블러 이미지를 반환합니다.
+
+
+### getPlaceholderImage 활용
+
+```tsx:BlurImage.tsx showLineNumbers
+import getPlaceholderImage from '@/utils/dynamicBlurDataUrl';
+import Image from 'next/image';
+import React from 'react';
+
+const BlurImage = async ({
+  imageURL,
+  title,
+}: {
+  imageURL: string;
+  title: string;
+}) => {
+  const { src, width, height, placeholder } =
+    await getPlaceholderImage(imageURL);
+  return (
+    <div className="mx-auto aspect-video md:w-2/3">
+      <Image
+        src={src}
+        alt={`${title} 이미지`}
+        width={width}
+        height={height}
+        placeholder="blur"
+        blurDataURL={placeholder}
+        className="size-full"
+      />
+    </div>
+  );
+};
+
+export default BlurImage;
+```
+
+```tsx:mdx-components.tsx showLineNumbers
+import BlurImage from './app/blog/_components/BlurImage';
+
+export function useMDXComponents(components: MDXComponents): MDXComponents {
+  return {
+    BlurImage,
+    ...components,
+  };
+}
+```
+
+```tsx:page.mdx
+  <BlurImage imageURL='https://storage.googleapis.com/leehyeonjun.com/Next_mdx%EB%A1%9C_%EB%B8%94%EB%A1%9C%EA%B7%B8_%EB%A7%8C%EB%93%A4%EA%B8%B02/blurBefore.gif' title={metadata.title}/>
+```
+
+상기 코드와 같이 getPlaceholderImage 함수를 이용해서 blurDataURL를 이용해 이미지 블러를 진행하면, 아래 이미지와 같이 나타나게 됩니다.
+
+<BlurImage imageURL='https://storage.googleapis.com/leehyeonjun.com/Next_mdx%EB%A1%9C_%EB%B8%94%EB%A1%9C%EA%B7%B8_%EB%A7%8C%EB%93%A4%EA%B8%B02/blurAfter.gif' title={metadata.title}/>
+
+## 사이트 설정 모달 구현
+
+Next.js의 <Link href='https://nextjs.org/docs/app/building-your-application/routing/parallel-routes'>Parallel Routes</Link> & <Link href='https://nextjs.org/docs/app/building-your-application/routing/intercepting-routes'>Intercepting Routes</Link>를 사용해서 사이트 설정이 가능한 모달을 구현할 것입니다.
+
+### Parallel Routes?
+
+Parallel Routes는 동일한 레이아웃 내에서 여러 페이지를 동시에 또는 조건부로 렌더링할 수 있게 해줍니다. 이를 위해 slots(@folderName)을 사용하여 생성됩니다. 이렇게 생성된 slot 속 페이지는 slot과 같은 레벨의 레이아웃에 props로 전달됩니다. 이때, slot 폴더는 URL에 영향을 주지 않고 무시됩니다.
+
+```plaintext
+  app/
+  ├── layout.tsx
+  └── @settingModal
+      └── default.tsx
+```
+
+```tsx:app/layout.tsx
+export default function RootLayout({
+  children,
+  settingModal,
+}: {
+  children: React.ReactNode;
+  settingModal: React.ReactNode;
+}) {
+
+  return (
+      <html lang="kr">
+        <body>
+          {children}
+          {settingModal}
+        </body>
+      </html>
+  );
+}
+
+```
+
+현재는 사이트 전체에서 설정 모달에 접근이 가능해야 하기 때문에 RootLayout에 settingModal Parallel Routes를 넣어 주었습니다.
+
+```tsx:default.tsx
+export default function Default() {
+  return null;
+}
+```
+
+default.tsx 파일은 특정 슬롯의 활성 상태를 파악할 수 없을 때 렌더링되는 기본 폴백 파일입니다. 만약 default.tsx 파일이 없을 경우, 일치하지 않는 슬롯에 대해 404 페이지를 렌더링합니다. 이를 통해 의도하지 않은 페이지에서 병렬 경로가 렌더링되는 것을 방지할 수 있습니다.
+
+### Intercepting Routes?
+
+현재 레이아웃 내에서 애플리케이션의 다른 부분에서 경로를 로드하는 기능을 말합니다. 이를 통해 사용자가 다른 컨텍스트로 전환하지 않고도 특정 경로의 콘텐츠를 표시할 수 있습니다.
+
+**Convention**
+
+(.): 같은 레벨의 세그먼트를 매칭.
+(..): 경로 세그먼트를 한 레벨 위로 매칭하는 규칙입니다.
+(..)(..): 두 레벨 위의 세그먼트를 매칭.
+(...): 루트 앱 디렉토리부터 매칭.
+
+```plaintext
+app/
+├── layout.tsx
+├── @settingModal/
+│   ├── (.)setting/
+│   │   └── page.tsx
+│   └── default.tsx
+└── setting/
+    └── page.tsx
+```
+
+상기와 같은 구조로 작성을 했을 때 (.)setting은 /setting 라우터로 접속하는 것을 가로채기 하게 됩니다. 
+
+**소프트 내비게이션**
+
+- next/link나 next/router를 사용하여 페이지 간의 이동 시 경로 인터셉트가 발생합니다.
+
+**하드 내비게이션**
+
+- URL에 /setting을 직접 입력하여 접속할 경우, 경로 인터셉트가 발생하지 않고 전체 페이지가 새로 고침됩니다.
+
+```tsx:(.)setting/page.tsx
+const page = () => {
+  return <SettingModal />;
+};
+
+export default page;
+```
+
+Modal 컴포넌트를 작성 한 후 해당 컴포넌트에 넣으면 됩니다.
+
+
+<ReferenceList
+  references={['https://dev.to/dpnunez/nextjs-image-loading-with-blur-effect-a-step-by-step-guide-4f64'
+  ]}
+/>

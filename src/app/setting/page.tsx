@@ -1,7 +1,11 @@
-import { redirect } from 'next/navigation';
+import { cookies } from 'next/headers';
+import SettingModal from '../@settingModal/(.)setting/_components/SettingModal';
 
 const page = () => {
-  return redirect('/');
+  const cookieStore = cookies();
+  const theme = cookieStore.get('theme')?.value ?? 'Dark';
+
+  return <SettingModal selectTheme={theme} />;
 };
 
 export default page;
