@@ -9,7 +9,7 @@ export interface NavItem {
   scroll?: boolean;
 }
 
-export interface Headings {
+export interface Heading {
   level: number;
   text: string;
   id: string;

@@ -2,7 +2,7 @@
 
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { Context } from '../Provider';
-import { Headings } from '@/types/types';
+import { Heading } from '@/types/types';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { HIDE_PATH } from '@/constants/constants';
 import Link from 'next/link';
@@ -19,9 +19,9 @@ const AnchorNav = () => {
   ] as const;
 
   const { anchorView, changeAnchorView } = useContext(Context);
-  const [headings, setHeadings] = useState<Headings[]>([]);
+  const [headings, setHeadings] = useState<Heading[]>([]);
   const [viewHeadings, setViewHeadings] = useState<{
-    view: Headings[];
+    view: Heading[];
     keep: boolean;
   }>({ view: [], keep: false });
   const pathname = usePathname();
@@ -32,7 +32,7 @@ const AnchorNav = () => {
   };
 
   const createHeadings = (allHeadings: NodeListOf<Element>) => {
-    const newHeadings: Headings[] = Array.from(allHeadings).map(
+    const newHeadings: Heading[] = Array.from(allHeadings).map(
       (heading: Element, index) => {
         const element = heading as HTMLElement;
         const id = generateIdFromText(element.innerText + index);
@@ -53,7 +53,7 @@ const AnchorNav = () => {
     { level: 7, text: '', id: '' },
   );
 
-  const addViewHeadings = (newHeading: Headings) => {
+  const addViewHeadings = (newHeading: Heading) => {
     setViewHeadings(({ view, keep }) => {
       const exists = view.some(({ id }) => id === newHeading.id);
 
@@ -68,9 +68,9 @@ const AnchorNav = () => {
   };
 
   const removeViewHeadings = (
-    removeHeading: Headings,
+    removeHeading: Heading,
     scrollDown: boolean,
-    newHeadings: Headings[],
+    newHeadings: Heading[],
   ) => {
     setViewHeadings(({ view }) => {
       if (view.length > 1) {
@@ -94,7 +94,6 @@ const AnchorNav = () => {
     const allHeadings = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
     const newHeadings = createHeadings(allHeadings);
     setViewHeadings({ view: [], keep: false });
-
     setHeadings(newHeadings);
 
     const observer = new IntersectionObserver(
