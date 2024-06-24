@@ -4,8 +4,8 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { BrushSVG, CloseSVG, TextSVG } from '@/icons/index';
 import Modal from './Modal';
-import Text from './Text';
 import Thema from './Theme';
+import Music from './Music';
 
 interface SettingModalProps {
   selectTheme: string;
@@ -35,10 +35,15 @@ const SettingModal = ({ selectTheme }: SettingModalProps) => {
         />
       ),
     },
+    // {
+    //   title: '글자',
+    //   SVGComponent: <TextSVG className="size-4 fill-black dark:fill-white" />,
+    //   Component: <Text />,
+    // },
     {
-      title: '글자',
+      title: '음악',
       SVGComponent: <TextSVG className="size-4 fill-black dark:fill-white" />,
-      Component: <Text />,
+      Component: <Music />,
     },
   ];
 

@@ -11,8 +11,9 @@ import Footer from './_components/Footer';
 import NprogressBarProvider from './_components/ProgressbarProvider';
 import RouterNav from './_components/RouterNav';
 import WebVitals from './_components/WebVitals';
-import { AnchorViewProvider } from './Provider';
+import { ContextProvider } from './Provider';
 import type { Metadata } from 'next';
+import Audio from './_components/Audio';
 
 const consola = localFont({
   src: './fonts/CONSOLA.ttf',
@@ -63,7 +64,7 @@ export default function RootLayout({
         />
       </head>
       {process.env.NODE_ENV !== 'development' && <ConsoleLog />}
-      <AnchorViewProvider>
+      <ContextProvider>
         <body
           className={`${consola.className} relative flex h-dvh flex-col bg-white sm:flex-row dark:bg-dark-body `}
         >
@@ -75,12 +76,13 @@ export default function RootLayout({
               {children}
               {settingModal}
               <Footer />
+              <Audio />
             </main>
             <AnchorNavButton />
             {process.env.NODE_ENV === 'development' && <WebVitals />}
           </NprogressBarProvider>
         </body>
-      </AnchorViewProvider>
+      </ContextProvider>
       {process.env.NEXT_PUBLIC_GTM_ID && (
         <GoogleTagManager gtmId={process.env.NEXT_PUBLIC_GTM_ID} />
       )}
