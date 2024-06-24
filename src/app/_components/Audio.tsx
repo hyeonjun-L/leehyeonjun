@@ -3,16 +3,16 @@ import { useContext, useEffect } from 'react';
 import { Context } from '../Provider';
 
 const Audio = () => {
-  const { audioRef, musicSrc, playNextTrack, playMusic } = useContext(Context);
+  const { audioRef, music, playNextTrack, playMusic } = useContext(Context);
 
   useEffect(() => {
     playMusic();
-  }, [musicSrc]);
+  }, [music]);
 
   return (
     <audio
       ref={audioRef}
-      src={musicSrc}
+      src={music.src}
       onEnded={playNextTrack}
       className="hidden"
     />

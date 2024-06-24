@@ -97,3 +97,7 @@ export { default as MobileSVG } from './mobile.svg';
 export { default as PcSVG } from './pc.svg';
 
 export { default as LongArrowSvg } from './longArrow.svg';
+
+export { default as PauseSvg } from './setting/pause.svg';
+
+export { default as StartSvg } from './setting/start.svg';

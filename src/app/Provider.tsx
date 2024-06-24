@@ -8,12 +8,14 @@ import React, {
   useState,
 } from 'react';
 
+type Music = { title: string; src: string };
+
 interface ContextProps {
   anchorView: boolean;
   changeAnchorView: () => void;
   audioRef: MutableRefObject<HTMLAudioElement | null>;
-  musicSrc: string;
-  changeMusicSrc: (src: string) => void;
+  music: Music;
+  changeMusic: (music: Music) => void;
   playMusic: () => void;
   pauseMusic: () => void;
   playNextTrack: () => void;
@@ -23,8 +25,8 @@ export const Context = React.createContext<ContextProps>({
   anchorView: false,
   changeAnchorView: () => {},
   audioRef: { current: null },
-  musicSrc: '',
-  changeMusicSrc: (src: string) => {},
+  music: TRACK_LIST[0],
+  changeMusic: (music: Music) => {},
   playMusic: () => {},
   pauseMusic: () => {},
   playNextTrack: () => {},
@@ -32,7 +34,7 @@ export const Context = React.createContext<ContextProps>({
 
 export const ContextProvider = ({ children }: { children: ReactNode }) => {
   const [anchorView, setAnchorView] = useState(false);
-  const [musicSrc, setMusicSrc] = useState(TRACK_LIST[0].src);
+  const [music, setMusic] = useState(TRACK_LIST[0]);
   const audioRef = useRef<null | HTMLAudioElement>(null);
   const trackIndexRef = useRef(0);
 
@@ -40,8 +42,8 @@ export const ContextProvider = ({ children }: { children: ReactNode }) => {
     setAnchorView((prevAnchorView) => !prevAnchorView);
   }, []);
 
-  const changeMusicSrc = useCallback((src: string) => {
-    setMusicSrc(src);
+  const changeMusic = useCallback((music: Music) => {
+    setMusic(music);
   }, []);
 
   const playMusic = useCallback(() => {
@@ -60,10 +62,10 @@ export const ContextProvider = ({ children }: { children: ReactNode }) => {
     if (audioRef.current) {
       trackIndexRef.current += 1;
       if (trackIndexRef.current < TRACK_LIST.length) {
-        changeMusicSrc(TRACK_LIST[trackIndexRef.current].src);
+        changeMusic(TRACK_LIST[trackIndexRef.current]);
       } else {
         trackIndexRef.current = 0;
-        changeMusicSrc(TRACK_LIST[trackIndexRef.current].src);
+        changeMusic(TRACK_LIST[trackIndexRef.current]);
       }
     }
   }, []);
@@ -75,8 +77,8 @@ export const ContextProvider = ({ children }: { children: ReactNode }) => {
         audioRef,
         anchorView,
         changeAnchorView,
-        musicSrc,
-        changeMusicSrc,
+        music,
+        changeMusic,
         playMusic,
         pauseMusic,
       }}
