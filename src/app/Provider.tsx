@@ -19,6 +19,7 @@ interface ContextProps {
   playMusic: () => void;
   pauseMusic: () => void;
   playNextTrack: () => void;
+  volumeControl: (volume: number) => void;
 }
 
 export const Context = React.createContext<ContextProps>({
@@ -30,6 +31,7 @@ export const Context = React.createContext<ContextProps>({
   playMusic: () => {},
   pauseMusic: () => {},
   playNextTrack: () => {},
+  volumeControl: (volume: number) => {},
 });
 
 export const ContextProvider = ({ children }: { children: ReactNode }) => {
@@ -70,9 +72,17 @@ export const ContextProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
+  const volumeControl = (volume: number) => {
+    const newVolume = Math.min(volume, 1);
+    if (audioRef.current) {
+      audioRef.current.volume = newVolume;
+    }
+  };
+
   return (
     <Context.Provider
       value={{
+        volumeControl,
         playNextTrack,
         audioRef,
         anchorView,

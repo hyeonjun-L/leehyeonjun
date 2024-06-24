@@ -6,6 +6,12 @@ const Audio = () => {
   const { audioRef, music, playNextTrack, playMusic } = useContext(Context);
 
   useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = 0.5;
+    }
+  }, []);
+
+  useEffect(() => {
     playMusic();
   }, [music]);
 
