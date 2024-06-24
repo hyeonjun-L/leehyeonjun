@@ -16,6 +16,7 @@ interface ContextProps {
   changeMusicSrc: (src: string) => void;
   playMusic: () => void;
   pauseMusic: () => void;
+  playNextTrack: () => void;
 }
 
 export const Context = React.createContext<ContextProps>({
@@ -26,12 +27,14 @@ export const Context = React.createContext<ContextProps>({
   changeMusicSrc: (src: string) => {},
   playMusic: () => {},
   pauseMusic: () => {},
+  playNextTrack: () => {},
 });
 
 export const ContextProvider = ({ children }: { children: ReactNode }) => {
   const [anchorView, setAnchorView] = useState(false);
   const [musicSrc, setMusicSrc] = useState(TRACK_LIST[0].src);
   const audioRef = useRef<null | HTMLAudioElement>(null);
+  const trackIndexRef = useRef(0);
 
   const changeAnchorView = useCallback(() => {
     setAnchorView((prevAnchorView) => !prevAnchorView);
@@ -48,12 +51,27 @@ export const ContextProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const pauseMusic = useCallback(() => {
-    audioRef.current?.pause();
+    if (audioRef.current) {
+      audioRef.current.pause();
+    }
+  }, []);
+
+  const playNextTrack = useCallback(() => {
+    if (audioRef.current) {
+      trackIndexRef.current += 1;
+      if (trackIndexRef.current < TRACK_LIST.length) {
+        changeMusicSrc(TRACK_LIST[trackIndexRef.current].src);
+      } else {
+        trackIndexRef.current = 0;
+        changeMusicSrc(TRACK_LIST[trackIndexRef.current].src);
+      }
+    }
   }, []);
 
   return (
     <Context.Provider
       value={{
+        playNextTrack,
         audioRef,
         anchorView,
         changeAnchorView,
