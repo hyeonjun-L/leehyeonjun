@@ -50,3 +50,66 @@ export const HOME_MENU_LIST = [
     textList: ['import ', '블로그 ', 'from ', "'이현준'", ';'],
   },
 ];
+
+export const TRACK_LIST = [
+  {
+    title: 'Always Sunshine',
+    src: 'https://storage.googleapis.com/leehyeonjun.com/music/Always%20Sunshine_full.wav',
+  },
+  {
+    title: 'Anywhere',
+    src: 'https://storage.googleapis.com/leehyeonjun.com/music/Anywhere_full.wav',
+  },
+  {
+    title: 'Bye Bye Bye!',
+    src: 'https://storage.googleapis.com/leehyeonjun.com/music/Bye%20Bye%20Bye!_full.wav',
+  },
+  {
+    title: 'Carpool',
+    src: 'https://storage.googleapis.com/leehyeonjun.com/music/Carpool_full.wav',
+  },
+  {
+    title: 'Crusher',
+    src: 'https://storage.googleapis.com/leehyeonjun.com/music/Crusher_full.wav',
+  },
+  {
+    title: 'Daytrip',
+    src: 'https://storage.googleapis.com/leehyeonjun.com/music/Daytrip_full.wav',
+  },
+  {
+    title: 'Follow My Feet',
+    src: 'https://storage.googleapis.com/leehyeonjun.com/music/Follow%20My%20Feet_full.wav',
+  },
+  {
+    title: 'Greeny',
+    src: 'https://storage.googleapis.com/leehyeonjun.com/music/Greeny_full.wav',
+  },
+  {
+    title: 'How Do I Say',
+    src: 'https://storage.googleapis.com/leehyeonjun.com/music/How%20Do%20I%20Say_full.wav',
+  },
+  {
+    title: 'Joy Of Travel',
+    src: 'https://storage.googleapis.com/leehyeonjun.com/music/Joy%20Of%20Travel_full.wav',
+  },
+  {
+    title: 'Lovely Day',
+    src: 'https://storage.googleapis.com/leehyeonjun.com/music/Lovely%20Day_full.wav',
+  },
+  {
+    title: 'My Hometown',
+    src: 'https://storage.googleapis.com/leehyeonjun.com/music/My%20Hometown_full.wav',
+  },
+  {
+    title: 'On The Way',
+    src: 'https://storage.googleapis.com/leehyeonjun.com/music/On%20The%20Way_full.wav',
+  },
+  {
+    title: 'Over The Sky',
+    src: 'https://storage.googleapis.com/leehyeonjun.com/music/Over%20The%20Sky_full.wav',
+  },
+  {
+    title: 'Second Life',
+    src: 'https://storage.googleapis.com/leehyeonjun.com/music/Second%20Life_full.wav',
+  },
+];

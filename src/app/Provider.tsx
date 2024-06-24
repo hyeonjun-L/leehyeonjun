@@ -1,4 +1,5 @@
 'use client';
+import { TRACK_LIST } from '@/constants/constants';
 import React, {
   MutableRefObject,
   ReactNode,
@@ -21,8 +22,7 @@ export const Context = React.createContext<ContextProps>({
   anchorView: false,
   changeAnchorView: () => {},
   audioRef: { current: null },
-  musicSrc:
-    'https://storage.googleapis.com/leehyeonjun.com/music/Always%20Sunshine_full.wav',
+  musicSrc: '',
   changeMusicSrc: (src: string) => {},
   playMusic: () => {},
   pauseMusic: () => {},
@@ -30,9 +30,7 @@ export const Context = React.createContext<ContextProps>({
 
 export const ContextProvider = ({ children }: { children: ReactNode }) => {
   const [anchorView, setAnchorView] = useState(false);
-  const [musicSrc, setMusicSrc] = useState(
-    'https://storage.googleapis.com/leehyeonjun.com/music/Always%20Sunshine_full.wav',
-  );
+  const [musicSrc, setMusicSrc] = useState(TRACK_LIST[0].src);
   const audioRef = useRef<null | HTMLAudioElement>(null);
 
   const changeAnchorView = useCallback(() => {
@@ -44,7 +42,9 @@ export const ContextProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const playMusic = useCallback(() => {
-    audioRef.current?.play();
+    if (audioRef.current) {
+      audioRef.current.play();
+    }
   }, []);
 
   const pauseMusic = useCallback(() => {
