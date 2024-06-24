@@ -33,3 +33,5 @@ export interface Post {
   posterImage: string;
   categories: string[];
 }
+
+export type Music = { title: string; src: string };

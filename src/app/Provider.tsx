@@ -1,5 +1,6 @@
 'use client';
 import { TRACK_LIST } from '@/constants/constants';
+import { Music } from '@/types/types';
 import React, {
   MutableRefObject,
   ReactNode,
@@ -7,8 +8,6 @@ import React, {
   useRef,
   useState,
 } from 'react';
-
-type Music = { title: string; src: string };
 
 interface ContextProps {
   anchorView: boolean;
@@ -45,6 +44,10 @@ export const ContextProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const changeMusic = useCallback((music: Music) => {
+    const selectMusicIndex = TRACK_LIST.findIndex(
+      ({ title }) => title === music.title,
+    );
+    trackIndexRef.current = selectMusicIndex;
     setMusic(music);
   }, []);
 

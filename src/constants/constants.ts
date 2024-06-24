@@ -112,4 +112,8 @@ export const TRACK_LIST = [
     title: 'Second Life',
     src: 'https://storage.googleapis.com/leehyeonjun.com/music/Second%20Life_full.wav',
   },
+  {
+    title: 'Slow Country',
+    src: 'https://storage.googleapis.com/leehyeonjun.com/music/Slow%20Country_full.wav',
+  },
 ];
