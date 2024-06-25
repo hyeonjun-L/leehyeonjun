@@ -43,14 +43,6 @@ export const ContextProvider = ({ children }: { children: ReactNode }) => {
     setAnchorView((prevAnchorView) => !prevAnchorView);
   }, []);
 
-  const changeMusic = useCallback((music: TMusic) => {
-    const selectMusicIndex = TRACK_LIST.findIndex(
-      ({ title }) => title === music.title,
-    );
-    trackIndexRef.current = selectMusicIndex;
-    setMusic(music);
-  }, []);
-
   const playMusic = useCallback(() => {
     if (audioRef.current) {
       audioRef.current.play();
@@ -61,6 +53,19 @@ export const ContextProvider = ({ children }: { children: ReactNode }) => {
     if (audioRef.current) {
       audioRef.current.pause();
     }
+  }, []);
+
+  const changeMusic = useCallback((music: TMusic) => {
+    if (audioRef.current) {
+      const selectMusicIndex = TRACK_LIST.findIndex(
+        ({ title }) => title === music.title,
+      );
+      trackIndexRef.current = selectMusicIndex;
+      audioRef.current.src = music.src;
+      setMusic(music);
+      playMusic();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const playNextTrack = useCallback(() => {
