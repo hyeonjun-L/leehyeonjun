@@ -1,9 +1,9 @@
+import { motion } from 'framer-motion';
+import { useContext, useState } from 'react';
 import { Context } from '@/app/Provider';
 import { TRACK_LIST } from '@/constants/constants';
 import { MuteSvg, PauseSvg, SpeakerSvg, StartSvg } from '@/icons/index';
 import { TMusic } from '@/types/types';
-import { motion } from 'framer-motion';
-import { useContext, useState } from 'react';
 
 const Music = () => {
   const { audioRef, playMusic, pauseMusic, music, volumeControl, changeMusic } =
@@ -36,19 +36,6 @@ const Music = () => {
   const selectMusicHandler = (music: TMusic) => {
     changeMusic(music);
     setIsPlaying(true);
-  };
-
-  const bounce = {
-    initial: { y: 0 },
-    animate: {
-      y: [0, -10, 0],
-      transition: {
-        duration: 0.6,
-        repeat: Infinity,
-        repeatType: 'loop',
-        ease: 'easeInOut',
-      },
-    },
   };
 
   return (

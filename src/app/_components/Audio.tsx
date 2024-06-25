@@ -13,7 +13,7 @@ const Audio = () => {
 
   useEffect(() => {
     playMusic();
-  }, [music]);
+  }, [music, playMusic]);
 
   return (
     <audio

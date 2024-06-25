@@ -1,6 +1,4 @@
 'use client';
-import { TRACK_LIST } from '@/constants/constants';
-import { TMusic } from '@/types/types';
 import React, {
   MutableRefObject,
   ReactNode,
@@ -8,6 +6,8 @@ import React, {
   useRef,
   useState,
 } from 'react';
+import { TRACK_LIST } from '@/constants/constants';
+import { TMusic } from '@/types/types';
 
 interface ContextProps {
   anchorView: boolean;
@@ -26,11 +26,11 @@ export const Context = React.createContext<ContextProps>({
   changeAnchorView: () => {},
   audioRef: { current: null },
   music: TRACK_LIST[0],
-  changeMusic: (music: TMusic) => {},
+  changeMusic: () => {},
   playMusic: () => {},
   pauseMusic: () => {},
   playNextTrack: () => {},
-  volumeControl: (volume: number) => {},
+  volumeControl: () => {},
 });
 
 export const ContextProvider = ({ children }: { children: ReactNode }) => {
@@ -73,7 +73,7 @@ export const ContextProvider = ({ children }: { children: ReactNode }) => {
         changeMusic(TRACK_LIST[trackIndexRef.current]);
       }
     }
-  }, []);
+  }, [changeMusic]);
 
   const volumeControl = (volume: number) => {
     const newVolume = Math.min(volume, 1);

@@ -4,8 +4,8 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { BrushSVG, CloseSVG, TextSVG } from '@/icons/index';
 import Modal from './Modal';
-import Thema from './Theme';
 import Music from './Music';
+import Thema from './Theme';
 
 interface SettingModalProps {
   selectTheme: string;

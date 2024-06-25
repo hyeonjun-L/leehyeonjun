@@ -6,6 +6,7 @@ import { cookies } from 'next/headers';
 import ActivityNav from '@/app/_components/ActivityNav';
 import AnchorNav from './_components/AnchorNav';
 import AnchorNavButton from './_components/AnchorNavButton';
+import Audio from './_components/Audio';
 import ConsoleLog from './_components/ConsoleLog';
 import Footer from './_components/Footer';
 import NprogressBarProvider from './_components/ProgressbarProvider';
@@ -13,7 +14,6 @@ import RouterNav from './_components/RouterNav';
 import WebVitals from './_components/WebVitals';
 import { ContextProvider } from './Provider';
 import type { Metadata } from 'next';
-import Audio from './_components/Audio';
 
 const consola = localFont({
   src: './fonts/CONSOLA.ttf',

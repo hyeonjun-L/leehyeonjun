@@ -1,6 +1,6 @@
-import getPlaceholderImage from '@/utils/dynamicBlurDataUrl';
 import Image from 'next/image';
 import React from 'react';
+import getPlaceholderImage from '@/utils/dynamicBlurDataUrl';
 
 const BlurImage = async ({
   imageURL,

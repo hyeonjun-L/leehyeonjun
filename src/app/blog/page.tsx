@@ -1,8 +1,8 @@
 import { Metadata } from 'next';
 import { getPosts } from '@/utils/posts';
 import Categories from './_components/Categories';
-import SearchPost from './_components/SearchPost';
 import Posts from './_components/Posts';
+import SearchPost from './_components/SearchPost';
 
 export const metadata: Metadata = {
   title: '이현준 | 블로그',
