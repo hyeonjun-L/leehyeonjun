@@ -2,7 +2,7 @@
 import Cookies from 'js-cookie';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { BrushSVG, CloseSVG, TextSVG } from '@/icons/index';
+import { BrushSVG, CloseSVG, MusicSvg } from '@/icons/index';
 import Modal from './Modal';
 import Music from './Music';
 import Thema from './Theme';
@@ -42,7 +42,7 @@ const SettingModal = ({ selectTheme }: SettingModalProps) => {
     // },
     {
       title: '음악',
-      SVGComponent: <TextSVG className="size-4 fill-black dark:fill-white" />,
+      SVGComponent: <MusicSvg className="size-4" />,
       Component: <Music />,
     },
   ];

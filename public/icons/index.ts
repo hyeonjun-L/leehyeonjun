@@ -105,3 +105,5 @@ export { default as StartSvg } from './setting/start.svg';
 export { default as MuteSvg } from './setting/mute.svg';
 
 export { default as SpeakerSvg } from './setting/speaker.svg';
+
+export { default as MusicSvg } from './setting/music.svg';
