@@ -34,4 +34,4 @@ export interface Post {
   categories: string[];
 }
 
-export type Music = { title: string; src: string };
+export type TMusic = { title: string; src: string };

@@ -1,6 +1,6 @@
 'use client';
 import { TRACK_LIST } from '@/constants/constants';
-import { Music } from '@/types/types';
+import { TMusic } from '@/types/types';
 import React, {
   MutableRefObject,
   ReactNode,
@@ -13,8 +13,8 @@ interface ContextProps {
   anchorView: boolean;
   changeAnchorView: () => void;
   audioRef: MutableRefObject<HTMLAudioElement | null>;
-  music: Music;
-  changeMusic: (music: Music) => void;
+  music: TMusic;
+  changeMusic: (music: TMusic) => void;
   playMusic: () => void;
   pauseMusic: () => void;
   playNextTrack: () => void;
@@ -26,7 +26,7 @@ export const Context = React.createContext<ContextProps>({
   changeAnchorView: () => {},
   audioRef: { current: null },
   music: TRACK_LIST[0],
-  changeMusic: (music: Music) => {},
+  changeMusic: (music: TMusic) => {},
   playMusic: () => {},
   pauseMusic: () => {},
   playNextTrack: () => {},
@@ -43,7 +43,7 @@ export const ContextProvider = ({ children }: { children: ReactNode }) => {
     setAnchorView((prevAnchorView) => !prevAnchorView);
   }, []);
 
-  const changeMusic = useCallback((music: Music) => {
+  const changeMusic = useCallback((music: TMusic) => {
     const selectMusicIndex = TRACK_LIST.findIndex(
       ({ title }) => title === music.title,
     );

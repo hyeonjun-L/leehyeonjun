@@ -1,7 +1,7 @@
 import { Context } from '@/app/Provider';
 import { TRACK_LIST } from '@/constants/constants';
 import { MuteSvg, PauseSvg, SpeakerSvg, StartSvg } from '@/icons/index';
-import { Music } from '@/types/types';
+import { TMusic } from '@/types/types';
 import { motion } from 'framer-motion';
 import { useContext, useState } from 'react';
 
@@ -33,9 +33,22 @@ const Music = () => {
     setVolumeHandler(newVolume);
   };
 
-  const selectMusicHandler = (music: Music) => {
+  const selectMusicHandler = (music: TMusic) => {
     changeMusic(music);
     setIsPlaying(true);
+  };
+
+  const bounce = {
+    initial: { y: 0 },
+    animate: {
+      y: [0, -10, 0],
+      transition: {
+        duration: 0.6,
+        repeat: Infinity,
+        repeatType: 'loop',
+        ease: 'easeInOut',
+      },
+    },
   };
 
   return (
@@ -87,12 +100,37 @@ const Music = () => {
           </button>
         </nav>
       </div>
-      <ul className="mt-2 grid grid-cols-2 gap-y-1.5">
+      <ul className="mt-4 grid grid-cols-2 gap-y-3 overflow-y-scroll sm:mt-2 sm:h-5/6 sm:gap-y-1.5">
         {TRACK_LIST.map(({ title, src }) => (
-          <li key={title}>
-            <button onClick={() => selectMusicHandler({ title, src })}>
-              {title}
-            </button>
+          <li key={title} className="relative">
+            {title === music.title ? (
+              title.split('').map((char, index) => (
+                <motion.span
+                  key={index}
+                  className="inline-block min-w-[0.55rem] text-White-myVScodeText"
+                  initial={{ y: 0 }}
+                  animate={{
+                    y: [0, -1.5, 0],
+                    transition: {
+                      delay: index * 0.1,
+                      duration: 0.6,
+                      repeat: Infinity,
+                      repeatType: 'loop',
+                      ease: 'easeInOut',
+                    },
+                  }}
+                >
+                  {char}
+                </motion.span>
+              ))
+            ) : (
+              <button
+                className="whitespace-nowrap hover:text-White-myVScodeText"
+                onClick={() => selectMusicHandler({ title, src })}
+              >
+                {title}
+              </button>
+            )}
           </li>
         ))}
       </ul>

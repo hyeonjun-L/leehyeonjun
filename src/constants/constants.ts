@@ -116,4 +116,36 @@ export const TRACK_LIST = [
     title: 'Slow Country',
     src: 'https://storage.googleapis.com/leehyeonjun.com/music/Slow%20Country_full.wav',
   },
+  {
+    title: 'Staying Alive',
+    src: 'https://storage.googleapis.com/leehyeonjun.com/music/Staying%20Alive_full.wav',
+  },
+  {
+    title: 'Summer Breeze',
+    src: 'https://storage.googleapis.com/leehyeonjun.com/music/Summer%20Breeze_full.wav',
+  },
+  {
+    title: 'Sunroof',
+    src: 'https://storage.googleapis.com/leehyeonjun.com/music/Sunroof_full.wav',
+  },
+  {
+    title: 'Soul Mates',
+    src: 'https://storage.googleapis.com/leehyeonjun.com/music/Soul%20Mates_full.wav',
+  },
+  {
+    title: 'The Start',
+    src: 'https://storage.googleapis.com/leehyeonjun.com/music/The%20Start_full.wav',
+  },
+  {
+    title: 'Towards You',
+    src: 'https://storage.googleapis.com/leehyeonjun.com/music/Towards%20You_full.wav',
+  },
+  {
+    title: 'Trail Walk',
+    src: 'https://storage.googleapis.com/leehyeonjun.com/music/Trail%20Walk_full.wav',
+  },
+  {
+    title: 'Youthhood',
+    src: 'https://storage.googleapis.com/leehyeonjun.com/music/Youthhood_full.wav',
+  },
 ];
