@@ -1,8 +1,8 @@
-import type { MDXComponents } from 'mdx/types';
-import BlogTitle from './app/blog/_components/BlogTitle';
 import Link from 'next/link';
-import ReferenceList from './app/blog/_components/ReferenceList';
+import BlogTitle from './app/blog/_components/BlogTitle';
 import BlurImage from './app/blog/_components/BlurImage';
+import ReferenceList from './app/blog/_components/ReferenceList';
+import type { MDXComponents } from 'mdx/types';
 
 export function useMDXComponents(components: MDXComponents): MDXComponents {
   return {

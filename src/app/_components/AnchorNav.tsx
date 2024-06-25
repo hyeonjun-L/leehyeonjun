@@ -1,12 +1,12 @@
 'use client';
 
-import { Fragment, useContext, useEffect, useState } from 'react';
+import Link from 'next/link';
+import { usePathname, useSearchParams } from 'next/navigation';
+import { Fragment, useCallback, useContext, useEffect, useState } from 'react';
+import { HIDE_PATH } from '@/constants/constants';
+import { DoubleArrowSVG } from '@/icons/index';
 import { Context } from '../Provider';
 import { Heading } from '@/types/types';
-import { usePathname, useSearchParams } from 'next/navigation';
-import { HIDE_PATH } from '@/constants/constants';
-import Link from 'next/link';
-import { DoubleArrowSVG } from '@/icons/index';
 
 const AnchorNav = () => {
   const ANCHOR_HEADER_MARGIN = [
@@ -31,7 +31,7 @@ const AnchorNav = () => {
     return text.replace(/\s+/g, '-').toLowerCase();
   };
 
-  const createHeadings = (allHeadings: NodeListOf<Element>) => {
+  const createHeadings = useCallback((allHeadings: NodeListOf<Element>) => {
     const newHeadings: Heading[] = Array.from(allHeadings).map(
       (heading: Element, index) => {
         const element = heading as HTMLElement;
@@ -46,7 +46,7 @@ const AnchorNav = () => {
     );
 
     return newHeadings;
-  };
+  }, []);
 
   const viewHeading = viewHeadings.view.reduce(
     (acc, heading) => (acc.level <= heading.level ? acc : heading),
@@ -133,7 +133,7 @@ const AnchorNav = () => {
         observer.unobserve(heading);
       });
     };
-  }, [pathname]);
+  }, [createHeadings, pathname]);
 
   useEffect(() => {
     if (window.location.hash) {

@@ -1,5 +1,5 @@
-import { Post } from '@/types/types';
 import Link from 'next/link';
+import { Post } from '@/types/types';
 
 interface CategoriesProps {
   posts: Post[];

@@ -1,6 +1,5 @@
-import { Post } from '@/types/types';
-import Image from 'next/image';
 import BlurImage from './BlurImage';
+import { Post } from '@/types/types';
 
 const BlogTitle = async ({
   title,

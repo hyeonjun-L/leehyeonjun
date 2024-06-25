@@ -1,5 +1,5 @@
-import Link from 'next/link';
 import Image from 'next/image';
+import Link from 'next/link';
 import getPlaceholderImage from '@/utils/dynamicBlurDataUrl';
 import { Post } from '@/types/types';
 

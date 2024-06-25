@@ -33,3 +33,5 @@ export interface Post {
   posterImage: string;
   categories: string[];
 }
+
+export type TMusic = { title: string; src: string };

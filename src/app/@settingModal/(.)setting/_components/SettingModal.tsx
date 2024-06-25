@@ -2,9 +2,9 @@
 import Cookies from 'js-cookie';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { BrushSVG, CloseSVG, TextSVG } from '@/icons/index';
+import { BrushSVG, CloseSVG, MusicSvg } from '@/icons/index';
 import Modal from './Modal';
-import Text from './Text';
+import Music from './Music';
 import Thema from './Theme';
 
 interface SettingModalProps {
@@ -35,10 +35,15 @@ const SettingModal = ({ selectTheme }: SettingModalProps) => {
         />
       ),
     },
+    // {
+    //   title: '글자',
+    //   SVGComponent: <TextSVG className="size-4 fill-black dark:fill-white" />,
+    //   Component: <Text />,
+    // },
     {
-      title: '글자',
-      SVGComponent: <TextSVG className="size-4 fill-black dark:fill-white" />,
-      Component: <Text />,
+      title: '음악',
+      SVGComponent: <MusicSvg className="size-4" />,
+      Component: <Music />,
     },
   ];
 
