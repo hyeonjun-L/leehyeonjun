@@ -21,6 +21,7 @@ const BlurImage = async ({
         placeholder="blur"
         blurDataURL={placeholder}
         className="size-full"
+        unoptimized={src.endsWith('.gif')}
       />
     </div>
   );
