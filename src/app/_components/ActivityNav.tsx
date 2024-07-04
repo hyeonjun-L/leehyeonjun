@@ -79,7 +79,7 @@ const ActivityNav = () => {
         )}
         {SVGComponent && (
           <SVGComponent
-            className={`${isSelected ? 'fill-white' : 'fill-dark-disabled group-hover:fill-white'}`}
+            className={`${isSelected ? 'fill-white' : 'fill-dark-disabled group-hover:fill-white'} relative size-full`}
           />
         )}
         {component && (
