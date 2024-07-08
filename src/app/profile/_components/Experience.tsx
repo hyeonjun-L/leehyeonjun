@@ -27,8 +27,9 @@ const Experience = () => {
         'JavaScript, TypeScript, React 학습',
         <>
           <Link
-            href="/https://www.youtube.com/watch?v=w0XsvOrLkcg"
+            href="https://www.youtube.com/watch?v=w0XsvOrLkcg"
             className="underline underline-offset-4"
+            target="_blank"
           >
             Tech-Talk
           </Link>{' '}
