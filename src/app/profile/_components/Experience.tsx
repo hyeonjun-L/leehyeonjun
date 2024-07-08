@@ -9,16 +9,16 @@ const Experience = () => {
       period: '(2023.08 ~ 2023.09)',
       historyInformation: ['200팀이 넘는 참가 팀 중 상위 40팀 예선 통과'],
     },
-    {
-      title: '프로그래머스 데브코스 4기',
-      explanation: '프론트엔드 개발자 양성 교육 과정 ',
-      period: '(2023.6 ~ 2023.8)',
-      historyInformation: [
-        'JavaScript, TypeScript, 알고리즘, SCSS 학습',
-        'Webpack, Vite, Parcel 번들러 경험',
-        '스터디, 멘토링, 코드리뷰, 팀 프로젝트를 통한 소프트스킬 증진',
-      ],
-    },
+    // {
+    //   title: '프로그래머스 데브코스 4기',
+    //   explanation: '프론트엔드 개발자 양성 교육 과정 ',
+    //   period: '(2023.6 ~ 2023.8)',
+    //   historyInformation: [
+    //     'JavaScript, TypeScript, 알고리즘, SCSS 학습',
+    //     'Webpack, Vite, Parcel 번들러 경험',
+    //     '스터디, 멘토링, 코드리뷰, 팀 프로젝트를 통한 소프트스킬 증진',
+    //   ],
+    // },
     {
       title: '모던애자일 5기',
       explanation: 'SW 개발 동아리 ',
