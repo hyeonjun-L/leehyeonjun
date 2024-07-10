@@ -149,12 +149,12 @@ const Skill = () => {
           detail:
             '보다 빠른 개발 환경을 위해 Vite를 사용한 경험이 있으며, HMR(핫 모듈 교체) 기능을 통해 변경사항이 즉시 반영되는 신속한 개발 경험을 제공했습니다.',
         },
-        {
-          svg: <WebpackSVG className="size-6 [&>path]:fill-[#8DD6F9] " />,
-          title: 'Webpack',
-          detail:
-            '모듈 번들링과 자산 관리를 위해 Webpack을 사용한 경험이 있습니다. 다양한 로더와 플러그인을 활용하여 프로젝트의 빌드 프로세스를 최적화하고, 코드 분할과 지연 로딩을 구현하여 애플리케이션의 로딩 시간을 단축했습니다.',
-        },
+        // {
+        //   svg: <WebpackSVG className="size-6 [&>path]:fill-[#8DD6F9] " />,
+        //   title: 'Webpack',
+        //   detail:
+        //     '모듈 번들링과 자산 관리를 위해 Webpack을 사용한 경험이 있습니다. 다양한 로더와 플러그인을 활용하여 프로젝트의 빌드 프로세스를 최적화하고, 코드 분할과 지연 로딩을 구현하여 애플리케이션의 로딩 시간을 단축했습니다.',
+        // },
         {
           svg: (
             <VercelSVG className="size-6 [&>path]:fill-[#000000] [&>path]:dark:fill-[#fff]" />
