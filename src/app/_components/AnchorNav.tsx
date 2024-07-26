@@ -83,7 +83,9 @@ const AnchorNav = () => {
           return { view, keep: true };
         } else {
           const prevIndx =
-            newHeadings.findIndex(({ id }) => id === view[0].id) - 1;
+            newHeadings.findIndex(
+              (heading) => heading.id && heading.id === view[0].id,
+            ) - 1;
           return { view: [{ ...newHeadings[prevIndx] }], keep: true };
         }
       }
