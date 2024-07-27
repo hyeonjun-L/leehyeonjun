@@ -78,17 +78,18 @@ const AnchorNav = () => {
           view: view.filter((heading) => heading.id !== removeHeading.id),
           keep: false,
         };
-      } else {
-        if (scrollDown) {
-          return { view, keep: true };
-        } else {
-          const prevIndx =
-            newHeadings.findIndex(
-              (heading) => heading?.id && heading.id === view[0].id,
-            ) - 1;
-          return { view: [{ ...newHeadings[prevIndx] }], keep: true };
-        }
       }
+
+      if (scrollDown) {
+        return { view, keep: true };
+      }
+
+      const prevIndex =
+        newHeadings.findIndex(
+          (heading) => heading?.id && heading.id === view[0]?.id,
+        ) - 1;
+
+      return { view: [{ ...newHeadings[prevIndex] }], keep: true };
     });
   };
 
