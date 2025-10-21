@@ -1,5 +1,4 @@
 import { Metadata } from 'next';
-import { cookies } from 'next/headers';
 import AboutMe from './_components/AboutMe';
 import Career from './_components/Career';
 import Certifications from './_components/Certifications';
@@ -14,15 +13,15 @@ export const metadata: Metadata = {
 };
 
 const page = () => {
-  const cookieStore = cookies();
-  const theme = cookieStore.get('theme')?.value ?? 'Dark';
+  // const cookieStore = cookies();
+  // const theme = cookieStore.get('theme')?.value ?? 'Dark';
 
   return (
     <div className="m-auto max-w-6xl p-4 sm:p-4 xl:p-8 2xl:p-0">
-      <AboutMe theme={theme} />
-      <Skill />
+      <AboutMe />
       <Career />
       <Project />
+      <Skill />
       <Experience />
       <Education />
       <Certifications />

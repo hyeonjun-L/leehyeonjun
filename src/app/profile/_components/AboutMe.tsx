@@ -1,13 +1,12 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { EmailSVG } from '@/icons/index';
-import myImage from '@/images/profile.png';
-import myDarkImage from '@/images/profile_dark.png';
+import myImage from '@/images/이현준.jpg';
 
-const AboutMe = ({ theme }: { theme: string }) => {
+const AboutMe = () => {
   return (
-    <section className="relative grid border-b border-solid border-dark-disabled sm:grid-cols-2">
-      <div className="flex flex-col justify-center gap-2">
+    <section className="relative mt-14 grid border-b border-solid border-dark-disabled sm:grid-cols-2">
+      <div className="mb-6 flex flex-col justify-center gap-2">
         <h1 className="mb-6 text-5xl font-semibold">이현준</h1>
         <strong className="mb-6 text-lg">프론트엔드 개발자</strong>
         <p>
@@ -22,9 +21,9 @@ const AboutMe = ({ theme }: { theme: string }) => {
         </p>
       </div>
       <Image
-        src={theme === 'Dark' ? myDarkImage : myImage}
+        src={myImage}
         alt="이현준"
-        className="size-full animate-fadeInUp rounded-md"
+        className="mx-auto size-56 animate-fadeInUp self-center rounded-md"
         priority={true}
       />
       <dl className="absolute -bottom-6 right-0 mt-auto flex gap-2">

@@ -2,6 +2,18 @@ import { Fragment } from 'react';
 
 const Career = () => {
   const CAREERS = [
+    // {
+    //   companyName: '거림소프트',
+    //   period: '2024.10 ~ 재직중',
+    //   department: '개발부',
+    //   position: '사원',
+    //   businessInformation: [
+    //     'GIS 시스템',
+    //     '중구본 대시보드',
+    //     '제주 풍수해 시스템',
+    //     '울산 통계 시스템',
+    //   ],
+    // },
     {
       companyName: '이엑스테크놀로지',
       period: '2021.06 ~ 2022.03',
