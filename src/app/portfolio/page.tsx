@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import connectionImage from '@/images/connection/connection_main.png';
 import connectionHealthImage from '@/images/connection-health/connection-health.png';
 import editorImage from '@/images/editor/editor.jpg';
+import hummingVisionImage from '@/images/humming-vision/humming-vision-main.png';
 import Project from './_components/Project';
 // import haruImage from '@/images/haru/haru.jpg';
 
@@ -13,10 +14,18 @@ export const metadata: Metadata = {
 const page = () => {
   const PROJECT_LIST = [
     {
+      src: hummingVisionImage,
+      alt: '허밍비전 프로젝트 이미지',
+      explanation:
+        '산업용 카메라, 렌즈, 조명 등 머신 비전 하드웨어를 공급하는 기업의 공식 웹사이트입니다. 제품 카탈로그, 기술 문서 다운로드, 고객 문의 등을 제공하는 B2B 플랫폼으로 풀스택 개발을 담당했습니다.',
+      webLink: 'https://hummingvision.com',
+      detailLink: '/portfolio/humming-vision',
+    },
+    {
       src: connectionImage,
       alt: '커넥션 프로젝트 이미지',
       explanation:
-        '설문조사를 통해 기획된 웹 댄스 플랫폼으로, 강사는 클래스 관리와 홍보를, 수강생은 필요에 맞는 수업 선택을 할 수 있습니다. 현재 사업자 등록 진행 중입니다.',
+        '설문조사를 통해 기획된 웹 댄스 플랫폼으로, 강사는 클래스 관리와 홍보를, 수강생은 필요에 맞는 수업 선택을 할 수 있습니다.',
       webLink: 'https://connection-frontend.vercel.app',
       detailLink: '/portfolio/connection',
     },

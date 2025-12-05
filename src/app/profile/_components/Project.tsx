@@ -28,6 +28,10 @@ import {
   ZustandSVG,
   JavaScriptSVG,
   WebpackSVG,
+  NestSVG,
+  PostgreSQLSVG,
+  AwsSVG,
+  TurboRepoSVG,
 } from '@/icons/index';
 import connectionImage from '@/images/connection/connection_main.png';
 import connectionHealthImage from '@/images/connection-health/connection-health.png';
@@ -36,6 +40,163 @@ import editorImage from '@/images/editor/editor.jpg';
 
 const Project = () => {
   const PROJECT = [
+    {
+      title: 'Humming Vision',
+      explanation: '머신 비전 하드웨어 전문 기업 웹사이트',
+      personnel: '(개인 프로젝트 - 기획/개발/인프라)',
+      period: '2024.12 ~ 2025.07',
+      image: connectionImage,
+      mainColor: 'border-[#your-brand-color]', // 브랜드 컬러로 수정
+      imageAlt: 'Humming Vision',
+      webSite: 'https://your-website.com', // 실제 URL로 수정
+      github: 'https://github.com/hyeonjun-L/humming-vision',
+      figma: 'https://www.figma.com/design/waxsJ1lV1zmwgTKYQ58duk/...',
+      developmentProcess: '/portfolio/humming-vision',
+      detailExplanation: (
+        <div>
+          머신 비전 하드웨어(카메라, 렌즈, 조명, 프레임그래버, 소프트웨어 등)
+          제품 카탈로그를 제공하는 <strong>B2B 기업 웹사이트</strong>입니다.
+          <br />
+          <br />
+          고객과 직접 미팅하며 <strong>요구사항을 정의</strong>하고,
+          스토리보드를 작성하여 디자이너와 협업했습니다. 디자인을 제외한{' '}
+          <strong>전체 개발 과정을 혼자 진행</strong>했으며, 데이터베이스
+          설계부터 프론트엔드/백엔드 개발, AWS 인프라 구축 및 CI/CD
+          파이프라인까지 end-to-end로 구현했습니다.
+          <br />
+          <br />
+          <strong>Turborepo 기반 모노레포 아키텍처</strong>를 적용하여
+          프론트엔드와 백엔드 간 타입 안정성을 확보하고, 공통 로직을 효율적으로
+          관리했습니다. 관리자는 제품을 등록/수정/삭제하고, 고객 문의를 관리할
+          수 있으며, 방문자는 다양한 제품을 탐색하고 문의를 남길 수 있습니다.
+        </div>
+      ),
+      role: (
+        <div>
+          이 프로젝트는 처음으로{' '}
+          <strong>요구사항 정의부터 배포까지 전 과정을 혼자 담당</strong>한
+          프로젝트로, 실제 고객과의 미팅을 통해 비즈니스 요구사항을 기술로
+          구현하는 과정을 경험할 수 있었습니다. 디자이너와의 협업을 위해 직접
+          스토리보드를 작성하며 <strong>기획자의 관점</strong>에서 프로젝트를
+          바라보는 시야를 넓힐 수 있었습니다.
+          <br />
+          <br />
+          <strong>NestJS를 사용한 백엔드 개발</strong>은 이 프로젝트에서 처음
+          시도한 부분으로, 의존성 주입(DI), 데코레이터 기반 라우팅, 미들웨어 등{' '}
+          <strong>백엔드 아키텍처 패턴</strong>을 실제로 적용하며 배울 수
+          있었습니다. 특히 TypeORM을 통해 엔티티 간 관계 설정, 마이그레이션
+          관리, 트랜잭션 처리 등{' '}
+          <strong>데이터베이스 설계의 실무적인 측면</strong>을 경험했습니다.
+          <br />
+          <br />
+          <strong>Turborepo 기반 모노레포 구조</strong>를 처음 도입하면서,
+          NestJS 백엔드에서 Swagger 데코레이터로 생성한 OpenAPI 스펙을{' '}
+          <strong>자동으로 TypeScript 타입 정의로 변환</strong>하여 shared
+          패키지에 배포하는 시스템을 구축했습니다. 이를 통해 프론트엔드에서 API
+          응답 타입을 수동으로 작성할 필요 없이{' '}
+          <strong>백엔드와 프론트엔드 간 타입 안정성을 자동으로 보장</strong>
+          하는 방법을 배웠고, 모노레포 환경에서의 코드 재사용과 타입 공유의
+          장점을 체감할 수 있었습니다.
+          <br />
+          <br />
+          <strong>Next.js의 SEO 최적화 기능</strong>을 활용하여{' '}
+          <strong>동적 Sitemap 생성 시스템</strong>을 구축했습니다. 백엔드
+          API에서 실제 제품 데이터를 가져와 모든 제품 페이지의 URL을 자동으로
+          생성하고, 각 페이지마다{' '}
+          <strong>
+            generateMetadata를 통해 Open Graph 메타데이터와 Canonical URL을
+            동적으로 설정
+          </strong>
+          하여 검색 엔진 최적화를 구현했습니다. 이를 통해{' '}
+          <strong>B2B 웹사이트에서의 SEO 중요성</strong>과
+          <strong>Next.js의 메타데이터 API를 활용한 실무적인 SEO 전략</strong>을
+          배울 수 있었습니다
+          <br />
+          <br />
+          <strong>AWS EC2에 직접 인프라를 구축</strong>하고{' '}
+          <strong>Docker로 컨테이너화</strong>하는 과정에서 멀티 스테이지 빌드를
+          통한 이미지 최적화, 보안을 위한 non-root 사용자 설정 등{' '}
+          <strong>프로덕션 환경 구축의 실무적인 고려사항</strong>을 배웠습니다.
+          특히 <strong>GitHub Actions로 CI/CD 파이프라인을 직접 구성</strong>{' '}
+          <strong>DevOps의 중요성과 자동화의 가치</strong>를 깊이 이해하게 하며
+          코드 푸시부터 배포까지 자동화하는 과정을 경험했고, 이를 통해{' '}
+          되었습니다.
+          <br />
+          <br />이 프로젝트를 통해 단순히 기능을 구현하는 것을 넘어서,
+          <strong>
+            비즈니스 요구사항을 기술로 해결하는 전체 프로세스
+          </strong>와{' '}
+          <strong>
+            실제 운영 환경에서 안정적으로 서비스를 제공하기 위한 아키텍처 설계
+          </strong>
+          의 중요성을 배울 수 있었습니다. 특히 프론트엔드 개발자로서 백엔드와
+          인프라까지 경험하며 <strong>개발자로서의 시야</strong>를 넓힐 수
+          있었던 의미 있는 프로젝트였습니다.
+        </div>
+      ),
+      skills: [
+        {
+          svg: <NextSVG className="size-5" />,
+          name: 'Next.js',
+          bg: 'bg-[#000000]',
+        },
+        {
+          svg: <TypeScriptSVG className="size-5" />,
+          name: 'TypeScript',
+          bg: 'bg-[#3178C6]',
+        },
+        {
+          svg: <TaillwindSVG className="size-5" />,
+          name: 'Tailwind CSS',
+          bg: 'bg-[#06B6D4]',
+        },
+        {
+          svg: <ReactQuerySVG className="size-5" />,
+          name: 'React Query',
+          bg: 'bg-[#FF4154]',
+        },
+        {
+          svg: <ZustandSVG className="size-5" />,
+          name: 'Zustand',
+          bg: 'bg-[#614a28]',
+        },
+        {
+          svg: <ReactHookFormSVG className="size-5" />,
+          name: 'React Hook Form',
+          bg: 'bg-[#EC5990]',
+        },
+        {
+          svg: <NestSVG className="size-5" />,
+          name: 'Nest.js',
+          bg: 'bg-[#E0234E]',
+        },
+        {
+          svg: <PostgreSQLSVG className="size-5" />,
+          name: 'PostgreSQL',
+          bg: 'bg-[#4169E1]',
+        },
+        {
+          svg: <AwsSVG className="size-5" />,
+          name: 'AWS',
+          bg: 'bg-[#FF9900]',
+        },
+        {
+          svg: <DockerSVG className="size-5" />,
+          name: 'Docker',
+          bg: 'bg-[#2496ED]',
+        },
+        {
+          svg: <GitHubActionsSVG className="size-5" />,
+          name: 'GitHub Actions',
+          bg: 'bg-[#2088FF]',
+        },
+        {
+          svg: <TurboRepoSVG className="size-5" />,
+          name: 'Turborepo',
+          bg: 'bg-[#EF4444]',
+        },
+      ],
+    },
     {
       title: 'Connection',
       explanation: '댄서와 수강생 매칭 서비스',
@@ -61,9 +222,6 @@ const Project = () => {
           수강생들은 다양한 클래스와 강사들 중에서 자신의 필요와 취향에 맞는
           수업을 자유롭게 선택할 수 있는 기회를 얻게 됩니다.
           <br />
-          <br />
-          현재 이 플랫폼은 실제 <strong>사업자 등록 절차 진행 중</strong>에
-          있습니다.
         </div>
       ),
       role: (

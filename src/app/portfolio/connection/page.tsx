@@ -195,9 +195,6 @@ const page = () => {
           수강생들은 다양한 클래스와 강사들 중에서 자신의 필요와 취향에 맞는
           수업을 자유롭게 선택할 수 있는 기회를 얻게 됩니다.
           <br />
-          <br />
-          현재 이 플랫폼은 실제 <strong>사업자 등록 </strong>
-          절차 진행 중에 있습니다.
         </div>
       </Explanation>
       <Skill skillList={SKILLS} />
