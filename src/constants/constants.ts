@@ -44,11 +44,11 @@ export const HOME_MENU_LIST = [
     href: '/portfolio',
     textList: ['import ', '포트폴리오 ', 'from ', "'이현준'", ';'],
   },
-  {
-    title: '블로그',
-    href: '/blog',
-    textList: ['import ', '블로그 ', 'from ', "'이현준'", ';'],
-  },
+  // {
+  //   title: '블로그',
+  //   href: '/blog',
+  //   textList: ['import ', '블로그 ', 'from ', "'이현준'", ';'],
+  // },
 ];
 
 export const TRACK_LIST = [

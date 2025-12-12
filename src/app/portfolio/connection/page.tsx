@@ -39,6 +39,7 @@ const page = () => {
     webSite: 'https://connection-frontend.vercel.app',
     github: 'https://github.com/connection-2023/frontend',
     logo,
+    isOperating: false,
   } as const;
 
   const SKILLS = [

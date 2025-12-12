@@ -31,6 +31,7 @@ const page = () => {
     period: '( 2024.12 ~ 2025.07 )',
     webSite: 'https://hummingvision.com/',
     github: 'https://github.com/hyeonjun-L/humming-vision',
+    isOperating: true,
     logo,
   } as const;
 
@@ -128,7 +129,7 @@ const page = () => {
     'https://embed.figma.com/design/waxsJ1lV1zmwgTKYQ58duk/%ED%97%88%EB%B0%8D%EB%B9%84%EC%A0%84-%EC%8A%A4%ED%86%A0%EB%A6%AC-%EB%B3%B4%EB%93%9C?node-id=0-1&embed-host=share';
 
   const REQUIREMENT_ANALYSIS_LINK =
-    'https://www.notioniframe.com/notion/20423w0s1jl';
+    'https://brief-zydeco-9fd.notion.site/ebd/15c97668c4da80f9a915d19e825bc050';
 
   return (
     <div className="mx-auto max-w-7xl p-4 sm:p-4 [&>section]:mb-16 [&>section]:border-b [&>section]:border-solid [&>section]:border-dark-disabled [&>section]:pb-4">

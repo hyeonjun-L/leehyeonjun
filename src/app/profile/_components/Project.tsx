@@ -1,5 +1,6 @@
-import Image from 'next/image';
+import Image, { StaticImageData } from 'next/image';
 import Link from 'next/link';
+import { ReactNode } from 'react';
 import {
   AxiosSVG,
   ChatGPTSVG,
@@ -26,8 +27,6 @@ import {
   VercelSVG,
   ViteSVG,
   ZustandSVG,
-  JavaScriptSVG,
-  WebpackSVG,
   NestSVG,
   PostgreSQLSVG,
   AwsSVG,
@@ -35,22 +34,52 @@ import {
 } from '@/icons/index';
 import connectionImage from '@/images/connection/connection_main.png';
 import connectionHealthImage from '@/images/connection-health/connection-health.png';
-import editorImage from '@/images/editor/editor.jpg';
+import hummingVisionImage from '@/images/humming-vision/humming-vision-main.png';
 // import haruImage from '@/images/haru/haru.jpg';
 
+interface ProjectType {
+  title: string;
+  explanation: string;
+  personnel: string;
+  period: string;
+  image: StaticImageData;
+  mainColor: string;
+  imageAlt: string;
+  webSite: string;
+  github: string;
+  developmentProcess: string;
+  figma?: string;
+  storyBoard?: string;
+  requirementAnalysis?: string;
+  detailExplanation: ReactNode;
+  role: ReactNode;
+  isOperating: boolean;
+  skills: Array<{
+    svg: ReactNode;
+    name: string;
+    bg: string;
+  }>;
+}
+
 const Project = () => {
-  const PROJECT = [
+  const PROJECT: ProjectType[] = [
     {
       title: 'Humming Vision',
       explanation: '머신 비전 하드웨어 전문 기업 웹사이트',
       personnel: '(개인 프로젝트 - 기획/개발/인프라)',
       period: '2024.12 ~ 2025.07',
-      image: connectionImage,
-      mainColor: 'border-[#your-brand-color]', // 브랜드 컬러로 수정
+      image: hummingVisionImage,
+      isOperating: true,
+      mainColor: 'border-[#00319b]',
       imageAlt: 'Humming Vision',
-      webSite: 'https://your-website.com', // 실제 URL로 수정
+      webSite: 'https://hummingvision.com/',
       github: 'https://github.com/hyeonjun-L/humming-vision',
-      figma: 'https://www.figma.com/design/waxsJ1lV1zmwgTKYQ58duk/...',
+      figma:
+        'https://embed.figma.com/design/aszBUPjoiS0VTmrEOB1OqP/%ED%97%88%EB%B0%8D%EB%B9%84%EC%A0%84?node-id=22-1147&embed-host=share',
+      storyBoard:
+        'https://embed.figma.com/design/waxsJ1lV1zmwgTKYQ58duk/%ED%97%88%EB%B0%8D%EB%B9%84%EC%A0%84-%EC%8A%A4%ED%86%A0%EB%A6%AC-%EB%B3%B4%EB%93%9C?node-id=0-1&embed-host=share',
+      requirementAnalysis:
+        'https://brief-zydeco-9fd.notion.site/Humming-Vision-15c97668c4da80f9a915d19e825bc050?pvs=74',
       developmentProcess: '/portfolio/humming-vision',
       detailExplanation: (
         <div>
@@ -201,8 +230,9 @@ const Project = () => {
       title: 'Connection',
       explanation: '댄서와 수강생 매칭 서비스',
       personnel: '(FE: 2명, BE: 2명, Designer: 1명)',
-      period: '2023.09 ~',
+      period: '2023.09 ~ 2024.04',
       image: connectionImage,
+      isOperating: false,
       mainColor: 'border-[#ff3e9a]',
       imageAlt: '커넥션',
       webSite: 'https://connection-frontend.vercel.app',
@@ -353,6 +383,7 @@ const Project = () => {
       personnel: '(FE: 2명, BE: 1명, Designer: 1명)',
       period: '2023.08 ~ 2023.09',
       image: connectionHealthImage,
+      isOperating: false,
       mainColor: 'border-[#12DDCE]',
       imageAlt: 'connection health',
       webSite: 'https://prompterday-frontend.vercel.app/',
@@ -457,62 +488,62 @@ const Project = () => {
         },
       ],
     },
-    {
-      title: 'Online Editor',
-      explanation: '온라인 에디터',
-      personnel: '(개인 프로젝트)',
-      period: '2023.06.27 ~ 2023.07.17',
-      image: editorImage,
-      mainColor: 'border-[#2ca9bc]',
-      imageAlt: 'online editor',
-      webSite: 'https://project-online-editor.vercel.app/',
-      github: 'https://github.com/hyeonjun-L/Project_Notion_VanillaJS-',
-      figma: '',
-      developmentProcess: '',
-      detailExplanation: (
-        <div>
-          글 작성, 수정, 삭제를 할 수 있는 온라인 에디터를{' '}
-          <strong>순수 JavaScript를 이용해 컴포넌트 방식으로 구현</strong>한
-          개인 프로젝트
-        </div>
-      ),
-      role: (
-        <div>
-          <strong>
-            싱글톤 패턴을 적용해 만든 전역 Store를 통한 상태 관리 기법
-          </strong>
-          을 배우며, 애플리케이션 상태를 효율적으로 관리하는 방법에 대해 이해할
-          수 있었습니다.
-          <br />
-          <br />글 자동 저장 기능의 구현 과정에서{' '}
-          <strong>debounce 함수를 활용</strong>해 비동기 처리의 성능을
-          최적화하는 방법을 익혔습니다. 이를 통해 사용자 입력 처리와 API 호출의
-          최적화 방법에 대한 지식을 획득하였습니다.
-          <br />
-          <br />
-          <strong>Webpack을 사용하여 번들링 과정을 설정</strong>하는 경험은 모던
-          웹 애플리케이션의 개발 및 배포 과정에서 필수적인 자원들을 효율적으로
-          관리하고 최적화하는 방법에 대해 배우게 됐습니다.
-        </div>
-      ),
-      skills: [
-        {
-          svg: <JavaScriptSVG className="size-5" />,
-          name: 'JavaScript',
-          bg: 'bg-[#F7DF1E]',
-        },
-        {
-          svg: <WebpackSVG className="size-5" />,
-          name: 'Webpack',
-          bg: 'bg-[#8DD6F9]',
-        },
-        {
-          svg: <VercelSVG className="size-5" />,
-          name: 'Vercel',
-          bg: 'bg-[#000000]',
-        },
-      ],
-    },
+    // {
+    //   title: 'Online Editor',
+    //   explanation: '온라인 에디터',
+    //   personnel: '(개인 프로젝트)',
+    //   period: '2023.06.27 ~ 2023.07.17',
+    //   image: editorImage,
+    //   mainColor: 'border-[#2ca9bc]',
+    //   imageAlt: 'online editor',
+    //   webSite: 'https://project-online-editor.vercel.app/',
+    //   github: 'https://github.com/hyeonjun-L/Project_Notion_VanillaJS-',
+    //   figma: '',
+    //   developmentProcess: '',
+    //   detailExplanation: (
+    //     <div>
+    //       글 작성, 수정, 삭제를 할 수 있는 온라인 에디터를{' '}
+    //       <strong>순수 JavaScript를 이용해 컴포넌트 방식으로 구현</strong>한
+    //       개인 프로젝트
+    //     </div>
+    //   ),
+    //   role: (
+    //     <div>
+    //       <strong>
+    //         싱글톤 패턴을 적용해 만든 전역 Store를 통한 상태 관리 기법
+    //       </strong>
+    //       을 배우며, 애플리케이션 상태를 효율적으로 관리하는 방법에 대해 이해할
+    //       수 있었습니다.
+    //       <br />
+    //       <br />글 자동 저장 기능의 구현 과정에서{' '}
+    //       <strong>debounce 함수를 활용</strong>해 비동기 처리의 성능을
+    //       최적화하는 방법을 익혔습니다. 이를 통해 사용자 입력 처리와 API 호출의
+    //       최적화 방법에 대한 지식을 획득하였습니다.
+    //       <br />
+    //       <br />
+    //       <strong>Webpack을 사용하여 번들링 과정을 설정</strong>하는 경험은 모던
+    //       웹 애플리케이션의 개발 및 배포 과정에서 필수적인 자원들을 효율적으로
+    //       관리하고 최적화하는 방법에 대해 배우게 됐습니다.
+    //     </div>
+    //   ),
+    //   skills: [
+    //     {
+    //       svg: <JavaScriptSVG className="size-5" />,
+    //       name: 'JavaScript',
+    //       bg: 'bg-[#F7DF1E]',
+    //     },
+    //     {
+    //       svg: <WebpackSVG className="size-5" />,
+    //       name: 'Webpack',
+    //       bg: 'bg-[#8DD6F9]',
+    //     },
+    //     {
+    //       svg: <VercelSVG className="size-5" />,
+    //       name: 'Vercel',
+    //       bg: 'bg-[#000000]',
+    //     },
+    //   ],
+    // },
     // {
     //   title: 'HARU',
     //   explanation: '친구들과 공유가 가능한 캘린더',
@@ -597,14 +628,19 @@ const Project = () => {
           skills,
           mainColor,
           figma,
+          storyBoard,
+          requirementAnalysis,
+          isOperating,
         }) => (
           <div key={title} className="grid gap-y-2 sm:grid-cols-[1.4fr_2fr]">
             <div className="top-16 mx-auto flex max-h-[25rem] flex-col sm:sticky">
               <h3 className="mb-4 text-3xl">{title}</h3>
               <p>{explanation}</p>
               <p>{personnel}</p>
-              <p>{period}</p>
-              <div className="mt-3 flex items-center gap-4 [&>a]:underline [&>a]:underline-offset-4">
+              <p>
+                {period} {isOperating ? null : '(운영종료)'}
+              </p>
+              <div className="mt-3 flex max-w-80 flex-wrap items-center gap-4 [&>a]:underline [&>a]:underline-offset-4">
                 <Link
                   className="hover:text-dark-text"
                   href={webSite}
@@ -635,6 +671,24 @@ const Project = () => {
                     href={developmentProcess}
                   >
                     Detail
+                  </Link>
+                )}
+                {storyBoard && (
+                  <Link
+                    className="hover:text-dark-text"
+                    href={storyBoard}
+                    target="_blank"
+                  >
+                    Story Board
+                  </Link>
+                )}
+                {requirementAnalysis && (
+                  <Link
+                    className="hover:text-dark-text"
+                    href={requirementAnalysis}
+                    target="_blank"
+                  >
+                    Requirement Analysis
                   </Link>
                 )}
               </div>

@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import React from 'react';
 import {
-  BlogSVG,
+  // BlogSVG,
   GithubSVG,
   HomeSVG,
   PortfolioSVG,
@@ -27,11 +27,11 @@ const activityNavList = [
     SVGComponent: PortfolioSVG,
     ariaLabel: '이현준 Portfolio',
   },
-  {
-    href: '/blog',
-    SVGComponent: BlogSVG,
-    ariaLabel: '이현준 Blog',
-  },
+  // {
+  //   href: '/blog',
+  //   SVGComponent: BlogSVG,
+  //   ariaLabel: '이현준 Blog',
+  // },
 ];
 
 const etcList = [

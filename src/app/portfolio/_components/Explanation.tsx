@@ -10,6 +10,7 @@ interface ExplanationProps {
   webSite: string;
   github: string;
   children: ReactNode;
+  isOperating: boolean;
 }
 
 const Explanation = ({
@@ -20,6 +21,7 @@ const Explanation = ({
   github,
   children,
   logo,
+  isOperating,
 }: ExplanationProps) => {
   return (
     <section className="flex flex-col gap-3">
@@ -36,6 +38,7 @@ const Explanation = ({
         <div className="flex flex-wrap gap-2">
           <p>{personnel}</p>
           <p>{period}</p>
+          {!isOperating && <p>*운영종료</p>}
         </div>
         <div className="mt-2 flex gap-4 sm:mt-0 [&>a]:underline [&>a]:underline-offset-4">
           <Link href={webSite} target="_blank" className="hover:text-dark-text">

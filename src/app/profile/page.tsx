@@ -5,7 +5,6 @@ import Certifications from './_components/Certifications';
 import Education from './_components/Education';
 import Experience from './_components/Experience';
 import Project from './_components/Project';
-import Skill from './_components/Skill';
 
 export const metadata: Metadata = {
   title: '이현준 | 프로필',
@@ -21,7 +20,7 @@ const page = () => {
       <AboutMe />
       <Career />
       <Project />
-      <Skill />
+      {/* <Skill /> */}
       <Experience />
       <Education />
       <Certifications />

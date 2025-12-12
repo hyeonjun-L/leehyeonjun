@@ -1,7 +1,6 @@
 import { Metadata } from 'next';
 import connectionImage from '@/images/connection/connection_main.png';
 import connectionHealthImage from '@/images/connection-health/connection-health.png';
-import editorImage from '@/images/editor/editor.jpg';
 import hummingVisionImage from '@/images/humming-vision/humming-vision-main.png';
 import Project from './_components/Project';
 // import haruImage from '@/images/haru/haru.jpg';
@@ -37,14 +36,14 @@ const page = () => {
       webLink: 'https://prompterday-frontend.vercel.app',
       detailLink: '/portfolio/connection-health',
     },
-    {
-      src: editorImage,
-      alt: '에디터 이미지',
-      explanation:
-        '글 작성, 수정, 삭제를 할 수 있는 온라인 에디터를 순수 JavaScript를 이용해 컴포넌트 방식으로 구현한 개인 프로젝트',
-      webLink: 'https://project-online-editor.vercel.app',
-      gitLink: 'https://github.com/hyeonjun-L/online-editor',
-    },
+    // {
+    //   src: editorImage,
+    //   alt: '에디터 이미지',
+    //   explanation:
+    //     '글 작성, 수정, 삭제를 할 수 있는 온라인 에디터를 순수 JavaScript를 이용해 컴포넌트 방식으로 구현한 개인 프로젝트',
+    //   webLink: 'https://project-online-editor.vercel.app',
+    //   gitLink: 'https://github.com/hyeonjun-L/online-editor',
+    // },
     // {
     //   src: haruImage,
     //   alt: '하루 이미지',

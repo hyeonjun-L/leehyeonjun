@@ -31,6 +31,7 @@ const page = () => {
     webSite: 'https://prompterday-frontend.vercel.app',
     github: 'https://github.com/connection-prompterday/prompterday-frontend',
     logo,
+    isOperating: false,
   } as const;
 
   const SKILLS = [
