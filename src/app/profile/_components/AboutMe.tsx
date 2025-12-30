@@ -9,7 +9,7 @@ const AboutMe = ({ theme }: { theme: string }) => {
     <section className="relative grid border-b border-solid border-dark-disabled sm:grid-cols-2">
       <div className="flex flex-col justify-center gap-2">
         <h1 className="mb-6 text-5xl font-semibold">이현준</h1>
-        <strong className="mb-6 text-lg">프론트엔드 개발자</strong>
+        {/* <strong className="mb-6 text-lg">프론트엔드 개발자</strong> */}
         <p>
           안녕하세요, 머신비전 업계에서 근무하며 현장에서의 광학 조건 계산의
           불편함과 시간 소요 문제를 해결하기 위해 광학용 계산기 어플리케이션을
