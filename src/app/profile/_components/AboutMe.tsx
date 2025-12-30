@@ -14,7 +14,7 @@ const AboutMe = () => {
       />
       <div className="mb-5 flex flex-col justify-center gap-2">
         <h1 className="mb-6 text-5xl font-semibold">이현준</h1>
-        <strong className="mb-6 text-lg">프론트엔드 개발자</strong>
+        {/* <strong className="mb-6 text-lg">프론트엔드 개발자</strong> */}
         <p>
           현재 대한민국의 소방청, 서울, 제주도, 울산 소방본부에서 사용하는 GIS
           기반 재난신고 시스템을 개발했으며, 머신 비전 B2B 기업 웹사이트를
