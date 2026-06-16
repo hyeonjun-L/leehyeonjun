@@ -1,13 +1,76 @@
+code[class*='language-'],
 pre[class*='language-'] {
-  color: theme('colors.zinc.100');
+  color: #f8f8f2;
+  background: none;
+}
+
+pre[class*='language-'] {
+  background: #282a36;
   margin-top: 1rem !important;
-  border-radius: 0px !important;
+  border-radius: 0.5rem !important;
+  overflow-x: auto;
+}
+
+/* Dracula token colors (이전 외부 CDN dracula-prism 로컬화) */
+.token.comment,
+.token.prolog,
+.token.cdata {
+  color: #6272a4;
+}
+
+.token.punctuation {
+  color: #f8f8f2;
+}
+
+.namespace {
+  opacity: 0.7;
 }
 
 .token.property,
+.token.tag,
+.token.constant,
+.token.symbol,
+.token.deleted {
+  color: #ff79c6;
+}
+
+.token.boolean,
+.token.number {
+  color: #bd93f9;
+}
+
+.token.selector,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin,
+.token.inserted {
+  color: #50fa7b;
+}
+
 .token.operator,
-.token.combinator {
-  color: theme('colors.zinc.400');
+.token.entity,
+.token.url,
+.language-css .token.string,
+.style .token.string,
+.token.variable {
+  color: #f8f8f2;
+}
+
+.token.atrule,
+.token.attr-value,
+.token.function,
+.token.class-name {
+  color: #f1fa8c;
+}
+
+.token.keyword {
+  color: #8be9fd;
+}
+
+.token.regex,
+.token.important {
+  color: #ffb86c;
 }
 
 .code-highlight {
@@ -26,29 +89,29 @@ pre[class*='language-'] {
 }
 
 .code-line.inserted {
-  background-color: theme('colors.emerald.900');
+  background-color: rgba(80, 250, 123, 0.15);
 }
 
 .code-line.deleted {
-  background-color: theme('colors.red.900');
+  background-color: rgba(255, 85, 85, 0.15);
 }
 
 .highlight-line {
   margin-left: -14px;
   margin-right: -16px;
-  background-color: theme('colors.zinc.800');
-  border-left: 2px solid theme('colors.amber.400');
+  background-color: rgba(255, 184, 108, 0.1);
+  border-left: 2px solid #ffb86c;
   display: block !important;
   border-radius: 0 !important;
 }
 
 .line-number::before {
   display: inline-block;
-  width: 1rem;
+  width: 2rem;
   text-align: right;
   margin-right: 16px;
   margin-left: -8px;
-  color: theme('colors.zinc.500');
+  color: #6272a4;
   content: attr(line);
 }
 
@@ -57,19 +120,11 @@ pre[class*='language-'] {
   display: inline-flex;
   position: relative;
   top: 1rem;
-  background: theme('colors.zinc.900');
-  color: theme('colors.zinc.100');
+  background: #21222c;
+  color: #f8f8f2;
   font-family: theme('fontFamily.mono');
   padding: 0.25rem 1.5rem;
   border-radius: 0.5rem 0.5rem 0 0;
-  border-top: 4px solid theme('colors.indigo.600');
+  border-top: 4px solid #bd93f9;
   font-size: 0.8rem;
-}
-
-.code-line.inserted {
-  background-color: theme('colors.emerald.900');
-}
-
-.code-line.deleted {
-  background-color: theme('colors.red.900');
 }
