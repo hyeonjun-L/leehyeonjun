@@ -36,14 +36,14 @@ export const metadata: Metadata = {
   referrer: 'origin-when-cross-origin',
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
   settingModal,
 }: {
   children: React.ReactNode;
   settingModal: React.ReactNode;
 }) {
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   const theme = cookieStore.get('theme')?.value ?? 'Dark';
 
   return (

@@ -32,6 +32,7 @@ export interface Post {
   publishDate: string;
   posterImage: string;
   categories: string[];
+  readingTime: number;
 }
 
 export type TMusic = { title: string; src: string };

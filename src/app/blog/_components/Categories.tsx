@@ -22,47 +22,37 @@ const Categories = ({ posts, selectCategorie }: CategoriesProps) => {
   );
 
   return (
-    <aside className="mt-2 lg:mt-0 lg:w-52 xl:w-64">
-      <div className="hidden border-b border-solid border-White-line py-3 lg:block dark:border-dark-line">
-        카테고리 목록
-      </div>
-      <ul className="hidden lg:block">
-        {Object.entries(categories).map(([categorie, count]) => (
-          <li
-            key={categorie}
-            className={`flex gap-2 pt-2 ${(!selectCategorie && categorie === '전체보기') || selectCategorie === categorie ? 'font-bold dark:text-white' : 'dark:[&>a]:text-dark-text'}`}
-          >
-            <Link
-              href={
-                categorie === '전체보기'
-                  ? '/blog'
-                  : `/blog?categorie=${categorie}`
-              }
-              className={`underline-offset-4 ${(!selectCategorie && categorie === '전체보기') || selectCategorie === categorie ? '' : 'hover:underline'}`}
-            >
-              {categorie}
-            </Link>
-            <span>({count})</span>
-          </li>
-        ))}
+    <nav
+      aria-label="카테고리"
+      className="border-b border-solid border-White-line pb-4 dark:border-dark-line"
+    >
+      <ul className="flex flex-wrap gap-2">
+        {Object.entries(categories).map(([categorie, count]) => {
+          const isActive =
+            (!selectCategorie && categorie === '전체보기') ||
+            selectCategorie === categorie;
+          const href =
+            categorie === '전체보기' ? '/blog' : `/blog?categorie=${categorie}`;
+
+          return (
+            <li key={categorie}>
+              <Link
+                href={href}
+                aria-current={isActive ? 'page' : undefined}
+                className={`inline-flex items-center gap-1 whitespace-nowrap rounded-full border border-solid px-3 py-1 text-sm transition-colors duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-White-myVScodeText dark:focus-visible:ring-dark-text ${
+                  isActive
+                    ? 'border-White-myVScodeText bg-White-menu-bg font-semibold text-White-myVScodeText dark:border-dark-text dark:bg-dark-menu-hover dark:text-white'
+                    : 'border-White-line text-White-menu-text hover:bg-White-anchor-hover dark:border-dark-line dark:text-dark-text dark:hover:bg-dark-menu-hover'
+                }`}
+              >
+                {categorie}
+                <span className="opacity-60">({count})</span>
+              </Link>
+            </li>
+          );
+        })}
       </ul>
-      <div className="flex gap-3 overflow-auto pb-2 lg:hidden">
-        {Object.entries(categories).map(([categorie, count]) => (
-          <Link
-            key={categorie}
-            href={
-              categorie === '전체보기'
-                ? '/blog'
-                : `/blog?categorie=${categorie}`
-            }
-            className={`${(!selectCategorie && categorie === '전체보기') || selectCategorie === categorie ? 'bg-White-menu-bg dark:bg-dark-menu-hover' : 'hover:bg-White-menu-bg dark:hover:bg-dark-menu-hover'} flex gap-1 whitespace-nowrap rounded-full border border-solid border-black px-3 py-1 dark:border-white`}
-          >
-            {categorie}
-            <span>({count})</span>
-          </Link>
-        ))}
-      </div>
-    </aside>
+    </nav>
   );
 };
 

@@ -16,17 +16,17 @@ import { NavItem } from '@/types/types';
 
 const activityNavList = [
   { href: '/', SVGComponent: HomeSVG, ariaLabel: 'Hoom' },
-  {
-    href: '/profile',
-    component: myImage,
-    alt: '이현준',
-    ariaLabel: '이현준 Profile',
-  },
-  {
-    href: '/portfolio',
-    SVGComponent: PortfolioSVG,
-    ariaLabel: '이현준 Portfolio',
-  },
+  // {
+  //   href: '/profile',
+  //   component: myImage,
+  //   alt: '이현준',
+  //   ariaLabel: '이현준 Profile',
+  // },
+  // {
+  //   href: '/portfolio',
+  //   SVGComponent: PortfolioSVG,
+  //   ariaLabel: '이현준 Portfolio',
+  // },
   {
     href: '/blog',
     SVGComponent: BlogSVG,

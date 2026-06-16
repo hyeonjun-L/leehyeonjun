@@ -1,8 +1,10 @@
-import { readdir } from 'fs/promises';
+import { readFile, readdir } from 'fs/promises';
 import path from 'path';
+import { cache } from 'react';
+import { getReadingTime } from '@/utils/readingTime';
 import { Post } from '@/types/types';
 
-export async function getPosts(): Promise<Post[]> {
+export const getPosts = cache(async (): Promise<Post[]> => {
   const postPath = path.resolve(process.cwd(), 'src', 'app', 'blog', '(posts)');
 
   const slugs = (await readdir(postPath, { withFileTypes: true })).filter(
@@ -11,12 +13,32 @@ export async function getPosts(): Promise<Post[]> {
 
   const posts = await Promise.all(
     slugs.map(async ({ name }) => {
-      const { metadata } = await import(`../app/blog/(posts)/${name}/page.mdx`);
-      return { slug: name, ...metadata };
+      const [{ metadata }, raw] = await Promise.all([
+        import(`../app/blog/(posts)/${name}/page.mdx`),
+        readFile(path.join(postPath, name, 'page.mdx'), 'utf-8'),
+      ]);
+
+      return { slug: name, ...metadata, readingTime: getReadingTime(raw) };
     }),
   );
 
   posts.sort((a, b) => +new Date(b.publishDate) - +new Date(a.publishDate));
 
   return posts;
+});
+
+export async function getAdjacentPosts(
+  slug: string,
+): Promise<{ prev: Post | null; next: Post | null }> {
+  const posts = await getPosts();
+  const index = posts.findIndex((post) => post.slug === slug);
+
+  if (index === -1) {
+    return { prev: null, next: null };
+  }
+
+  return {
+    prev: posts[index - 1] ?? null,
+    next: posts[index + 1] ?? null,
+  };
 }
