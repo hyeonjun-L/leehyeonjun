@@ -9,7 +9,7 @@ const Footer = () => {
         <Link href="/">홈</Link>
         <Link href="/profile">프로필</Link>
         <Link href="/portfolio">포트폴리오</Link>
-        <Link href="/blog">블로그</Link>
+        {/* <Link href="/blog">블로그</Link> */}
       </nav>
       <p>
         ⓒ 2024{' '}

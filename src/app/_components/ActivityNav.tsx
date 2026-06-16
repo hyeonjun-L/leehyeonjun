@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import React from 'react';
 import {
-  BlogSVG,
+  // BlogSVG,
   GithubSVG,
   HomeSVG,
   PortfolioSVG,

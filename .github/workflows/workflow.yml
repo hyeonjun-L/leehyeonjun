@@ -1,27 +1,23 @@
 name: duckoo Workflow
 
-on: [pull_request]
+on:
+  push:
+    branches:
+      - main
+  pull_request:
       
 jobs:
   eslint:
     name: Eslint test
     runs-on: ubuntu-latest
-
-    strategy:
-      fail-fast: false
-      matrix:
-        node_version:
-          - "16"
-          - "18"
-          - "20"
-
+    if: github.event_name == 'pull_request'
     steps:
       - uses: actions/checkout@v4
       
       - name: setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node_version }}
+          node-version: 18
           cache: 'npm'
 
       - name: Install dependencies
@@ -33,22 +29,14 @@ jobs:
   build:
     name: Next build test
     runs-on: ubuntu-latest
-
-    strategy:
-      fail-fast: false
-      matrix:
-        node_version:
-          - "16"
-          - "18"
-          - "20"
-
+    if: github.event_name == 'pull_request'
     steps:
       - uses: actions/checkout@v4
 
       - name: setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node_version }}
+          node-version: 18
           cache: 'npm'
 
       - name: Install dependencies
@@ -58,6 +46,7 @@ jobs:
         run: npm run build
 
   deploy:
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     env:
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
@@ -73,4 +62,3 @@ jobs:
         run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
       - name: Deploy Project Artifacts to Vercel
         run: vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
-      

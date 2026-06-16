@@ -25,7 +25,7 @@ const Project = ({
       <Image
         src={src}
         alt={alt}
-        className="size-full duration-500 group-hover:scale-110 dark:bg-white"
+        className="size-full object-cover duration-500 group-hover:scale-110 dark:bg-white"
       />
       <figcaption className="absolute top-0 flex size-full flex-col items-center justify-evenly bg-White-selectFileMenu-bg px-2 text-sm opacity-0 duration-700 group-hover:opacity-100 sm:p-5 sm:text-base dark:bg-dark-menu-bg">
         <h1>{explanation}</h1>

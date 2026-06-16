@@ -86,6 +86,14 @@ export { default as WebpackSVG } from './skill/webpack.svg';
 
 export { default as RecoilSVG } from './skill/recoil.svg';
 
+export { default as NestSVG } from './skill/nest.svg';
+
+export { default as PostgreSQLSVG } from './skill/postgresql.svg';
+
+export { default as AwsSVG } from './skill/aws.svg';
+
+export { default as TurboRepoSVG } from './skill/turborepo.svg';
+
 export { default as ListSVG } from './list.svg';
 
 export { default as DoubleArrowSVG } from './doubleArrow.svg';
