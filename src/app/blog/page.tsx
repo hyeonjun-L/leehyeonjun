@@ -12,9 +12,9 @@ export const metadata: Metadata = {
 const page = async ({
   searchParams,
 }: {
-  searchParams: { [key: string]: string };
+  searchParams: Promise<{ [key: string]: string }>;
 }) => {
-  const { categorie: selectedCategory, q: query } = searchParams;
+  const { categorie: selectedCategory, q: query } = await searchParams;
   const postList = await getPosts();
 
   const getFilteredPosts = () => {
@@ -43,19 +43,19 @@ const page = async ({
 
   return (
     <main
-      className={`${posts.length > 1 ? '' : 'min-h-dvh'} w-full gap-3 p-4 lg:flex xl:p-8`}
+      className={`${posts.length > 1 ? '' : 'min-h-dvh'} mx-auto w-full max-w-6xl p-4 lg:p-8`}
     >
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <h1 className="text-4xl font-semibold sm:text-5xl">이현준 블로그</h1>
+        <SearchPost />
+      </div>
       <Categories selectCategorie={selectedCategory} posts={postList} />
-      <section className="mx-auto mt-5 lg:mt-0 lg:w-[44.5rem] xl:w-[47.5rem]">
-        <div className="mb-4">
-          <div className="flex items-center justify-between py-3">
-            <h1>이현준 블로그</h1>
-            <SearchPost />
-          </div>
-          {query && <p>총 {posts.length}개의 포스트를 찾았습니다.</p>}
-        </div>
-        <Posts selectedCategory={selectedCategory} posts={posts} />
-      </section>
+      {query && (
+        <p className="mt-4 text-White-menu-text dark:text-dark-text">
+          총 {posts.length}개의 포스트를 찾았습니다.
+        </p>
+      )}
+      <Posts selectedCategory={selectedCategory} posts={posts} />
     </main>
   );
 };

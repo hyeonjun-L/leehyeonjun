@@ -34,21 +34,21 @@ export const HOME_TEXT_COLOR = [
 ] as const;
 
 export const HOME_MENU_LIST = [
-  {
-    title: '프로필',
-    href: '/profile',
-    textList: ['import ', '프로필 ', 'from ', "'이현준'", ';'],
-  },
-  {
-    title: '포트폴리오',
-    href: '/portfolio',
-    textList: ['import ', '포트폴리오 ', 'from ', "'이현준'", ';'],
-  },
   // {
-  //   title: '블로그',
-  //   href: '/blog',
-  //   textList: ['import ', '블로그 ', 'from ', "'이현준'", ';'],
+  //   title: '프로필',
+  //   href: '/profile',
+  //   textList: ['import ', '프로필 ', 'from ', "'이현준'", ';'],
   // },
+  // {
+  //   title: '포트폴리오',
+  //   href: '/portfolio',
+  //   textList: ['import ', '포트폴리오 ', 'from ', "'이현준'", ';'],
+  // },
+  {
+    title: '블로그',
+    href: '/blog',
+    textList: ['import ', '블로그 ', 'from ', "'이현준'", ';'],
+  },
 ];
 
 export const TRACK_LIST = [

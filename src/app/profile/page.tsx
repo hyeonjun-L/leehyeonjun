@@ -11,9 +11,9 @@ export const metadata: Metadata = {
   description: '이현준 자세히 보기 페이지',
 };
 
-const page = () => {
-  // const cookieStore = cookies();
-  // const theme = cookieStore.get('theme')?.value ?? 'Dark';
+const page = async () => {
+  const cookieStore = await cookies();
+  const theme = cookieStore.get('theme')?.value ?? 'Dark';
 
   return (
     <div className="m-auto max-w-6xl p-4 sm:p-4 xl:p-8 2xl:p-0">

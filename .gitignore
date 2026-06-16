@@ -36,6 +36,7 @@ yarn-error.log*
 next-env.d.ts
 
 .vercel
+.playwright-mcp
 
 # Sentry Config File
 .env.sentry-build-plugin
