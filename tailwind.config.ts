@@ -5,6 +5,25 @@ const config: Config = {
   content: ['./src/app/**/*.{js,ts,jsx,tsx,mdx}'],
   theme: {
     extend: {
+      fontFamily: {
+        mono: [
+          'var(--font-consola)',
+          'ui-monospace',
+          'SFMono-Regular',
+          'Menlo',
+          'Consolas',
+          'monospace',
+        ],
+        sans: [
+          '-apple-system',
+          'BlinkMacSystemFont',
+          '"Apple SD Gothic Neo"',
+          '"Malgun Gothic"',
+          '"Noto Sans KR"',
+          'system-ui',
+          'sans-serif',
+        ],
+      },
       zIndex: {
         routerNav: '10',
         anchorNav: '20',

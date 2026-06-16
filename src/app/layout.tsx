@@ -18,6 +18,7 @@ import type { Metadata } from 'next';
 const consola = localFont({
   src: './fonts/CONSOLA.ttf',
   display: 'swap',
+  variable: '--font-consola',
 });
 
 export const metadata: Metadata = {
@@ -58,15 +59,11 @@ export default async function RootLayout({
           name="naver-site-verification"
           content="b9297bed53014d32edd615ee741712e2f9846cd3"
         />
-        <link
-          rel="stylesheet"
-          href="https://unpkg.com/dracula-prism/dist/css/dracula-prism.css"
-        />
       </head>
       {process.env.NODE_ENV !== 'development' && <ConsoleLog />}
       <ContextProvider>
         <body
-          className={`${consola.className} relative flex h-dvh flex-col bg-white sm:flex-row dark:bg-dark-body `}
+          className={`${consola.className} ${consola.variable} relative flex h-dvh flex-col bg-white sm:flex-row dark:bg-dark-body `}
         >
           <NprogressBarProvider>
             <ActivityNav />

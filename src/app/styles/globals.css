@@ -14,6 +14,16 @@
   color: white;
 }
 
+/* 블로그 본문 단락/리스트만 읽기 좋은 sans (제목·코드·UI는 CONSOLA 유지) */
+.prose :where(p, li, blockquote, dl, dd, table) {
+  font-family: theme('fontFamily.sans');
+}
+
+/* 제목·코드는 항상 CONSOLA(monospace) — 본문 sans 상속 차단 (중첩 위치 무관) */
+.prose :where(h1, h2, h3, h4, h5, h6, code, kbd, samp, pre, pre *) {
+  font-family: theme('fontFamily.mono');
+}
+
 /* 인라인 코드 (코드블록 pre > code 제외) */
 .prose :not(pre) > code {
   background-color: theme('colors.White.selectFileMenu.bg');
