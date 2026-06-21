@@ -3,11 +3,12 @@ import { withSentryConfig } from '@sentry/nextjs';
 import nextMDX from '@next/mdx';
 import rehypeCodeTitles from 'rehype-code-titles';
 import rehypePrism from 'rehype-prism-plus';
+import remarkGfm from 'remark-gfm';
 
 const withMDX = nextMDX({
   extension: /\.mdx?$/,
   options: {
-    remarkPlugins: [],
+    remarkPlugins: [remarkGfm],
     rehypePlugins: [rehypeCodeTitles, rehypePrism],
   },
 });
