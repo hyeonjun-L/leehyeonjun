@@ -12,7 +12,7 @@ const BlurImage = async ({
   const { src, width, height, placeholder } =
     await getPlaceholderImage(imageURL);
   return (
-    <div className="mx-auto aspect-video md:w-2/3">
+    <div className="mx-auto aspect-video">
       <Image
         src={src}
         alt={`${title} 이미지`}
