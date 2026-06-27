@@ -12,18 +12,16 @@ const BlurImage = async ({
   const { src, width, height, placeholder } =
     await getPlaceholderImage(imageURL);
   return (
-    <div className="mx-auto aspect-video">
-      <Image
-        src={src}
-        alt={`${title} 이미지`}
-        width={width}
-        height={height}
-        placeholder="blur"
-        blurDataURL={placeholder}
-        className="size-full"
-        unoptimized={src.endsWith('.gif')}
-      />
-    </div>
+    <Image
+      src={src}
+      alt={`${title} 이미지`}
+      width={width}
+      height={height}
+      placeholder="blur"
+      blurDataURL={placeholder}
+      className="mx-auto h-auto w-full"
+      unoptimized={src.endsWith('.gif')}
+    />
   );
 };
 
