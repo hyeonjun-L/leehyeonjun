@@ -1,11 +1,14 @@
-export const metadata = {
+import { createPostMetadata } from '@/utils/postMetadata';
+
+export const metadata = createPostMetadata({
   title: '좌표를 변환했더니 서울이 사라졌다 — proj4와 ST_Transform의 함정',
   description:
     '5179로 받은 데이터를 4326으로. 코드 한 줄이면 되는데 왜 서울이 지도 밖으로 날아갈까. 좌표 변환이 실제로 하는 일과, proj4js·PostGIS·GDAL에서 사람들이 가장 자주 빠지는 네 가지 함정.',
   publishDate: '2026-07-05T00:00:00Z',
   posterImage: 'https://storage.googleapis.com/leehyeonjun.com/gis/08/setsrid-vs-transform.png',
   categories: ['GIS'],
-};
+  slug: 'gis-08-coordinate-transformation',
+});
 
 <BlogTitle {...metadata} />
 

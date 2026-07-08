@@ -1,11 +1,14 @@
-export const metadata = {
+import { createPostMetadata } from '@/utils/postMetadata';
+
+export const metadata = createPostMetadata({
   title: '@next/mdx로 블로그 만들기 2 (App router)',
   description: 'Anchor Navigation 구현, blurDataURL 기능 활용, Parallel Routes 및 Intercepting Routes 기능을 통한 모달 구현',
   publishDate: '2024-06-23T00:00:00Z',
   posterImage:
     'https://storage.googleapis.com/leehyeonjun.com/Next_mdx%EB%A1%9C_%EB%B8%94%EB%A1%9C%EA%B7%B8_%EB%A7%8C%EB%93%A4%EA%B8%B0/next%2Bmdx.png',
   categories: ['Next'],
-};
+  slug: 'next_mdx_blog2',
+});
 
 <BlogTitle {...metadata} />
 

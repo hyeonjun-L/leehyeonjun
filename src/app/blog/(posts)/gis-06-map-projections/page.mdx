@@ -1,11 +1,14 @@
-export const metadata = {
+import { createPostMetadata } from '@/utils/postMetadata';
+
+export const metadata = createPostMetadata({
   title: '지도 투영법 총정리 — 완벽한 세계지도가 불가능한 이유',
   description:
     '둥근 지구를 평평한 화면에 펴는 순간, 무언가는 반드시 거짓말이 된다. 그것도 수학적으로 증명된 불가능. 정각·정적·정거, 원통·원뿔·평면, 그리고 한국이 자기만의 좌표계를 쓰는 이유까지.',
   publishDate: '2026-06-27T00:00:00Z',
   posterImage: 'https://storage.googleapis.com/leehyeonjun.com/gis/06/conformal-vs-equalarea.png',
   categories: ['GIS'],
-};
+  slug: 'gis-06-map-projections',
+});
 
 <BlogTitle {...metadata} />
 

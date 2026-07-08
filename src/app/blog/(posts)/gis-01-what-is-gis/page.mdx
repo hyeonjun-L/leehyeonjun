@@ -1,11 +1,14 @@
-export const metadata = {
+import { createPostMetadata } from '@/utils/postMetadata';
+
+export const metadata = createPostMetadata({
   title: 'GIS란 무엇인가 — 지도는 결과물, GIS는 시스템',
   description:
     '카카오맵·배민·재난문자가 모두 GIS다. 1854년 콜레라 지도로 보는 GIS의 본질과, 지도와 GIS의 결정적 차이.',
   publishDate: '2026-06-21T00:00:00Z',
   posterImage: 'https://storage.googleapis.com/leehyeonjun.com/gis/gis-cover.jpg',
   categories: ['GIS'],
-};
+  slug: 'gis-01-what-is-gis',
+});
 
 <BlogTitle {...metadata} />
 

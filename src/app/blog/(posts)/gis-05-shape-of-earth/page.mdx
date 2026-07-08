@@ -1,11 +1,14 @@
-export const metadata = {
+import { createPostMetadata } from '@/utils/postMetadata';
+
+export const metadata = createPostMetadata({
   title: '지구의 진짜 모양 — 같은 좌표가 수백 미터 어긋나는 이유',
   description:
     '지구는 공이 아니다. 적도가 불룩한 타원체, 그보다 더 울퉁불퉁한 지오이드, 그리고 측지계(Bessel·GRS80·WGS84)가 다르면 같은 위경도가 수백 미터 어긋나는 이유 — 한국이 동경측지계를 버린 사연.',
   publishDate: '2026-06-26T12:00:00Z',
   posterImage: 'https://storage.googleapis.com/leehyeonjun.com/gis/05/sphere-vs-ellipsoid.png',
   categories: ['GIS'],
-};
+  slug: 'gis-05-shape-of-earth',
+});
 
 <BlogTitle {...metadata} />
 

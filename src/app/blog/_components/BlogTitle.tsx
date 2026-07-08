@@ -1,6 +1,9 @@
+import JsonLd from '@/app/_components/JsonLd';
+import { SITE_NAME, SITE_URL } from '@/constants/site';
 import { getPosts } from '@/utils/posts';
 import BlurImage from './BlurImage';
 import { CategoryBadgeList } from './CategoryBadge';
+import ViewCounter from './ViewCounter';
 import { Post } from '@/types/types';
 
 const BlogTitle = async ({
@@ -10,10 +13,44 @@ const BlogTitle = async ({
   posterImage,
 }: Post) => {
   const posts = await getPosts();
-  const readingTime = posts.find((post) => post.title === title)?.readingTime;
+  const post = posts.find((item) => item.title === title);
+  const readingTime = post?.readingTime;
+  const postUrl = `${SITE_URL}/blog/${post?.slug ?? ''}`;
+
+  const blogPostingJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    headline: title,
+    description: post?.description,
+    image: posterImage,
+    datePublished: publishDate,
+    dateModified: publishDate,
+    author: { '@type': 'Person', name: SITE_NAME, url: SITE_URL },
+    publisher: { '@type': 'Person', name: SITE_NAME, url: SITE_URL },
+    mainEntityOfPage: { '@type': 'WebPage', '@id': postUrl },
+    url: postUrl,
+    keywords: categories.join(', '),
+    inLanguage: 'ko-KR',
+  };
+
+  const breadcrumbJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: '홈', item: SITE_URL },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: '블로그',
+        item: `${SITE_URL}/blog`,
+      },
+      { '@type': 'ListItem', position: 3, name: title, item: postUrl },
+    ],
+  };
 
   return (
     <header className="not-prose mb-8">
+      <JsonLd data={[blogPostingJsonLd, breadcrumbJsonLd]} />
       <h1 className="mb-3 text-3xl font-semibold leading-tight sm:text-4xl lg:text-5xl">
         {title}
       </h1>
@@ -27,6 +64,7 @@ const BlogTitle = async ({
             <span>{readingTime}분</span>
           </>
         ) : null}
+        <ViewCounter slug={post?.slug ?? ''} increment />
         <CategoryBadgeList categories={categories} asLink size="md" />
       </div>
       <hr className="my-6 border-t border-solid border-White-line dark:border-dark-line" />
