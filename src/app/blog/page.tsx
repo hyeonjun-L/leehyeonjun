@@ -1,49 +1,65 @@
 import { Metadata } from 'next';
 import { getPosts } from '@/utils/posts';
 import Categories from './_components/Categories';
+import Pagination from './_components/Pagination';
 import Posts from './_components/Posts';
 import SearchPost from './_components/SearchPost';
 
 export const metadata: Metadata = {
-  title: '이현준 | 블로그',
-  description: '이현준 블로그 메인 페이지',
+  title: '블로그',
+  description: 'GIS·지도·웹 개발에 대한 기록을 남기는 이현준의 블로그',
+  alternates: {
+    canonical: '/blog',
+    types: {
+      'application/rss+xml': [{ url: '/feed.xml', title: '이현준 블로그 RSS' }],
+    },
+  },
 };
+
+const PAGE_SIZE = 8;
 
 const page = async ({
   searchParams,
 }: {
   searchParams: Promise<{ [key: string]: string }>;
 }) => {
-  const { categorie: selectedCategory, q: query } = await searchParams;
+  const {
+    categorie: selectedCategory,
+    q: query,
+    page: pageParam,
+  } = await searchParams;
   const postList = await getPosts();
 
-  const getFilteredPosts = () => {
-    const lowerQuery = query.toLowerCase();
+  const normalizedQuery = query?.trim().toLowerCase() ?? '';
 
-    const filteredPosts = postList.filter(
-      ({ title, description, categories }) => {
-        const lowerTitle = title.toLowerCase();
-        const lowerDescription = description.toLowerCase();
-        const lowerCategories = categories.map((category) =>
-          category.toLowerCase(),
-        );
+  const filteredPosts = postList.filter((post) => {
+    const matchesCategory =
+      !selectedCategory ||
+      post.categories.some((category) => category === selectedCategory);
 
-        return (
-          lowerTitle.includes(lowerQuery) ||
-          lowerDescription.includes(lowerQuery) ||
-          lowerCategories.some((category) => category.includes(lowerQuery))
-        );
-      },
+    if (!matchesCategory) return false;
+
+    if (!normalizedQuery) return true;
+
+    return (
+      post.title.toLowerCase().includes(normalizedQuery) ||
+      post.description.toLowerCase().includes(normalizedQuery) ||
+      post.categories.some((category) =>
+        category.toLowerCase().includes(normalizedQuery),
+      )
     );
+  });
 
-    return filteredPosts;
-  };
-
-  const posts = query ? getFilteredPosts() : postList;
+  const totalPages = Math.max(1, Math.ceil(filteredPosts.length / PAGE_SIZE));
+  const currentPage = Math.min(Math.max(1, Number(pageParam) || 1), totalPages);
+  const pagedPosts = filteredPosts.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE,
+  );
 
   return (
     <main
-      className={`${posts.length > 1 ? '' : 'min-h-dvh'} mx-auto w-full max-w-6xl p-4 lg:p-8`}
+      className={`${pagedPosts.length > 1 ? '' : 'min-h-dvh'} mx-auto w-full max-w-6xl p-4 lg:p-8`}
     >
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-4xl font-semibold sm:text-5xl">이현준 블로그</h1>
@@ -52,10 +68,16 @@ const page = async ({
       <Categories selectCategorie={selectedCategory} posts={postList} />
       {query && (
         <p className="mt-4 text-White-menu-text dark:text-dark-text">
-          총 {posts.length}개의 포스트를 찾았습니다.
+          총 {filteredPosts.length}개의 포스트를 찾았습니다.
         </p>
       )}
-      <Posts selectedCategory={selectedCategory} posts={posts} />
+      <Posts posts={pagedPosts} />
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        query={query}
+        category={selectedCategory}
+      />
     </main>
   );
 };

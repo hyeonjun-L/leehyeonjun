@@ -39,7 +39,7 @@ export async function GET(request: Request) {
   try {
     fontData = await loadFont();
   } catch {
-    fontPromise = null; // 다음 요청에서 재시도하도록 캐시 초기화
+    fontPromise = null;
 
     return new Response('OG font load failed', { status: 500 });
   }

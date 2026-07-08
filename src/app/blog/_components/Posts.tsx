@@ -1,24 +1,28 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import getPlaceholderImage from '@/utils/dynamicBlurDataUrl';
+import { getAllViews } from '@/utils/views';
 import { CategoryBadgeList } from './CategoryBadge';
 import { Post } from '@/types/types';
 
 interface PostsProps {
   posts: Post[];
-  selectedCategory: string;
 }
 
-const Posts = ({ posts, selectedCategory }: PostsProps) => {
-  const filteredPosts = posts.filter(
-    ({ categories }) =>
-      selectedCategory === undefined ||
-      categories.some((category) => category === selectedCategory),
-  );
+const Posts = async ({ posts }: PostsProps) => {
+  if (posts.length === 0) {
+    return (
+      <p className="mt-10 text-center text-White-menu-text dark:text-dark-text">
+        조건에 맞는 포스트가 없습니다.
+      </p>
+    );
+  }
+
+  const views = await getAllViews();
 
   return (
     <ol className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2">
-      {filteredPosts.map(
+      {posts.map(
         async ({
           slug,
           title,
@@ -62,6 +66,12 @@ const Posts = ({ posts, selectedCategory }: PostsProps) => {
                       <>
                         <span aria-hidden>·</span>
                         <span>{readingTime}분</span>
+                      </>
+                    ) : null}
+                    {views[slug] !== undefined ? (
+                      <>
+                        <span aria-hidden>·</span>
+                        <span>조회 {views[slug].toLocaleString()}</span>
                       </>
                     ) : null}
                     <CategoryBadgeList categories={categories} size="sm" />
