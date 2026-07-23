@@ -13,15 +13,22 @@ const CARD_CLASS =
 const PostNavigation = ({ posts }: PostNavigationProps) => {
   const pathname = usePathname();
   const slug = pathname.split('/').filter(Boolean).pop();
-  const index = posts.findIndex((post) => post.slug === slug);
+  const currentIndex = posts.findIndex((post) => post.slug === slug);
 
-  if (index === -1) {
+  if (currentIndex === -1) {
     return null;
   }
 
-  // posts는 최신순 정렬 → index+1이 더 오래된(이전) 글, index-1이 더 최신(다음) 글
-  const older = posts[index + 1] ?? null;
-  const newer = posts[index - 1] ?? null;
+  // 같은 시리즈(카테고리 공유) 글로만 이전/다음을 잇는다 — gis↔next 섞임 방지.
+  const current = posts[currentIndex];
+  const seriesPosts = posts.filter((post) =>
+    post.categories.some((category) => current.categories.includes(category)),
+  );
+  const index = seriesPosts.findIndex((post) => post.slug === slug);
+
+  // seriesPosts는 최신순 정렬 → index+1이 더 오래된(이전) 글, index-1이 더 최신(다음) 글
+  const older = seriesPosts[index + 1] ?? null;
+  const newer = seriesPosts[index - 1] ?? null;
 
   if (!older && !newer) {
     return null;
