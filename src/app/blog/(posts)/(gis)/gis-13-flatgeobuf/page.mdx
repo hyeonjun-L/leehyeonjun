@@ -1,0 +1,208 @@
+import { createPostMetadata } from '@/utils/postMetadata';
+
+export const metadata = createPostMetadata({
+  title: '화면에 보이는 조각만 내려받는다 — 공간 인덱스를 품은 바이너리, FlatGeobuf',
+  description:
+    'GeoJSON은 커지면 브라우저 탭을 잡아먹고, GeoPackage는 웹으로 스트리밍이 안 됐다. FlatGeobuf는 바이너리 안에 공간 인덱스를 통째로 심어, 12GB 파일을 정적 저장소에 올려두고도 HTTP Range 요청으로 화면에 보이는 피처만 뜯어온다. GeoJSON의 진짜 후계자를 만난다.',
+  publishDate: '2026-07-21T00:00:00Z',
+  posterImage:
+    'https://storage.googleapis.com/leehyeonjun.com/gis/13/hilbert.gif',
+  categories: ['GIS'],
+  slug: 'gis-13-flatgeobuf',
+});
+
+<BlogTitle {...metadata} />
+
+> ## 12GB짜리 지도를, 서버도 없이 넘긴다
+>
+> 전국 건물 데이터를 GeoJSON으로 브라우저에 올렸더니 탭이 **얼어붙었습니다.** 몇 GB짜리 텍스트를 통째로 받아, 통째로 파싱하다 뻗은 거죠. 그런데 옆 동네 데모는 태연합니다. **12GB짜리** 지도 파일을 S3에 툭 올려두고, 지도를 움직일 때마다 **화면에 보이는 만큼만** 사르르 불러와요. 지도 서버도, 데이터베이스도 없이. 12GB 중 실제로 받은 건 고작 몇 KB. — 대체 무슨 마술일까요?
+
+지난 <Link href='/blog/gis-12-geopackage'>GeoPackage</Link> 편은 이런 숙제를 남기고 끝났습니다. **"바이너리와 공간 인덱스의 힘을, 파일을 통째로 내려받지 않고 웹에서 그대로 누릴 순 없을까?"** 그 전 <Link href='/blog/gis-11-geojson'>GeoJSON</Link> 편에선 파일이 커지는 순간 텍스트가 어떻게 무너지는지 봤죠. 오늘의 주인공은 그 두 숙제를 **한 번에** 푸는 포맷입니다. GeoJSON의 진짜 후계자로 불리는 **FlatGeobuf**예요.
+
+## 이름이 곧 설계도 — Flat · Geo · buf
+
+낯선 이름이지만, 뜯어보면 설계가 다 들어 있습니다. **FlatGeobuf = Flat + Geo + buf.**
+
+- **Flat** — 구글이 만든 바이너리 직렬화 기술 **FlatBuffers**.
+- **Geo** — 지리 데이터.
+- **buf** — 버퍼(buffer), 즉 바이너리 덩어리.
+
+<Link href='/blog/gis-11-geojson'>GeoJSON</Link>이 "Geo + JSON(텍스트)"였다면, FlatGeobuf는 "Geo + FlatBuffers(바이너리)"인 셈이에요. 텍스트를 버리고 바이너리를 택한 순간, GeoJSON의 첫 번째 약점 — **텍스트라 뚱뚱하다** — 이 사라집니다.
+
+핵심은 FlatBuffers의 **제로카피(zero-copy)** 라는 성질입니다. 어렵지 않아요. GeoJSON은 브라우저가 `JSON.parse()`로 텍스트를 **일일이 풀어서** 새 객체를 통째로 만들어야 비로소 읽힙니다. 데이터가 크면 이 "푸는 비용"이 어마어마하죠. FlatBuffers는 반대예요. 데이터를 **풀지 않고, 놓인 그 자리에서 곧바로** 원하는 필드만 콕 집어 읽습니다. 파싱 단계도, 중간 객체를 만드는 낭비도 없어요. 좌표가 수백만 개인 지도 데이터에선 이게 속도를 가릅니다.
+
+> 💡 사실 FlatGeobuf는 무에서 나오지 않았습니다. Mapbox가 만든 **geobuf**라는 선배가 있었어요. GeoJSON을 **Protocol Buffers**(구글의 또 다른 바이너리 포맷)로 압축한 것이었죠. FlatGeobuf는 그 아이디어를 가져오되, protobuf 대신 **FlatBuffers**로 갈아탔습니다. 이유가 바로 위의 제로카피 — protobuf는 결국 한 번 "풀어야" 하지만, FlatBuffers는 안 풀어도 되거든요. 만든 사람은 스웨덴 개발자 **비에른 하르텔(Björn Harrtell)**. GDAL의 FlatGeobuf 지원 코드까지 직접 짠 이 바닥 고인물입니다. 2018년 말에 시작했는데, 정작 본인은 이름이 "너무 기술적이고 안 와닿는다"며 `OpenGeoFile` 같은 대안을 고민했다고 해요. 다행히(?) 원래 이름으로 남았습니다.
+
+## 뚜껑을 열면 네 칸 — 마법 바이트·헤더·인덱스·데이터
+
+FlatGeobuf 파일(`.fgb`)은 딱 **네 칸으로 나뉜 서랍장**입니다. 순서가 항상 고정돼 있어요.
+
+1. **마법 바이트(Magic Bytes)** — 맨 앞 8바이트. `FGB` + `0x03` + `FGB` + `0x01` 이라고 적혀 있습니다. 앞의 `FGB`는 "나 FlatGeobuf야"라는 서명, 붙어 있는 숫자는 스펙 버전(주 버전 3, 패치 1)이에요. 덕분에 확장자가 없어도 프로그램이 파일 정체를 알아봅니다.
+2. **헤더(Header)** — 이 지도의 목차이자 설명서. 무엇이 들었는지 바로 아래에서 봅니다.
+3. **인덱스(Index)** — 공간 인덱스. 이게 첫 번째 마법입니다. (선택 사항이라 뺄 수도 있어요.)
+4. **데이터(Data)** — 진짜 피처들. 도형 + 속성이 하나씩 차곡차곡.
+
+헤더에 담기는 것 중 눈여겨볼 게 있습니다. 바로 **좌표계(CRS)를 파일 안에 싣는다**는 점이에요. <Link href='/blog/gis-11-geojson'>GeoJSON</Link>은 RFC 7946이 좌표계를 <Link href='/blog/gis-07-epsg-codes'>WGS84(4326)</Link> 하나로 못박아, 한국 공공데이터를 담으려면 반드시 <Link href='/blog/gis-08-coordinate-transformation'>좌표 변환</Link>을 거쳐야 했죠. FlatGeobuf는 <Link href='/blog/gis-12-geopackage'>GeoPackage</Link>처럼 **좌표계 정의를 파일에 실어 나르기** 때문에, 5179든 5186이든 **원본 그대로** 담깁니다. 이 밖에 컬럼 스키마, 전체 피처 개수, 데이터 전체를 감싸는 경계상자, 그리고 인덱스의 가지 수(`index_node_size`, 기본 16) 같은 정보가 들어가요.
+
+{/* 🖼️ 이미지: .fgb 파일을 세로로 4칸(Magic Bytes / Header / Index / Data)으로 자른 서랍장 다이어그램. Index 칸엔 작은 R-tree, Data 칸엔 피처들이 줄지어 있는 모습 — gis/13/file-layout.png */}
+<BlurImage imageURL='https://storage.googleapis.com/leehyeonjun.com/gis/13/file-layout.png' title={metadata.title} />
+
+이제 이 서랍장의 진짜 주인공, **인덱스**와 **데이터**가 어떻게 짝을 이뤄 "조각만 받기"를 가능케 하는지 볼 차례입니다.
+
+## 첫 번째 마법 — 힐베르트 곡선으로 줄 세우기
+
+<Link href='/blog/gis-11-geojson'>GeoJSON</Link>의 두 번째 약점, 기억하시나요? **공간 인덱스가 없다**는 것. "화면에 보이는 이 영역의 피처만 줘"라고 못 해서, 한 개를 찾으려 해도 파일 전체를 훑어야 했죠. FlatGeobuf는 이 인덱스를 **파일 안에 붙박이로** 심어 넣습니다.
+
+인덱스의 정체는 **패킹된 힐베르트 R-tree(packed Hilbert R-tree)** 예요. 이름이 무섭지만 두 조각으로 나눠 보면 쉽습니다.
+
+<BlurImage imageURL='https://storage.googleapis.com/leehyeonjun.com/gis/13/hilbert.gif' title={metadata.title} />
+
+**① 힐베르트 곡선 — 데이터를 지리적으로 줄 세운다.** 먼저 오해부터 풀고 갈게요. 여기서 "줄 세운다"는 건 **건물을 실제로 옮긴다는 뜻이 아닙니다.** 좌표는 그대로예요. 바뀌는 건 오직 **파일에 저장되는 순서** — "누구를 몇 번째 바이트에 적을까" — 뿐입니다.
+
+그러면 "그거 그냥 정렬 아닌가요?" 싶을 거예요. 맞습니다, 정렬이에요. 문제는 **무엇을 기준으로** 정렬하느냐죠. 이름은 가나다순, 숫자는 오름차순으로 줄 세우면 그만입니다. 그런데 위치는 숫자가 **두 개**예요 — 경도(x)와 위도(y). 이 둘을 하나의 줄(1차원)로 세우려니 함정이 생깁니다.
+
+**경도만으로 정렬하면?** 서울과 광주는 경도가 둘 다 127° 근처라, 경도순으로 세우면 파일에서 바로 이웃이 됩니다. 하지만 실제론 300km나 떨어져 있죠. 반대로 바로 옆 건물인데도 경도 순서에선 저 멀리 밀려날 수 있어요. 한 축(경도)만 챙기고 나머지 축(위도)은 통째로 무시했기 때문입니다. 위도만 써도 똑같고요.
+
+**힐베르트 곡선은 이 "숫자 두 개를 하나로 접는" 영리한 방법입니다.** 평면 전체를 **한붓그리기로, 그것도 절대 멀리 점프하지 않고 늘 옆 칸으로만** 빈틈없이 훑고 지나가는 특별한 곡선이거든요. 이 곡선이 각 지점을 "몇 번째로 지나가는지" 번호를 매기면(가령 강남의 어느 지점 = 8,142번째), 그 번호 하나에 경도와 위도가 **함께** 녹아듭니다. 그다음은 간단해요. 이제 이 번호로 **평범하게 오름차순 정렬**하면 됩니다.
+
+곡선이 점프를 안 하니 결과도 깔끔합니다. **번호가 가까우면 실제 위치도 가깝다** — 그래서 지도 위에서 가까운 것끼리 파일 안에서도 가깝게 놓여요. 서울 강남의 건물들은 파일의 여기, 부산 해운대의 건물들은 저기, 이렇게 지역별로 뭉쳐서 저장되는 거죠.
+
+> 💡 왜 굳이 꼬불꼬불한 곡선일까요? 가장 단순한 대안인 "책 읽기 순서"(맨 윗줄 왼→오, 끝나면 아랫줄)와 비교하면 답이 나옵니다. 책 순서는 한 줄이 끝나고 다음 줄로 넘어갈 때, 오른쪽 끝에서 **왼쪽 끝으로 확 점프**해요. 파일상으론 바로 이웃인데 실제 위치는 화면 반대편인 셈이죠. 힐베르트 곡선은 이 점프가 없어서 "파일에서의 이웃 = 지도에서의 이웃"이 훨씬 잘 지켜집니다.
+
+**② R-tree — 뭉친 것들을 상자로 묶는다.** 그렇게 줄 세운 피처들을 몇 개씩(기본 16개씩) 묶어 경계상자(bounding box)를 씌우고, 그 상자들을 다시 더 큰 상자로 묶고… 이걸 반복해 만든 계층 트리가 R-tree입니다. "이 상자 안에 저 피처들이 있다"는 지도를 트리로 그려둔 셈이에요. 파일을 쓸 때 **딱 한 번** 통째로 지어 넣기 때문에 '패킹된(정적)' 인덱스라고 부릅니다.
+
+> 💡 R-tree는 공간 검색의 조상 격인 자료구조라, 나중에 **Phase 9(공간 인덱스 편)** 에서 제대로 뜯어봅니다. 여기선 "가까운 것끼리 묶은 상자들의 트리" 정도로만 기억해도 충분해요. 참고로 이 힐베르트 R-tree 아이디어는 Leaflet을 만든 블라디미르 아가폰킨의 **flatbush**라는 라이브러리에서 왔습니다.
+
+{/* 🖼️ 이미지: 왼쪽은 지도 위 점들을 힐베르트 곡선(S자로 공간을 채우는 곡선)이 순서대로 꿰는 모습, 오른쪽은 그 점들이 경계상자로 계층적으로 묶인 R-tree — gis/13/hilbert-rtree.png */}
+<BlurImage imageURL='https://storage.googleapis.com/leehyeonjun.com/gis/13/hilbert-rtree.png' title={metadata.title} />
+
+## 두 번째 마법 — 통째로 안 받고 조각만 (HTTP Range)
+
+인덱스를 파일에 심은 것만으로는 <Link href='/blog/gis-12-geopackage'>GeoPackage</Link>도 했던 일입니다(그쪽은 R-tree를 SQLite에 내장했죠). FlatGeobuf의 진짜 한 방은, **그 인덱스를 네트워크 너머에서 그대로 쓴다**는 데 있어요. GeoPackage가 끝내 못 푼 바로 그 숙제입니다.
+
+비결은 **HTTP Range 요청**입니다. 웹의 기본 기능인데, 한 줄로 말하면 **"이 파일에서 1,000번째 바이트부터 200바이트만 주세요"** 라고 콕 집어 받아오는 것이에요. 파일 전체가 아니라 일부만요.
+
+앞의 두 마법(고정된 4칸 구조 + 붙박이 인덱스)이 깔려 있으니, 클라이언트는 이렇게 움직입니다.
+
+1. **헤더만 먼저 받는다.** 파일 맨 앞 몇백 바이트만 Range로 요청해 목차를 읽어요. 이제 인덱스와 데이터가 각각 파일의 몇 바이트째에 있는지 계산됩니다.
+2. **인덱스를 타고 내려간다.** R-tree의 상자들을 Range로 조금씩 받아, **지금 내 화면(bbox)과 겹치는 가지만** 따라 내려갑니다. 안 겹치는 가지는 **아예 요청조차 안 해요.**
+3. **겹치는 피처만 뜯어온다.** 인덱스가 알려준 위치대로, 화면에 걸리는 피처들의 **바이트 범위만** 콕 집어 받습니다. 힐베르트 정렬 덕에 이웃한 피처는 파일에서도 붙어 있어, 한 번의 요청으로 뭉텅이째 가져올 수 있죠.
+
+그래서 서두의 **12GB 데모**가 성립합니다. 미국 전역의 센서스 블록을 담은 12GB짜리 `.fgb`를 그냥 정적 저장소에 올려둔 것뿐인데, 맨해튼 한 구역을 보면 그 구역 피처 수백 개만 전송되고 나머지 12GB는 **건드리지도 않아요.** 지도 서버도, DB도 필요 없습니다. **S3나 CDN 같은 정적 파일 저장소면 끝** — 모든 검색 로직이 클라이언트 안에서 돌기 때문이에요.
+
+{/* 🖼️ 이미지: S3 버킷에 놓인 거대한 .fgb 파일에서, 사용자 화면(bbox)에 해당하는 작은 조각만 화살표로 당겨오는 그림. 나머지 대부분은 회색으로 남아 "전송 안 됨" — gis/13/flatgeobuf-range.png */}
+<BlurImage imageURL='https://storage.googleapis.com/leehyeonjun.com/gis/13/flatgeobuf-range.png' title={metadata.title} />
+
+여기에 하나 더. FlatGeobuf는 **스트리밍**도 됩니다. 데이터 칸의 피처들은 각자 "내 크기는 여기까지"라고 앞에 길이를 붙이고 줄지어 있어요. 그래서 파일이 다 도착하기 전에도, **먼저 온 피처부터 순서대로 화면에 그리기 시작**할 수 있습니다. <Link href='/blog/gis-11-geojson'>GeoJSON</Link>이 "전부 받고 → 전부 파싱하고 → 그제야 첫 점"이었던 것과 정반대죠. 다운로드가 진행되는 동안 지도가 착착 채워지는 경험을 줄 수 있습니다.
+
+## 정직한 숫자 — 얼마나 작고, 얼마나 빠른가
+
+여기서 잠깐, 예고편의 그 문구를 짚고 넘어가야겠습니다. "**1GB GeoJSON을 200MB로**" — 정말 5분의 1로 줄까요? 정답은 **데이터 종류에 따라 다릅니다.** 솔직하게 봅시다.
+
+FlatGeobuf가 작아지는 이유는 두 가지예요. 바이너리라 숫자를 글자로 안 쓰고, `"type"`·`"coordinates"` 같은 **키를 피처마다 반복하지 않기** 때문입니다. 그 효과는 원본이 "얼마나 장황한 GeoJSON이었나"에 비례해요.
+
+| 데이터 성격 | GeoJSON 대비 FlatGeobuf 크기 |
+| --- | --- |
+| 도로·행정구역 (선·면) | 대략 **절반** (0.5~0.65배) |
+| 점 데이터·고정밀 좌표 | **5분의 1**까지도 (0.2배 안팎) |
+
+즉 "1GB → 200MB"는 **점이 잔뜩 든 데이터에서 나오는 극단값**입니다. 소수점 15자리까지 찍힌 뚱뚱한 GeoJSON일수록 격차가 크죠. 반대로 이미 알뜰한 선·면 데이터라면 "대략 절반" 정도가 현실적인 기대치예요.
+
+크기보다 더 극적인 건 **읽기 속도**입니다. 공식 벤치마크에서 FlatGeobuf의 전체 읽기는 <Link href='/blog/gis-10-shapefile'>Shapefile</Link>보다 **2~8배 빠르고**, GeoJSON은 아예 상대가 안 됩니다(수십 배 느림). bbox로 걸러 읽을 땐 격차가 더 벌어지고요.
+
+> 💡 오해는 말아야 합니다. FlatGeobuf는 **"작게 만드는 포맷"이 아니라 "빠르게 읽는 포맷"** 이에요. 순수하게 용량을 최소화하는 게 목표라면, 컬럼 지향으로 압축하는 **GeoParquet**(Phase 3 뒤에서 만납니다)가 훨씬 작습니다. FlatGeobuf의 진짜 강점은 크기가 아니라 **"인덱스를 품은 채, 빠르게, 그리고 조각으로 읽힌다"** 는 데 있습니다.
+
+{/* 🖼️ 이미지: 같은 데이터셋을 GeoJSON / Shapefile / GeoPackage / FlatGeobuf로 저장했을 때의 (1)파일 크기와 (2)전체 읽기 시간을 나란히 보여주는 막대그래프. FlatGeobuf의 읽기 시간이 압도적으로 짧게 — gis/13/size-benchmark.png */}
+<BlurImage imageURL='https://storage.googleapis.com/leehyeonjun.com/gis/13/size-benchmark.png' title={metadata.title} />
+
+## 손으로 만져보기 — 변환과 웹 로딩
+
+이론은 됐고, 실제로 만들고 써 봅시다. 만드는 건 <Link href='/blog/gis-10-shapefile'>Shapefile</Link>·<Link href='/blog/gis-12-geopackage'>GeoPackage</Link> 편에서 계속 만난 GDAL의 `ogr2ogr` 그대로예요. GDAL 3.1(2020)부터 FlatGeobuf를 지원합니다.
+
+```bash
+# Shapefile / GeoJSON → FlatGeobuf (공간 인덱스는 기본으로 켜짐)
+ogr2ogr -f FlatGeobuf korea.fgb sido.shp
+
+# 인덱스 없이 만들기 (파일은 더 작아지지만, bbox로 조각만 받는 마법은 포기)
+ogr2ogr -f FlatGeobuf korea.fgb sido.shp -lco SPATIAL_INDEX=NO
+```
+
+진짜 재미는 웹에서 나옵니다. `flatgeobuf` 자바스크립트 라이브러리의 `deserialize(url, bbox)` 함수에 **지금 화면 범위(bbox)만 넘기면**, 나머지는 알아서 해줘요. 위에서 본 3단계 Range 요청을 라이브러리가 대신 수행하고, 도착하는 피처를 하나씩 흘려줍니다.
+
+```js
+import { deserialize } from 'flatgeobuf/lib/mjs/geojson.js';
+
+// 지금 지도에 보이는 영역
+const bbox = { minX: 126.9, minY: 37.4, maxX: 127.1, maxY: 37.7 };
+
+// 도착하는 피처를 순서대로 지도에 그린다 (Leaflet 예)
+for await (const feature of deserialize(url, bbox)) {
+  L.geoJSON(feature).addTo(map);
+}
+```
+
+`for await` 한 줄이 핵심입니다. 파일을 통째로 받아 파싱하는 게 아니라, **화면에 걸리는 피처만, 도착하는 대로** 그리는 거죠. 지도를 옮길 때마다 새 bbox로 다시 호출하면, 그 영역 데이터만 새로 받아옵니다. <Link href='/blog/gis-11-geojson'>GeoJSON</Link>을 `fetch` 해서 통째로 얹던 방식과는 체감이 완전히 다릅니다.
+
+> 💡 실무 함정 하나 — CORS. 다른 도메인(CDN)에 올린 `.fgb`를 브라우저에서 읽으려면, 서버가 `Access-Control-Allow-Origin` 같은 **CORS 헤더**를 내줘야 합니다. 다행히 `bytes=100-200` 같은 **단일 Range 요청은 요즘 브라우저가 안전 목록(safelist)으로 처리**해서, 대개 `OPTIONS` 프리플라이트(본 요청 전에 브라우저가 "이렇게 보내도 돼?"라고 자동으로 먼저 던지는 예비 요청) 없이 통과해요. 다만 프리플라이트가 걸리는 상황이라면, CloudFront 같은 CDN이 그 `OPTIONS` 응답을 **기본으로는 캐시하지 않아** 조각을 받을 때마다 왕복이 한 번씩 더 붙습니다. 교차 출처로 서빙한다면 CORS 헤더와 캐시 설정을 미리 챙겨두세요.
+
+## 그래도 만능은 아니다
+
+여기까지 들으면 완벽해 보이지만, FlatGeobuf에도 뚜렷한 경계선이 있습니다. <Link href='/blog/gis-12-geopackage'>GeoPackage</Link> 편에서 그랬듯, 약점을 알아야 제대로 씁니다.
+
+**① 쓰기는 사실상 한 번뿐.** FlatGeobuf는 **수정·삭제·추가(append)를 지원하지 않습니다.** 일부러 뺐어요. 피처를 하나라도 끼워 넣는 순간 힐베르트 정렬과 R-tree가 통째로 어긋나거든요. 그래서 "한 번 쓰고 여러 번 읽는" 정적 포맷입니다. 데이터를 계속 고쳐야 한다면 그건 `UPDATE` 한 줄로 되는 <Link href='/blog/gis-12-geopackage'>GeoPackage</Link>나, 여럿이 동시에 편집하는 PostGIS(Phase 6)의 몫이에요.
+
+**② 압축이 목적이 아니다.** 앞서 봤듯 최소 용량을 원하면 GeoParquet가 낫습니다.
+
+**③ 줌에 따른 단순화가 없다.** FlatGeobuf는 언제나 **피처 원본**을 줍니다. 화면을 아무리 축소해도, 해안선 10만 개 꼭짓점을 그대로 다 받아와야 해요. 전국을 한눈에 보는 초저배율에선 이게 낭비가 됩니다. "줌 레벨에 맞게 적당히 뭉갠" 데이터를 주는 장치(타일·오버뷰)가 없거든요.
+
+**④ 조각을 받되, 왕복이 잦다.** Range 요청이 여러 번 오가니, 대역폭보다 **네트워크 지연(latency)** 에 민감합니다. 그래서 CDN 튜닝(위의 CORS 포함)이 중요해요.
+
+눈치채셨나요? 세 번째 약점이 묘하게 익숙합니다. <Link href='/blog/gis-12-geopackage'>GeoPackage</Link>가 "원격 스트리밍"을 숙제로 남겼듯, FlatGeobuf는 "**대용량을 매끄럽게 그리는 시각화**"를 숙제로 남깁니다. 그리고 그 숙제를 정면으로 겨냥한 포맷이 바로 다음 편에 나옵니다.
+
+## 클라우드 네이티브 지도라는 흐름
+
+사실 FlatGeobuf는 혼자 튀어나온 게 아니라, 2020년대 GIS의 큰 물결 위에 있습니다. **클라우드 네이티브 지오(cloud-native geospatial)** 라 불리는 흐름이에요. 핵심 철학은 하나 — **"지도 데이터를 서버 없이 정적 저장소에 올려두고, HTTP Range로 필요한 조각만 읽는다."** 우리가 방금 본 그 방식입니다.
+
+이 철학을 공유하는 한 식구를 정리하면 이렇습니다.
+
+| 포맷 | 담는 것 | 한 줄 요약 |
+| --- | --- | --- |
+| **COG** | 래스터(위성영상) | 큰 TIFF에서 보이는 영역만 뜯어오기 |
+| **FlatGeobuf** | 벡터 피처 | 큰 벡터에서 bbox 조각만 뜯어오기 |
+| **PMTiles** | 지도 타일 | 미리 그린 타일 묶음을 한 파일로 |
+| **GeoParquet** | 벡터(분석용) | 컬럼 지향으로 대량 분석 |
+
+같은 벡터라도 역할이 갈립니다. FlatGeobuf는 **가공 안 된 원본 피처**를 건네고 그림은 클라이언트가 그립니다. 반면 **PMTiles**는 **미리 그려둔 타일**을 건네죠. 그래서 둘은 경쟁이 아니라 짝꿍이에요 — 실제로 FlatGeobuf를 입력으로 받아 타일로 굽는 경우가 흔합니다.
+
+> 💡 표준 지위는 정확히 알아둡시다. FlatGeobuf는 아직 **OGC 정식 표준은 아닙니다.** 커뮤니티가 만든 스펙이고, 2023년에 OGC 커뮤니티 표준으로 올리기 위한 공개검토를 거쳤어요. 그럼에도 GDAL·QGIS·PostGIS·GeoServer 등 주요 도구가 이미 폭넓게 지원하니, 실무에서 쓰는 데엔 부족함이 없습니다.
+
+## 정리 — 한 문장으로
+
+> **FlatGeobuf는 '공간 인덱스를 통째로 삼킨 바이너리 지도'다. 힐베르트 곡선으로 줄 세운 피처와 붙박이 R-tree 덕에, 파일을 통째로 내려받지 않고 HTTP Range로 화면에 보이는 조각만 뜯어온다.**
+
+| | Shapefile | GeoJSON | GeoPackage | FlatGeobuf |
+| --- | --- | --- | --- | --- |
+| 파일 구성 | 3~5개 묶음 | 텍스트 1개 | DB 파일 1개 | 바이너리 1개 |
+| 사람이 읽나 | 아니오 | 예 | 아니오 | 아니오 |
+| 좌표계 | `.prj` 별도 | 4326 고정 | 파일 안에 자유 | 파일 안에 자유 |
+| 공간 인덱스 | 부실(`.shx`) | 없음 | R-tree 내장 | **R-tree 내장** |
+| 웹 스트리밍 | 부분적 | 통째로만 | 부적합 | **조각만 (Range)** |
+| 수정 | 깨지기 쉬움 | 전체 다시 쓰기 | `UPDATE` 한 행 | 다시 쓰기(정적) |
+| 약점 | 화석 제약들 | 크면 붕괴 | 웹 스트리밍 X | 시각화·수정 X |
+
+이제 그림이 완성됐습니다. Shapefile(파일 묶음) → GeoJSON(텍스트) → GeoPackage(데이터베이스) → FlatGeobuf(스트리밍 바이너리)로 오면서, 포맷은 점점 **"웹에서, 필요한 만큼만"** 쪽으로 진화해 왔어요.
+
+그런데 FlatGeobuf가 조각내 보낸 건 어디까지나 **원본 피처**였습니다. 브라우저가 그걸 받아 매번 직접 그려야 했죠. 만약 **다 그려진 지도(타일) 자체**를 조각내 보낼 수 있다면? 그러면 클라이언트는 그리지도 않고 그냥 붙이기만 하면 됩니다. 다음 편은 바로 그 발상 — 지도 타일 수백만 장을 **단일 파일**로 정적 저장소에 올려, 지도 서버를 통째로 없애버리는 포맷 **PMTiles**입니다. "서버 없는 지도"가 어디까지 가는지 보게 될 거예요.
+
+<ReferenceList
+  references={[
+    'https://flatgeobuf.org/',
+    'https://github.com/flatgeobuf/flatgeobuf',
+    'https://guide.cloudnativegeo.org/flatgeobuf/intro.html',
+    'https://gdal.org/en/stable/drivers/vector/flatgeobuf.html',
+    'https://worace.works/2022/03/12/flatgeobuf-implementers-guide/',
+    'https://github.com/mourner/flatbush',
+    'https://lists.osgeo.org/pipermail/gdal-dev/2018-December/049450.html',
+    'https://cloudnativegeo.org/blog/2023/10/where-is-cog-for-vector/',
+  ]}
+/>
