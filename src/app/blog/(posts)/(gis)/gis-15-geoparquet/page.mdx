@@ -1,0 +1,209 @@
+import { createPostMetadata } from '@/utils/postMetadata';
+
+export const metadata = createPostMetadata({
+  title: '수억 행을 훑는다 — 열로 눕힌 공간 데이터, GeoParquet',
+  description:
+    'Shapefile부터 PMTiles까지, 지금까지의 포맷은 모두 "지도로 그리기"가 목적이었다. GeoParquet는 방향을 튼다 — 데이터를 열(column) 단위로 눕혀 저장해, PostGIS 서버 없이 노트북 한 대로 수억 행 공간 데이터를 SQL로 분석한다. Overture가 지구 전체의 장소·건물을 GeoParquet로 뿌리는 "공간 데이터의 빅데이터 시대"를 연다.',
+  publishDate: '2026-07-27T00:00:00Z',
+  posterImage:
+    'https://storage.googleapis.com/leehyeonjun.com/gis/15/geoparquet-anatomy.png',
+  categories: ['GIS'],
+  slug: 'gis-15-geoparquet',
+});
+
+<BlogTitle {...metadata} />
+
+> ## 지도를 그리는 대신, 계산한다
+>
+> 전 세계 수억 개의 장소가 담긴 데이터를 노트북에 얹었습니다. 지도에 찍어보려는 게 아니에요. **"서울 안에 가게가 몇 개고, 그중 뭐가 제일 많지?"** 를 묻고 싶은 겁니다. 그런데 PostGIS 서버도, 데이터 적재도, 다운로드도 없어요. 클라우드에 놓인 파일을 **SQL로 직접** 찌르는데, 전 세계 수백 GB 중 실제로 받은 건 극히 일부. 그리고 **6초 만에** 답이 나옵니다 — 서울엔 장소가 12만 4천여 개, 1등은 한식당. 지도를 그린 게 아니라 **세고, 거르고, 집계한** 거죠. 대체 무슨 조화일까요?
+
+지금까지의 포맷들을 돌아볼까요. <Link href='/blog/gis-10-shapefile'>Shapefile</Link> → <Link href='/blog/gis-11-geojson'>GeoJSON</Link> → <Link href='/blog/gis-12-geopackage'>GeoPackage</Link> → <Link href='/blog/gis-13-flatgeobuf'>FlatGeobuf</Link> → <Link href='/blog/gis-14-pmtiles'>PMTiles</Link>. 생김새는 달랐지만 결국 향한 곳은 하나였어요 — **"화면에 그리기(display)".** 오늘의 주인공은 목적지가 다릅니다. 그리라고 주는 게 아니라 **계산하라고** 주는 포맷, **GeoParquet**예요. 공간 데이터가 "지도"를 넘어 **"빅데이터 분석"** 의 세계로 넘어가는 지점입니다.
+
+## 잠깐, Parquet이 뭐죠?
+
+GeoParquet의 성을 떼면 **Parquet**이 남습니다. 이게 뭔지부터 짚어야 해요. Parquet은 GIS 출신이 아니라 **빅데이터 세계(하둡 생태계)에서 온 파일 포맷**이거든요. GeoParquet는 여기에 공간을 얹은 것뿐입니다. 그러니 Parquet의 정체 하나만 이해하면 절반은 끝나요.
+
+핵심은 **"표를 디스크에 어떤 방향으로 눕히느냐"** 입니다. 이름·나이·좌표가 든 표가 있다고 해봐요. 저장하는 방법이 사실 두 가지예요.
+
+- **행 지향(row-oriented)** — <Link href='/blog/gis-11-geojson'>GeoJSON</Link>이나 CSV, 보통의 데이터베이스. **한 레코드를 통째로** 나란히 적습니다. `(철수, 20, 좌표) (영희, 34, 좌표) …` 이런 식으로요.
+- **열 지향(column-oriented)** — Parquet. **같은 컬럼의 값들을 한곳에** 모읍니다. 이름은 이름끼리 `(철수, 영희, …)`, 나이는 나이끼리 `(20, 34, …)`, 좌표는 좌표끼리.
+
+**비유로 보면 확실해집니다.** 행 지향은 **사람마다 서류 한 봉투**를 만들어 캐비닛에 꽂아 둔 거예요. "철수에 대한 모든 것"은 봉투 하나만 꺼내면 되니 빠르죠. 반대로 열 지향은 **"이름"만 든 서랍, "나이"만 든 서랍**을 따로 두는 겁니다. 그럼 **"우리 회원 1억 명의 평균 나이"** 같은 걸 물을 때, 나이 서랍 하나만 열면 돼요. 이름도 좌표도 안 건드립니다.
+
+{/* 🖼️ 이미지: 같은 표(이름/나이/좌표)를 (위) 행 지향 — 레코드 봉투가 줄줄이, (아래) 열 지향 — 컬럼별 서랍으로 눕힌 비교 다이어그램 — gis/15/row-vs-column.png */}
+<BlurImage imageURL='https://storage.googleapis.com/leehyeonjun.com/gis/15/row-vs-column.png' title={metadata.title} />
+
+눈치채셨겠지만, 두 방식은 **잘하는 일이 정반대**예요. 행 지향은 "레코드 하나를 통째로 읽거나 새로 끼워 넣기"에 강하고 — 그래서 대부분의 앱 데이터베이스가 이 방식이죠 — 열 지향은 **"수많은 행을 훑어 집계·필터링하기"** 에 강합니다. 후자가 바로 **분석(analytics)** 의 일이에요.
+
+## 열로 눕히면 분석이 빨라지는 세 가지 이유
+
+왜 열 지향이 분석에서 이기는지, 딱 세 가지로 정리됩니다.
+
+**① 필요한 열만 읽는다 (column pruning).** 컬럼이 50개인 표에서 내 질문이 3개 컬럼만 건드린다면? 열 지향은 그 **3개 서랍만** 디스크에서 꺼냅니다. 나머지 94%는 아예 손도 안 대요. 행 지향이라면 필요 없는 47개 컬럼까지 매 행마다 훑고 지나가야 했을 텐데 말이죠.
+
+**② 압축이 잘 된다.** 같은 컬럼엔 **같은 종류의, 비슷한 값**이 모여 있습니다(정수만, 비슷한 문자열만). 이러면 사전 인코딩·런렝스 같은 압축이 훨씬 강력하게 먹혀요. <Link href='/blog/gis-13-flatgeobuf'>FlatGeobuf</Link> 편에서 "순수하게 용량을 줄이는 데엔 GeoParquet가 최강"이라고 예고했던 이유가 바로 이겁니다.
+
+**③ 안 맞는 덩어리는 통째로 건너뛴다 (predicate pushdown).** Parquet은 데이터를 **row group**이라는 덩어리로 나눠 담고, 각 덩어리마다 컬럼별 **최솟값·최댓값(min/max) 통계**를 파일 꼬리표(footer)에 적어 둡니다. 그래서 `나이 >= 65`를 찾을 때, "이 덩어리는 나이 최댓값이 20이네? → **통째로 건너뜀**" 이 가능해요. 파일을 다 읽지 않고 **필요한 덩어리만** 콕 집습니다.
+
+이 셋이 합쳐지면, 수억 행짜리 파일에서도 **내 질문에 관련된 아주 일부만** 읽고 답을 냅니다. 클라우드에 올려두고 <Link href='/blog/gis-13-flatgeobuf'>HTTP Range</Link>로 그 일부만 받아오면? 서버 없이 원격 분석이 되는 거죠. 익숙한 흐름이죠 — 이 시리즈가 계속 봐 온 그 "필요한 조각만" 철학입니다.
+
+## GeoParquet = Parquet + 공간
+
+여기까지가 Parquet이고, **GeoParquet는 여기에 딱 두 가지를 더한** 겁니다.
+
+1. **지오메트리 컬럼** — 점·선·면 좌표를 <Link href='/blog/gis-13-flatgeobuf'>WKB</Link>(Well-Known Binary) 같은 바이너리로 담는 전용 컬럼. 여느 컬럼처럼 열 지향으로 눕혀지죠.
+2. **표준 메타데이터** — 파일에 `geo`라는 꼬리표를 달아 "어느 게 지오메트리 컬럼인지, 좌표계(CRS)는 뭔지, 지오메트리 타입과 전체 경계는 어떤지"를 적습니다. 덕분에 도구가 이 파일을 열자마자 **"아, 이건 공간 데이터고 좌표계는 5179구나"** 하고 알아봐요.
+
+좌표계를 파일 안에 싣는 건 <Link href='/blog/gis-12-geopackage'>GeoPackage</Link>·<Link href='/blog/gis-13-flatgeobuf'>FlatGeobuf</Link>와 같은 계보예요. 한국 데이터를 원본 좌표계 그대로 담을 수 있습니다. GeoParquet는 현재 **OGC의 표준(v1.1, 인큐베이팅 단계)** 이고요.
+
+> 💡 **1.1의 한 방 — bbox covering 컬럼.** 위에서 본 ③번(min/max로 덩어리 건너뛰기)을 **공간에도** 적용하는 장치예요. 각 피처의 경계상자(`xmin/ymin/xmax/ymax`)를 **별도 컬럼**으로 심어 두면, Parquet의 row group 통계가 그 bbox에도 붙습니다. 그럼 "이 덩어리의 bbox는 부산 근처네? 나는 서울을 찾는데? → **통째로 건너뜀**"이 돼요. 잠시 뒤 데모에서 이걸로 전 세계 데이터에서 서울만 순식간에 걸러냅니다. 뒤에서 만날 Overture가 바로 이 방식을 씁니다.
+
+{/* 🖼️ 이미지: Parquet 파일 구조(여러 row group + 맨 뒤 footer 메타데이터) 안에, 일반 컬럼들과 나란히 geometry(WKB) 컬럼과 bbox 컬럼이 있고, footer에 'geo' 메타(CRS 등)가 붙은 구조도 — gis/15/geoparquet-anatomy.png */}
+<BlurImage imageURL='https://storage.googleapis.com/leehyeonjun.com/gis/15/geoparquet-anatomy.png' title={metadata.title} />
+
+## 노트북 한 대로 수억 행 — DuckDB × Overture
+
+이론은 됐고, **진짜로 해봅시다.** 서두에서 말한 그 데모예요.
+
+먼저 데이터. **Overture Maps**는 구글·마이크로소프트·아마존 등이 참여하는 오픈 지도 프로젝트인데, 전 세계 **장소·건물·도로**를 **GeoParquet로 클라우드(S3)에 공개** 배포합니다. 누구나 자격증명 없이 접근할 수 있어요.
+
+그다음 도구. **DuckDB**는 흔히 **"분석용 SQLite"** 라 불려요 — 별도 서버 없이 **프로그램 안에서 도는 가벼운 분석 데이터베이스**인데, 설치는 가벼워도 다루는 데이터는 안 작아서(메모리보다 큰 수억 행도) 노트북 한 대로 처리합니다. 여기에 확장(`spatial`, `httpfs`)을 얹으면 **원격 GeoParquet를 SQL로 직접** 쿼리해요 — 서버도, 다운로드도, 적재도 필요 없이. (DuckDB 자체는 이 시리즈 **Phase 18**에서 따로 깊게 다룹니다. 지금은 "GeoParquet를 마시는 빨대" 정도로 봐 주세요.)
+
+이 두 개를 붙이면 이렇게 됩니다. "전 세계 장소 중, 서울 사각형 안에 든 게 몇 개인가?"
+
+```sql
+INSTALL spatial; LOAD spatial;
+INSTALL httpfs; LOAD httpfs;
+SET s3_region='us-west-2';
+
+-- 전 세계 장소(place) 데이터에서 서울 대략 범위만 세기
+SELECT count(*) AS seoul_places
+FROM read_parquet(
+  's3://overturemaps-us-west-2/release/2026-07-22.0/theme=places/type=place/*',
+  hive_partitioning=1)
+WHERE bbox.xmin BETWEEN 126.9 AND 127.1   -- 경도
+  AND bbox.ymin BETWEEN 37.4 AND 37.7;    -- 위도
+```
+
+실제로 돌린 결과입니다.
+
+```text
+┌──────────────┐
+│ seoul_places │
+├──────────────┤
+│       124899 │
+└──────────────┘
+Run Time (s): real 5.950
+```
+
+전 세계 데이터를 상대로 **약 6초.** 노트북에서요. 한 걸음 더 나가볼까요 — "그럼 그중 **뭐가 제일 많나?**"
+
+```sql
+SELECT categories.primary AS category, count(*) AS n
+FROM read_parquet(
+  's3://overturemaps-us-west-2/release/2026-07-22.0/theme=places/type=place/*',
+  hive_partitioning=1)
+WHERE bbox.xmin BETWEEN 126.9 AND 127.1
+  AND bbox.ymin BETWEEN 37.4 AND 37.7
+GROUP BY 1 ORDER BY n DESC LIMIT 7;
+```
+
+역시 실제 출력입니다(카테고리 미분류 등 일부 생략).
+
+```text
+┌─────────────────────┬───────┐
+│      category       │   n   │
+├─────────────────────┼───────┤
+│ korean_restaurant   │ 13542 │
+│ cafe                │  7666 │
+│ restaurant          │  6529 │
+│ coffee_shop         │  5288 │
+│ japanese_restaurant │  3013 │
+│ bar                 │  2363 │
+│ beauty_salon        │  1928 │
+└─────────────────────┴───────┘
+Run Time (s): real 1.701
+```
+
+한식당 1만 3천, 카페 7천, 커피숍 5천… 서울답죠. 이게 **1.7초**에 나옵니다. 방금 무슨 일이 일어난 걸까요?
+
+- 파일은 전 세계 장소를 담은 **거대한 GeoParquet**인데, 우리가 받은 건 **서울과 겹치는 row group의, 그것도 필요한 컬럼(bbox·categories)뿐**이에요. 앞서 본 세 가지(**열만·통계로 건너뛰기·Range로 조각만**)가 한꺼번에 작동한 겁니다.
+- 재밌는 포인트 하나 — 서울을 거르는 데 **`ST_` 공간 함수조차 안 썼어요.** `bbox` 컬럼의 **숫자 비교**만으로 걸렀죠. 바로 그 단순한 숫자 비교가 row group 통계와 맞물려 "건너뛰기"를 켜는 열쇠였습니다.
+
+{/* 🖼️ 이미지: 노트북(DuckDB)이 클라우드의 거대한 GeoParquet에서, 서울과 겹치는 덩어리(row group)만 화살표로 당겨와 집계하는 그림. 나머지 대부분(부산·도쿄 등)은 회색으로 "안 읽음" — gis/15/laptop-overture.png */}
+<BlurImage imageURL='https://storage.googleapis.com/leehyeonjun.com/gis/15/laptop-overture.png' title={metadata.title} />
+
+## 손으로 만져보기
+
+원격 데이터 말고 내 데이터를 GeoParquet로 만들고 싶다면, 변환은 늘 만나던 GDAL의 `ogr2ogr` 한 줄이에요(GDAL 3.5+가 Parquet을 지원합니다).
+
+```bash
+# GeoPackage / Shapefile → GeoParquet
+ogr2ogr -f Parquet seoul.parquet seoul.gpkg
+```
+
+읽는 쪽도 간단합니다. 파이썬이라면 <Link href='/blog/gis-11-geojson'>GeoJSON</Link>을 다루듯 한 줄이에요.
+
+```python
+import geopandas as gpd
+gdf = gpd.read_parquet("seoul.parquet")   # → GeoDataFrame
+```
+
+방금 본 DuckDB로 로컬 파일을 여는 것도 물론 됩니다(`FROM 'seoul.parquet'`).
+
+> 💡 원격 분석의 핵심은 저장소의 **HTTP Range** 지원이에요 — 이 시리즈가 계속 우려먹은 그 마법 맞습니다. Overture 버킷은 익명 공개라 자격증명 없이 `s3_region`만 맞추면 되고요. GeoPandas·DuckDB의 본격 활용은 각각 **Phase 18(#98, #99)** 에서 제대로 다룹니다. 여기선 "GeoParquet가 이렇게 마셔진다"는 감만 잡으면 충분해요.
+
+## 그래도 만능은 아니다
+
+강력하지만, GeoParquet도 경계가 뚜렷합니다.
+
+**① 그리는 포맷이 아니다.** 이건 **분석·교환**용이에요. 지도에 바로 얹는 용도가 아닙니다. 화면에 그리려면 결국 타일(<Link href='/blog/gis-14-pmtiles'>PMTiles</Link>)로 굽거나 피처로 변환해야 해요. "계산은 GeoParquet, 그리기는 PMTiles" 식의 분업이죠.
+
+**② 단건 수정엔 부적합.** 열 지향은 **한 번 쓰고 여러 번 읽는** 대량 분석용입니다. 행 하나만 실시간으로 고치는 일은 <Link href='/blog/gis-12-geopackage'>GeoPackage</Link>나 PostGIS(Phase 6)의 몫이에요.
+
+**③ 정밀 공간 인덱스는 아니다.** bbox로 하는 건 어디까지나 **덩어리(row group) 단위 건너뛰기**입니다. <Link href='/blog/gis-13-flatgeobuf'>FlatGeobuf</Link>의 R-tree처럼 피처 하나를 정밀하게 콕 집어내는 용도가 아니에요. GeoParquet의 진짜 무대는 **대량 스캔·집계**입니다.
+
+**④ 사람이 못 읽고, 전용 도구가 필요하다.** 바이너리 컬럼 포맷이라 메모장으로 열면 깨져 보여요. DuckDB·GeoPandas·GDAL 같은 Parquet-aware 도구가 있어야 합니다.
+
+**⑤ 생태계가 아직 무르익는 중.** v1.1이 비교적 최근이고, 네이티브 지오메트리 인코딩 같은 게 계속 다듬어지고 있어요(그래도 주요 도구 지원은 이미 폭넓습니다).
+
+## 클라우드 네이티브 지도, 다시
+
+<Link href='/blog/gis-14-pmtiles'>지난 편</Link>에서 봤던 그 가족표, 이제 마지막 자리가 채워집니다. **클라우드 네이티브 지오(cloud-native geospatial)** — "정적 저장소에 올려두고 HTTP Range로 필요한 조각만" — 라는 한 철학 아래 네 식구예요.
+
+| 포맷 | 담는 것 | 무엇을 하나 |
+| --- | --- | --- |
+| **COG** | 래스터(위성영상) | 큰 TIFF에서 보이는 영역만 (그리기) |
+| **FlatGeobuf** | 벡터 원본 피처 | bbox 조각 스트리밍 (그리기) |
+| **PMTiles** | 미리 그린 타일 | 서버 없는 지도 (그리기) |
+| **GeoParquet** | 분석용 벡터 | 대량 집계·필터 (**분석**) |
+
+같은 "필요한 조각만" 철학이지만, 결정적으로 갈리는 축이 하나 있어요 — **"무엇으로 그리나(COG·FlatGeobuf·PMTiles)" vs "무엇으로 분석하나(GeoParquet)".** GeoParquet만 목적지가 지도가 아니라 **계산**입니다. 그래서 BigQuery·Snowflake 같은 클라우드 데이터 웨어하우스까지 GeoParquet를 받아들이고 있어요.
+
+## 정리 — 한 문장으로
+
+> **GeoParquet는 '열로 눕힌 공간 데이터'다. 필요한 열만 읽고, 잘 압축되고, bbox로 안 겹치는 덩어리를 통째로 건너뛰기 때문에, 서버 없이 노트북 한 대로 수억 행을 SQL로 훑는다.**
+
+| | GeoJSON | FlatGeobuf | PMTiles | GeoParquet |
+| --- | --- | --- | --- | --- |
+| 저장 방향 | 행(텍스트) | 행(바이너리) | 타일 묶음 | **열(컬럼)** |
+| 목적 | 교환·소량 | 스트리밍 표시 | 서버리스 지도 | **대량 분석** |
+| 강점 | 범용·읽기 쉬움 | bbox 조각 스트리밍 | 서버 없는 지도 | **집계·필터·압축** |
+| 약점 | 크면 붕괴 | 시각화·수정 | 굽기 선행 | 그리기·단건 수정 |
+
+Shapefile부터 여기까지, 포맷의 여정은 **"웹에서 그리기"** 를 넘어 이제 **"클라우드에서 분석하기"** 까지 왔습니다. 벡터 데이터의 현대적 얼굴은 웬만큼 본 셈이에요.
+
+그런데 우리가 지금껏 다룬 건 전부 **벡터**(점·선·면)였습니다. 그럼 **위성영상** 같은 **래스터**는요? 100GB짜리 위성 TIFF에서 내가 보는 화면 영역만 쏙 뜯어오는 건 어떻게 할까요? 다음 편은 래스터 세계의 클라우드 네이티브 주인공 — **COG(Cloud Optimized GeoTIFF)** 입니다. GeoParquet가 벡터 분석의 문을 열었듯, COG는 **래스터의 문**을 엽니다.
+
+<ReferenceList
+  references={[
+    'https://geoparquet.org/',
+    'https://github.com/opengeospatial/geoparquet',
+    'https://docs.overturemaps.org/getting-data/duckdb/',
+    'https://guide.cloudnativegeo.org/geoparquet/',
+    'https://parquet.apache.org/docs/',
+    'https://duckdb.org/docs/stable/extensions/spatial/overview',
+    'https://gdal.org/en/stable/drivers/vector/parquet.html',
+    'https://geopandas.org/en/stable/docs/user_guide/io.html',
+  ]}
+/>
