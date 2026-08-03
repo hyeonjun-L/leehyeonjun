@@ -1,0 +1,313 @@
+import { createPostMetadata } from '@/utils/postMetadata';
+
+export const metadata = createPostMetadata({
+  title: '구글 어스가 준 .kmz, 공공 API가 뱉은 XML 덩어리 — 알아만 둘 포맷 3형제',
+  description:
+    '직접 골라 쓰진 않는데 자꾸 받게 되는 포맷들이 있다. 구글 어스의 KML, WFS가 돌려주는 GML, D3가 사랑하는 TopoJSON. 셋의 정체와 만났을 때 대응법을 정리한다. 55MB짜리 한국 시군구 GeoJSON을 TopoJSON으로 바꿔 실제로 얼마나 줄어드는지도 재봤다.',
+  publishDate: '2026-08-03T00:00:00Z',
+  posterImage:
+    'https://storage.googleapis.com/leehyeonjun.com/gis/18/topojson-arcs.png',
+  categories: ['GIS'],
+  slug: 'gis-18-kml-gml-topojson',
+});
+
+<BlogTitle {...metadata} />
+
+> ## 지도 데이터인데, GeoJSON이 아니다
+>
+> 구글 어스에서 "내보내기"를 눌렀더니 **`.kmz`** 라는 게 떨어집니다. 공공기관 지도 API에 요청을 보냈더니 JSON이 아니라 **XML 덩어리**가 돌아옵니다. D3 예제를 열어봤더니 **`.topojson`** 이라는 낯선 확장자를 읽고 있어요. 셋 다 분명 지도 데이터인데, 우리가 아는 GeoJSON은 아닙니다. 정체가 뭐고, 받으면 어떻게 해야 할까요?
+
+지난 <Link href='/blog/gis-17-stac'>STAC</Link> 편까지, 우리는 웹과 클라우드 시대의 포맷을 두루 훑었습니다. 그런데 실무에서 손에 들어오는 파일이 전부 그 목록 안에 있진 않죠. **직접 골라 쓰진 않는데, 자꾸 받게 되는** 포맷들이 있습니다. 오늘은 그 셋 — **KML · GML · TopoJSON** — 을 빠르게 정리하고, **데이터 포맷 편(Phase 3)** 을 마무리합니다.
+
+셋의 성격이 워낙 다르니, 먼저 지도부터 펴 놓고 갑시다.
+
+| 포맷 | 출신 | 정체 | 주로 만나는 곳 |
+| --- | --- | --- | --- |
+| **KML** | 구글(Keyhole) | **표현(스타일)까지** 담는 XML | 구글 어스 내보내기, `.kmz` 첨부파일 |
+| **GML** | OGC / ISO | 지리 XML의 **문법 그 자체** | WFS 응답, 국제·공공 표준 |
+| **TopoJSON** | D3 저자 | GeoJSON의 **위상 압축판** | D3 코로플레스, 행정구역 시각화 |
+
+{/* 🖼️ 이미지: 3형제 관계도 — (좌) KML: 구글 어스 아이콘에서 나온 .kmz, 스타일 태그 강조 / (중) GML: OGC·ISO 도장이 찍힌 WFS 응답 XML / (우) TopoJSON: D3 코로플레스 지도와 공유되는 경계선. 아래에 "셋 다 결국 GeoJSON으로 바꿔서 쓴다"는 화살표 — gis/18/three-formats.png */}
+<BlurImage imageURL='https://storage.googleapis.com/leehyeonjun.com/gis/18/three-formats.png' title={metadata.title} />
+
+## KML — 구글 어스가 남긴 표준
+
+이름부터 보죠. **KML = Keyhole Markup Language.** 여기서 Keyhole은 회사 이름입니다. 위성영상 뷰어를 만들던 이 회사를 **2004년 구글이 인수**했고, 그 제품이 이름을 바꿔 나온 게 **구글 어스**예요. KML은 그 뷰어에 "여기에 이런 걸 그려라"라고 지시하던 언어였습니다.
+
+구글 혼자 쓰던 이 언어는 나중에 국제 표준이 됩니다. **2008년 4월 14일 KML 2.2가 OGC 표준으로 채택**됐고, **2015년 8월 4일에는 KML 2.3**이 나왔어요. 지금도 구글 어스를 비롯한 대부분의 도구가 읽고 씁니다.
+
+생김새는 이렇습니다. XML이고, 점 하나는 `Placemark`로 표현해요.
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <Placemark>
+    <name>서울시청</name>
+    <Point>
+      <coordinates>126.9779,37.5663,0</coordinates>
+    </Point>
+  </Placemark>
+</kml>
+```
+
+좌표 부분을 눈여겨보세요. `126.9779,37.5663,0` — **경도, 위도, 고도** 순서입니다. <Link href='/blog/gis-11-geojson'>GeoJSON</Link>과 같은 순서죠. 다만 GeoJSON이 `[126.9779, 37.5663]`이라는 **배열**인 반면, KML은 **콤마로 이어붙인 문자열**입니다. 좌표가 여러 개면 쌍과 쌍 사이를 공백으로 띄우고요. 좌표계도 GeoJSON처럼 **WGS84 하나로 고정**입니다(고도는 EGM96 지오이드 기준 미터).
+
+### KML의 진짜 특징 — 데이터와 '표현'이 한 파일에
+
+여기가 KML을 다른 포맷과 갈라놓는 지점입니다. <Link href='/blog/gis-11-geojson'>GeoJSON</Link>은 **"무엇이 어디 있나"만** 담습니다. 색이나 아이콘은 지도 라이브러리가 따로 정하죠. 그런데 KML은 **어떻게 보일지까지 파일 안에** 넣습니다.
+
+- **스타일** — `IconStyle`·`LineStyle`·`PolyStyle`로 아이콘·선 색·면 채우기를 지정
+- **말풍선** — `description` 안에 HTML을 통째로 넣어 클릭 시 뜨는 팝업을 그림
+- **시간** — `TimeStamp`·`TimeSpan`으로 타임슬라이더 재생
+- **3D** — `altitudeMode`·`extrude`로 건물처럼 지면에서 솟아오르게
+- **바깥 자원** — `GroundOverlay`(지면에 이미지 덮기), `NetworkLink`(원격 KML 끌어오기)
+
+그래서 KML은 "데이터 포맷"이라기보다 **"지도 프레젠테이션 포맷"** 에 가깝습니다. 구글 어스에서 그대로 열면 만든 사람이 의도한 색·아이콘·팝업이 재현되죠.
+
+> 💡 그럼 **`.kmz`** 는 뭘까요? 그냥 **KML을 zip으로 압축한 것**입니다. 안에 `doc.kml`이 있고, 커스텀 아이콘 이미지나 COLLADA 3D 모델 같은 딸린 자원이 함께 들어 있어요. 받은 게 `.kmz`면 확장자를 `.zip`으로 바꿔 풀어보면 정체가 바로 드러납니다.
+
+### 그래서 한계도 분명하다
+
+- **XML이라 뚱뚱하다.** 뒤에서 바이트로 재 보겠지만, 같은 점 하나가 GeoJSON의 몇 배입니다.
+- **스타일이 섞여 있어 분석엔 나쁘다.** 데이터만 뽑아 쓰려면 표현 정보를 걷어내야 합니다.
+- **앱마다 지원 범위가 다르다.** 스펙이 넓은 만큼 전부 구현한 도구가 드뭅니다. 같은 구글 안에서도 그래요 — 구글 지도 API 문서를 보면 `TimeSpan`·`Model`·`StyleMap`·`LabelStyle` 같은 게 **미지원**으로 표시돼 있고, 파서는 *"이해하지 못하는 XML 태그를 대체로 조용히 무시한다"* 고 적혀 있습니다. **에러도 없이 그냥 안 보이는** 거죠. 구글 어스에서 멀쩡하던 파일이 다른 뷰어에선 반쪽이 되는 이유입니다.
+- **큰 데이터엔 부적합.** 공간 인덱스가 없어 <Link href='/blog/gis-11-geojson'>GeoJSON</Link>과 똑같은 지점에서 무너집니다.
+
+## GML — 표준들의 표준, 그리고 XML의 심연
+
+**GML = Geography Markup Language.** OGC가 만들고 **ISO 19136:2007**로 국제 표준까지 된, 이 바닥에서 가장 격식 있는 이름입니다. 1.0이 2000년, 2.0이 2001년, 그리고 지금도 현역인 **3.2.1이 2007년 8월 27일**에 나왔어요.
+
+그런데 GML을 "포맷 하나"로 생각하면 계속 헷갈립니다. **GML은 포맷이라기보다 XML 문법(메타 표준)** 이에요. "지리 데이터를 XML로 쓸 때 점·선·면·좌표계·피처를 이렇게 적자"는 **어휘집**만 정해두고, 실제 구조는 각 분야가 **응용 스키마(application schema)** 로 따로 정의합니다.
+
+그래서 이런 것들이 전부 "GML 위에 얹힌" 것들입니다.
+
+- **CityGML** — 3D 도시 모델
+- **AIXM** — 항공 정보
+- **GeoSciML** — 지질
+- **INSPIRE** — 유럽연합 공간정보 지침
+- **OS MasterMap** — 영국 국가 기본도
+
+한 마디로 **GML은 포맷들의 부모**입니다. 우리가 "GML 파일"이라 부르는 건 대개 그 자식 중 하나예요.
+
+### 어디서 만나나 — WFS 응답
+
+실무에서 GML을 마주치는 가장 흔한 경로는 **WFS(Web Feature Service)** 입니다. 지도 서버에 "이 영역의 피처를 줘"라고 요청하는 OGC 표준인데, **WFS 2.0의 기본 출력 포맷이 `application/gml+xml; version=3.2`** 예요. 즉 **`outputFormat`을 따로 지정하지 않으면 GML이 돌아옵니다.** JSON을 기대하고 요청했다가 XML 덩어리를 받는 상황이 여기서 생겨요.
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<wfs:FeatureCollection xmlns:wfs="http://www.opengis.net/wfs/2.0"
+                       xmlns:gml="http://www.opengis.net/gml/3.2"
+                       xmlns:app="http://example.com/app">
+  <wfs:member>
+    <app:Office gml:id="office.1">
+      <app:name>서울시청</app:name>
+      <app:position>
+        <gml:Point srsName="urn:ogc:def:crs:EPSG::4326">
+          <gml:pos>37.5663 126.9779</gml:pos>
+        </gml:Point>
+      </app:position>
+    </app:Office>
+  </wfs:member>
+</wfs:FeatureCollection>
+```
+
+### 함정 — 그 축 순서가 또 나온다
+
+위 예시의 좌표를 다시 보세요. **`37.5663 126.9779`** — 위도가 **앞**입니다. KML·GeoJSON과 정반대죠. 왜 이럴까요?
+
+범인은 `srsName`에 적힌 좌표계 표기법입니다.
+
+| 표기 | 관행적으로 읽히는 순서 |
+| --- | --- |
+| `EPSG:4326` (옛 표기) | 경도, 위도 (X, Y) |
+| `urn:ogc:def:crs:EPSG::4326` (URN 표기) | **위도, 경도** (EPSG 정의 그대로) |
+
+같은 4326인데, **적는 방식 하나로 축이 뒤집힙니다.** 게다가 더 골치 아픈 건, 스펙 자체가 이 부분을 명확히 못 박지 않았다는 점이에요. 오픈소스 WFS 서버인 deegree의 문서는 축 순서 항목에 아예 **"Specification: Unclear"** 라고 적어 두고, 자기들은 식별자 표기를 보고 판단한다고 밝힙니다. 구현마다 다르게 동작할 수 있다는 뜻이죠.
+
+> 🔗 이 함정, 세 번째 등장입니다. <Link href='/blog/gis-08-coordinate-transformation'>좌표 변환</Link> 편의 lon/lat 뒤바뀜, <Link href='/blog/gis-11-geojson'>GeoJSON</Link> 편의 `[경도, 위도]` 순서, 그리고 오늘 GML의 `srsName` 표기법. **층만 바꿔 계속 되살아나는 같은 함정**이에요. WFS에서 받은 좌표가 엉뚱한 곳에 찍힌다면, 열에 아홉은 여기입니다.
+
+여기에 GML의 고질병 둘이 더 붙습니다. **① 장황함** — 네임스페이스 선언만으로도 줄이 몇 개씩 나갑니다. **② 스키마 의존** — 응용 스키마(XSD)를 모르면 태그 이름이 무슨 뜻인지 알 수 없어요. `app:Office`가 뭔지는 그 스키마만 압니다.
+
+> 💡 실무 대응은 간단합니다. **GML로 씨름하지 마세요.** 요청에 `outputFormat=application/json`을 붙여 GeoJSON으로 받거나, 이미 받은 파일이라면 `ogr2ogr -f GeoJSON out.geojson in.gml` 한 줄로 바꾸면 됩니다.
+
+## TopoJSON — 경계선을 두 번 저장하지 않는다
+
+셋 중 마지막은 성격이 완전히 다릅니다. **TopoJSON**은 <Link href='/blog/gis-11-geojson'>GeoJSON</Link> 편 말미에 잠깐 예고했던 그 확장 포맷이에요. 만든 사람은 **D3의 저자 Mike Bostock**. OGC나 ISO 같은 표준화 기구가 아니라 **깃허브에 올라온 사실상 표준**입니다.
+
+출발점은 이 관찰입니다. **행정구역 지도에서, 이웃한 두 구역은 경계선을 공유한다.** 종로구와 중구가 맞닿은 그 선은 하나인데, GeoJSON은 종로구 폴리곤에 한 번, 중구 폴리곤에 또 한 번 — **똑같은 좌표를 두 번** 적습니다. 전국 단위로 가면 이 중복이 어마어마하죠.
+
+TopoJSON은 그 경계선들을 **호(arc)** 라는 이름으로 따로 빼서 **딱 한 번만** 저장하고, 각 지역은 "나는 3번, 7번, 12번 호로 둘러싸여 있다"처럼 **번호로 참조**합니다.
+
+{/* 🖼️ 이미지: 인접한 두 폴리곤(종로구·중구) — (좌) GeoJSON: 맞닿은 경계선이 각 폴리곤에 하나씩, 총 두 번 저장됨을 붉게 강조 / (우) TopoJSON: 경계선이 arcs 배열에 하나만 있고 두 폴리곤이 [3], [-4] 처럼 인덱스로 참조 — gis/18/topojson-arcs.png */}
+<BlurImage imageURL='https://storage.googleapis.com/leehyeonjun.com/gis/18/topojson-arcs.png' title={metadata.title} />
+
+절약은 3단으로 겹칩니다.
+
+**① 호 공유** — 맞닿은 경계는 한 번만 저장하고 인덱스로 참조.
+**② 양자화(quantization)** — `transform`에 `scale`과 `translate`를 적어두고, 좌표를 **실수 대신 정수 격자 번호**로 바꿉니다. `126.97790000000001` 같은 긴 소수가 사라져요.
+**③ 델타 인코딩** — 두 번째 점부터는 **이전 점과의 차이만** 저장합니다. 이웃한 좌표끼리는 차이가 작으니 자릿수가 확 줄죠.
+
+공식 문서는 효과를 이렇게 표현합니다 — *"substantially more compact than GeoJSON, frequently offering a reduction of **80% or more even without simplification**"* (단순화 없이도 80% 이상 줄어드는 경우가 잦다).
+
+### 진짜 매력은 용량이 아니라 위상
+
+그런데 TopoJSON을 쓰는 사람들이 꼽는 진짜 이유는 따로 있습니다. **경계를 공유해 두면 "같이 움직인다"** 는 것.
+
+지도를 단순화(simplify)할 때, GeoJSON은 폴리곤마다 따로 계산합니다. 그러면 종로구의 단순화된 경계와 중구의 단순화된 경계가 **미묘하게 어긋나서** 사이에 얇은 틈(sliver)이 생겨요. 지도에 하얀 실금이 그어지는 그 현상입니다. TopoJSON은 경계가 애초에 **하나의 호**라 이런 일이 구조적으로 안 생깁니다. 시군구를 시도로 합치는 것(`topomerge`)도 호 단위로 깔끔하게 됩니다.
+
+### 대신 치르는 값
+
+- **그리기 전에 되돌려야 한다.** 지도 라이브러리는 TopoJSON을 직접 못 읽습니다. `topojson-client`로 GeoJSON으로 복원한 뒤 그려요.
+- **공간 인덱스도, 스트리밍도 없다.** 파일 전체를 받아 전부 파싱해야 합니다. <Link href='/blog/gis-13-flatgeobuf'>FlatGeobuf</Link>가 "부분만 읽기"로 간 것과 정반대 방향의 최적화예요.
+- **쓰기 지원이 의외로 좁다.** GDAL의 TopoJSON 드라이버는 **읽기 전용**입니다 — 문서에 *"The driver does not support writing TopoJSON datasets"* 라고 명시돼 있어요. 만들려면 `mapshaper`나 `topojson-server`를 써야 합니다.
+- **생태계가 D3 중심.** 웹 지도 라이브러리 진영에선 벡터타일이 그 자리를 가져갔습니다.
+
+## 손으로 만져보기 — 55MB 시군구 지도를 줄여보자
+
+말보다 숫자죠. 실제로 재봤습니다. 데이터는 공개 저장소 **southkorea-maps**의 통계청 2013년 **시군구 경계 GeoJSON** — 251개 지역, 좌표점 **1,227,389개**, 용량 **55,022,850바이트(55.0MB)** 짜리입니다.
+
+```bash
+# ① 호 공유만 (양자화 없음)
+npx -y -p topojson-server geo2topo sigungu=sigungu.geojson -o sigungu.topo.json
+
+# ② 여기에 양자화 + 델타 인코딩까지
+npx -y -p topojson-client topoquantize 1e5 sigungu.topo.json -o sigungu.q.topo.json
+```
+
+결과입니다. gzip을 건 크기도 같이 실었어요.
+
+| 파일 | 원본 크기 | gzip(-9) |
+| --- | --- | --- |
+| GeoJSON (원본) | 55,022,850 B (55.0MB) | 19,444,818 B (19.4MB) |
+| ① TopoJSON — 호 공유만 | 34,801,397 B (34.8MB) | 13,180,979 B (13.2MB) |
+| ② TopoJSON — 양자화 `1e5`까지 | **5,813,998 B (5.8MB)** | **1,062,796 B (1.06MB)** |
+
+**55.0MB가 5.8MB로 — 89.4% 감소.** gzip끼리 비교하면 19.4MB → 1.06MB로 **94.5% 감소**입니다.
+
+그런데 표를 한 줄씩 뜯어보면 더 재미있는 게 보입니다. **호 공유만으로는 36.8%밖에 안 줄었어요.** 안을 들여다보면 이유가 나옵니다.
+
+```text
+GeoJSON 좌표점    : 1,227,389
+TopoJSON 호 좌표점 :   890,798   ← 중복 27.4% 제거
+호 개수           :     2,731   ← 그중 531개는 두 지역 이상이 공유
+```
+
+경계 공유로 걷어낸 중복은 27% 남짓입니다. **나머지 절감의 대부분은 ②의 양자화와 델타 인코딩**에서 나온 거예요. "TopoJSON은 경계를 공유해서 작다"는 흔한 설명은 절반만 맞는 셈입니다.
+
+> 💡 **양자화는 공짜가 아닙니다.** `1e5`는 데이터 전체 범위를 10만 칸 격자로 쪼갠다는 뜻인데, 이 데이터에선 격자 한 칸이 **가로 약 6.6m, 세로 약 6.1m** 였습니다. 즉 좌표가 그 정도로 반올림돼요. 전국 지도를 화면에 그리는 용도라면 아무 문제가 없지만, 필지 경계처럼 **미터 단위가 중요한 데이터에는 그대로 쓰면 안 됩니다.**
+
+> 💡 그리고 정직하게 덧붙이면, **gzip을 걸면 이야기가 조금 달라집니다.** 원본 GeoJSON도 gzip으로 65% 줄어드니까요(55.0 → 19.4MB). 웹서버가 어차피 gzip/brotli를 걸어 보낸다면, 실제 체감할 전송량 차이는 **19.4MB 대 1.06MB**로 봐야 정확합니다. 그리고 압축과 무관하게 남는 이득이 하나 더 있어요 — 브라우저가 **파싱해야 할 텍스트의 양** 자체가 줄어든다는 것.
+
+## 같은 점 하나, 네 가지 표기
+
+이제 셋을 한자리에 놓아 봅시다. **서울시청 점 하나**를 각 포맷의 최소 형태로 적고, 바이트를 세어 봤습니다.
+
+```json
+{
+  "type": "Feature",
+  "geometry": { "type": "Point", "coordinates": [126.9779, 37.5663] },
+  "properties": { "name": "서울시청" }
+}
+```
+
+```json
+{
+  "type": "Topology",
+  "objects": {
+    "office": {
+      "type": "Point",
+      "coordinates": [126.9779, 37.5663],
+      "properties": { "name": "서울시청" }
+    }
+  },
+  "arcs": []
+}
+```
+
+위가 GeoJSON, 아래가 TopoJSON입니다. KML과 GML은 앞에서 본 그 예시고요. 넷을 나란히 세우면 이렇습니다.
+
+| 포맷 | 바이트 | 배수 |
+| --- | --- | --- |
+| GeoJSON | 138 B | 1.0× |
+| TopoJSON | 192 B | 1.4× |
+| KML | 226 B | 1.6× |
+| GML (WFS 응답) | 545 B | **3.9×** |
+
+> 💡 여기서 **TopoJSON이 GeoJSON보다 크다**는 게 중요합니다. 앞에서 89% 줄인 그 포맷이 맞아요. **점 하나에는 공유할 경계가 없기 때문**입니다. TopoJSON의 이득은 **맞닿은 면이 많을 때만** 나옵니다. 반대로 GML이 3.9배인 건 네임스페이스 선언과 중첩 태그 때문이고, 피처가 늘어도 이 오버헤드는 피처마다 반복됩니다.
+
+## 덤 — 이것들도 종종 만납니다
+
+Phase 3을 닫기 전에, 목록에는 없었지만 자주 마주치는 둘만 한 문단씩 붙입니다.
+
+**GPX (GPS Exchange Format).** 러닝·자전거 앱, 등산 기록, 드론 로그에서 나오는 그 파일입니다. XML이고, 구조는 아주 단순해요 — 트랙(`trk`) 안에 구간(`trkseg`)이 있고, 그 안에 점(`trkpt`)이 `lat`·`lon` **속성으로** 박힙니다. 시간(`time`)과 고도(`ele`)가 함께 담겨 **"언제 어디를 지났나"** 를 표현하는 데 특화돼 있죠. 지도에 올리려면 역시 GeoJSON으로 바꾸면 됩니다.
+
+**WKT / WKB (Well-Known Text / Binary).** 이건 파일 포맷이라기보다 **지오메트리 하나를 적는 표기법**입니다. `POINT(126.9779 37.5663)`, `POLYGON((...))` 처럼 생겼어요. 파일로 주고받기보다 **SQL 안에서, 로그에서, DB 컬럼 값으로** 마주칩니다. WKB는 그 바이너리 버전이고, PostGIS가 지오메트리를 실제로 저장하는 형태가 이쪽이에요. 이 둘은 Phase 6의 PostGIS 편에서 매일 보게 될 물건이라, 여기선 얼굴만 익혀 둡시다.
+
+## 실무 규칙 — 만나면 GeoJSON으로 바꿔서 일한다
+
+오늘 셋을 관통하는 결론은 사실 한 줄입니다. **골라 쓰는 포맷이 아니라, 받았을 때 처리하는 포맷.** 그러니 변환 명령어만 손에 익히면 됩니다.
+
+| 받은 것 | GeoJSON으로 | 반대 방향 |
+| --- | --- | --- |
+| `.kml` / `.kmz` | `ogr2ogr -f GeoJSON out.geojson in.kml` | 가능 (KML·LIBKML 드라이버) |
+| `.gml` | `ogr2ogr -f GeoJSON out.geojson in.gml` | 가능 |
+| `.topojson` | `ogr2ogr -f GeoJSON out.geojson in.topojson` | **불가** — `mapshaper`나 `topojson-server`를 써야 함 |
+| `.gpx` | `ogr2ogr -f GeoJSON out.geojson in.gpx` | 가능 |
+
+> 💡 `.kmz`는 zip이라 `ogr2ogr`이 그냥 못 읽는 경우가 있습니다. 그럴 땐 압축을 풀어 안의 `doc.kml`을 넘기면 됩니다. GDAL은 <Link href='/blog/gis-10-shapefile'>Shapefile</Link> 편에서 만난 그 만능 변환기예요 — 여기서도 그대로 씁니다.
+
+## 정리 — 한 문장으로
+
+> **KML·GML·TopoJSON은 '골라 쓰는 포맷'이 아니라 '받았을 때 알아보는 포맷'이다. KML은 표현까지 담은 구글 어스의 언어, GML은 표준들이 올라타는 XML 문법, TopoJSON은 경계를 공유해 압축한 GeoJSON의 사촌 — 셋 다 결국 GeoJSON으로 바꿔서 일한다.**
+
+| | KML | GML | TopoJSON |
+| --- | --- | --- | --- |
+| 정체 | 지도 프레젠테이션 | 지리 XML 문법 | GeoJSON 위상 압축 |
+| 표준 | OGC (2008) | OGC·ISO 19136 | 사실상 표준 |
+| 좌표 순서 | 경도, 위도 | **`srsName`에 따라 뒤집힘** | 경도, 위도 |
+| 강점 | 스타일·3D·시간 내장 | 무엇이든 표현 가능 | 용량·위상 보존 |
+| 약점 | 분석엔 부적합 | 장황·스키마 의존 | 렌더 전 복원 필요 |
+| 만나면 | GeoJSON으로 변환 | `outputFormat=json` 요청 | `topojson-client`로 복원 |
+
+## Phase 3을 닫으며 — 포맷 지도 한 장
+
+<Link href='/blog/gis-09-vector-and-raster'>벡터와 래스터</Link>에서 출발해 여기까지, 포맷만 열 종이 넘게 훑었습니다. 마지막으로 전체를 한 표에 눕혀 둘게요. **"어떤 상황이면 무엇"** 만 기억하면 됩니다.
+
+| 포맷 | 한 문장 | 언제 |
+| --- | --- | --- |
+| <Link href='/blog/gis-10-shapefile'>Shapefile</Link> | 30년 묵은 파일 묶음 | 공공데이터를 받을 때 (선택의 여지 없이) |
+| <Link href='/blog/gis-11-geojson'>GeoJSON</Link> | 메모장으로 열리는 지도 | 작고 가벼운 웹 데이터 |
+| <Link href='/blog/gis-12-geopackage'>GeoPackage</Link> | SQLite 한 파일에 담은 GIS | Shapefile 대신 주고받을 때 |
+| <Link href='/blog/gis-13-flatgeobuf'>FlatGeobuf</Link> | 인덱스 내장 바이너리 | 큰 벡터를 부분만 읽을 때 |
+| <Link href='/blog/gis-14-pmtiles'>PMTiles</Link> | 타일 전체가 파일 하나 | 서버 없이 지도를 서빙할 때 |
+| <Link href='/blog/gis-15-geoparquet'>GeoParquet</Link> | 컬럼 지향 공간 빅데이터 | 수억 행을 분석할 때 |
+| <Link href='/blog/gis-16-cog'>COG</Link> | 부분 읽기가 되는 거대 TIFF | 위성·항공 영상을 다룰 때 |
+| <Link href='/blog/gis-17-stac'>STAC</Link> | 시공간 자산 목록 | 그 영상을 **찾아야** 할 때 |
+| KML | 표현까지 담은 XML | 구글 어스에서 뭔가 받았을 때 |
+| GML | 지리 XML의 문법 | WFS 응답을 받았을 때 |
+| TopoJSON | 경계를 공유하는 GeoJSON | D3로 행정구역을 그릴 때 |
+
+{/* 🖼️ 이미지: Phase 3 포맷 지도 — 가로축 "벡터 ↔ 래스터", 세로축 "교환용 ↔ 클라우드 최적화"의 사분면에 Shapefile·GeoJSON·GeoPackage·FlatGeobuf·PMTiles·GeoParquet·COG·STAC·KML·GML·TopoJSON을 배치한 한 장 요약도 — gis/18/format-map.png */}
+<BlurImage imageURL='https://storage.googleapis.com/leehyeonjun.com/gis/18/format-map.png' title={metadata.title} />
+
+이걸로 **데이터 포맷 편(Phase 3)** 이 끝났습니다. 이제 어떤 파일을 받아도 "이건 무엇이고, 무엇으로 바꿔서 다뤄야 하는지" 답할 수 있어요.
+
+<ReferenceList
+  references={[
+    'https://developers.google.com/kml/documentation/kmlreference',
+    'https://developers.google.com/kml/documentation/mapsSupport',
+    'https://www.ogc.org/publications/standard/kml/',
+    'https://docs.ogc.org/is/12-007r2/12-007r2.html',
+    'https://www.ogc.org/publications/standard/gml/',
+    'https://docs.ogc.org/is/09-025r2/09-025r2.html',
+    'https://github.com/deegree/deegree3/wiki/Axis-order-handling',
+    'https://github.com/topojson/topojson',
+    'https://github.com/topojson/topojson-specification',
+    'https://github.com/mbloch/mapshaper',
+    'https://gdal.org/en/stable/drivers/vector/gml.html',
+    'https://gdal.org/en/stable/drivers/vector/topojson.html',
+    'https://github.com/southkorea/southkorea-maps',
+    'https://www.topografix.com/gpx.asp',
+    'https://libgeos.org/specifications/wkt/',
+  ]}
+/>
