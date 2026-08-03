@@ -1,0 +1,160 @@
+import { createPostMetadata } from '@/utils/postMetadata';
+
+export const metadata = createPostMetadata({
+  title: '100GB 위성영상에서 화면만 뜯어온다 — 클라우드에 최적화된 GeoTIFF, COG',
+  description:
+    '위성영상은 한 장이 수십 GB를 넘긴다. 예전엔 귀퉁이 하나 보려 해도 통째로 받아야 했다. COG는 평범한 GeoTIFF를 내부 타일과 오버뷰로 재배열해, 클라우드에 올려두고 HTTP Range로 화면에 보이는 조각만 뜯어온다. Sentinel-2·Landsat이 모두 채택한 위성영상의 사실상 표준을 만난다.',
+  publishDate: '2026-07-27T12:00:00Z',
+  posterImage:
+    'https://storage.googleapis.com/leehyeonjun.com/gis/16/cog-anatomy.png',
+  categories: ['GIS'],
+  slug: 'gis-16-cog',
+});
+
+<BlogTitle {...metadata} />
+
+> ## 100GB 위성영상을, 통째로 안 받고 본다
+>
+> 위성영상 뷰어에서 도시 위를 휙휙 넘겨봅니다. 줌아웃하면 나라 전체가 흐릿하게, 줌인하면 그 골목만 선명하게 떠요. 그런데 원본 한 장이 **수십 GB.** 내 브라우저가 실제로 받은 건 고작 몇 MB, 지금 화면에 보이는 만큼뿐입니다. 다운로드도, 타일 서버도, 데이터베이스도 없어요. 거대한 파일 하나가 클라우드에 놓여 있고, 필요한 **바이트 구간만** 사르르 오갈 뿐이죠. 어디서 본 마술 같지 않나요?
+
+맞아요, 이 시리즈가 계속 봐 온 그 마술입니다. 다만 지금까지의 주인공은 전부 **벡터**였어요. <Link href='/blog/gis-13-flatgeobuf'>FlatGeobuf</Link>·<Link href='/blog/gis-14-pmtiles'>PMTiles</Link>로 **그리고**, <Link href='/blog/gis-15-geoparquet'>GeoParquet</Link>로 **분석**했죠. 그런데 매 편 등장하던 "클라우드 네이티브 가족표"에는 아직 정체를 안 밝힌 칸이 하나 있었습니다 — **래스터** 칸, 바로 **COG(Cloud Optimized GeoTIFF)** 예요. 오늘 그 마지막 빈칸을 채웁니다. 위성영상의 사실상 표준이 된 포맷이죠.
+
+## 잠깐, GeoTIFF가 뭐죠?
+
+COG를 알려면 먼저 **GeoTIFF**부터. TIFF는 그냥 이미지 포맷이에요(사진 저장할 때 쓰는 그 `.tif` 맞습니다). 여기에 **지리정보를 태그로 박은 게 GeoTIFF**예요 — "이 픽셀이 지도상 어느 좌표인지, <Link href='/blog/gis-07-epsg-codes'>좌표계(CRS)</Link>는 뭔지, 전체가 어디를 덮는지"를 파일 안에 적어 둔 겁니다. 그래서 그냥 그림이 아니라 **지도에 정확히 얹히는 격자 데이터**가 되죠. <Link href='/blog/gis-09-vector-and-raster'>래스터</Link>(격자 픽셀)의 대표 주자예요.
+
+위성영상은 이 GeoTIFF의 **극단적인 버전**입니다. 한 장이 수천만에서 수억 화소에 이르고, **여러 밴드**(빨강·초록·파랑, 심지어 눈에 안 보이는 근적외선까지)로 이뤄져 크기가 수 GB에서 수백 GB까지 갑니다. 문제는 여기서 시작돼요 — **너무 크다**는 것.
+
+## 문제 — 예전엔 통째로 받아야 했다
+
+보통의 TIFF는 픽셀을 **가로줄(스트립) 단위**로 쭉 저장합니다. 게다가 "어디에 뭐가 있는지" 알려주는 정보가 파일 곳곳에 흩어져 있기도 해요. 그래서 "왼쪽 위 귀퉁이만 보고 싶다"고 해도, 그 부분이 파일의 어디에 있는지 집어내기가 어려워 **결국 전체를 받아야** 했습니다.
+
+로컬에서야 그러려니 하지만, 클라우드에선 치명적이죠. 조각 하나 보겠다고 50GB를 내려받을 순 없으니까요. <Link href='/blog/gis-13-flatgeobuf'>FlatGeobuf</Link>가 벡터에서, <Link href='/blog/gis-14-pmtiles'>PMTiles</Link>가 타일에서 풀어낸 그 숙제 — **"통째로 말고 필요한 조각만"** — 을 래스터에서도 풀어야 합니다.
+
+{/* 🖼️ 이미지: (좌) 일반 TIFF — 픽셀이 가로줄(스트립)로 쭉 저장된 모습 / (우) COG — 같은 이미지를 정사각형 블록(타일) 격자로 나눠 저장한 모습 — gis/16/strip-vs-tiled.png */}
+<BlurImage imageURL='https://storage.googleapis.com/leehyeonjun.com/gis/16/strip-vs-tiled.png' title={metadata.title} />
+
+## COG의 두 기둥 — 내부 타일 + 오버뷰
+
+COG는 **평범한 GeoTIFF를, 조각내 읽히도록 내부만 재배열한 것**입니다. 새 포맷이 아니에요 — COG를 모르는 옛날 도구도 그냥 GeoTIFF로 잘 엽니다. 비결은 딱 두 가지 장치예요.
+
+**① 내부 타일링(블록).** 이미지를 가로줄이 아니라 **512×512 같은 정사각형 블록 격자**로 저장합니다. 그러면 화면에 걸리는 블록만 <Link href='/blog/gis-13-flatgeobuf'>HTTP Range</Link>로 콕 집어 읽을 수 있어요. <Link href='/blog/gis-14-pmtiles'>PMTiles</Link>에서 지도를 네모(타일)로 잘랐던 것처럼, COG는 **한 장의 위성영상**을 파일 내부에서 네모로 잘라 두는 겁니다.
+
+**② 오버뷰(피라미드).** **미리 줄여둔 저해상도 사본들**을 같은 파일에 함께 넣습니다. 나라 전체를 줌아웃해서 볼 땐 1억 화소 원본을 읽을 필요가 없어요 — 잘게 줄인 작은 오버뷰만 읽으면 되죠.
+
+> 💡 이 오버뷰, 어디서 봤죠? <Link href='/blog/gis-14-pmtiles'>PMTiles</Link>의 **줌 피라미드**입니다. 거기선 지도 타일을 줌 레벨별로 미리 구워 뒀는데, COG는 **한 장의 이미지**를 줌 레벨별로 미리 줄여 파일 안에 심어 둬요. "미리 줄여두고 줌에 맞게 골라 쓴다"는 발상이 똑같습니다.
+
+여기에 하나 더 — **레이아웃**이 'cloud optimized'의 진짜 핵심이에요. COG는 "어느 블록이 파일의 몇 바이트째에 있는지" 알려주는 **목차(헤더)를 파일 맨 앞에** 몰아 둡니다. 그래서 클라이언트는 맨 앞 몇 KB만 먼저 받아 목차를 손에 쥐고, 그다음 **필요한 블록·오버뷰만** 골라 요청할 수 있죠.
+
+{/* 🖼️ 이미지: .tif 한 파일 안에 맨 앞 헤더(블록 위치 목차) + 원본 해상도 타일 격자 + 그 뒤에 줄어드는 오버뷰들이 담긴 구조도 — gis/16/cog-anatomy.png */}
+<BlurImage imageURL='https://storage.googleapis.com/leehyeonjun.com/gis/16/cog-anatomy.png' title={metadata.title} />
+
+{/* 🖼️ 이미지: 원본(가장 큼) → 1/2 → 1/4 → 1/8 로 줄어드는 오버뷰 피라미드. 줌아웃하면 위쪽 작은 사본을, 줌인하면 아래쪽 큰 원본을 읽는다는 화살표 — gis/16/overview-pyramid.png */}
+<BlurImage imageURL='https://storage.googleapis.com/leehyeonjun.com/gis/16/overview-pyramid.png' title={metadata.title} />
+
+## 다시, HTTP Range
+
+두 기둥이 깔려 있으니, 클라이언트는 <Link href='/blog/gis-14-pmtiles'>PMTiles</Link> 때와 똑같이 움직입니다.
+
+1. **헤더부터 받는다.** 파일 맨 앞 몇 KB만 Range로 요청해 목차를 읽어요. 이제 어느 블록·오버뷰가 파일 어디에 있는지 다 압니다.
+2. **필요한 것만 계산한다.** 지금 화면의 줌 레벨에 맞는 **오버뷰**를 고르고, 그 안에서 화면에 걸치는 **블록**만 추립니다.
+3. **그 블록 바이트만 뜯어온다.** 계산된 블록들의 바이트 범위만 Range로 받아 화면에 그립니다. 나머지 수십 GB는 **건드리지도 않아요.**
+
+그래서 지도 서버도 DB도 필요 없습니다. 거대 위성영상을 그냥 **S3나 CDN 같은 정적 저장소**에 올려두면, 뷰어가 알아서 조각내 읽어요. 시리즈 내내 봐 온 그 마술의 **래스터 버전**이죠.
+
+## 손으로 만져보기 — 헤더만 읽어 뼈대 보기
+
+COG를 만들고 다루는 표준 도구는 GDAL이에요.
+
+```bash
+# 일반 GeoTIFF → COG (내부 타일링·오버뷰 자동 생성)
+gdal_translate in.tif out.tif -of COG
+
+# COG 조회 (원격 파일도 /vsicurl/ 로 바로) — Block, Overviews가 다 나온다
+gdalinfo /vsicurl/https://sentinel-cogs.s3.us-west-2.amazonaws.com/.../TCI.tif
+```
+
+그런데 COG의 진가는 **특별한 도구 없이도** 드러납니다. 목차가 파일 맨 앞에 있으니, 평범한 `curl`로 앞부분만 받아봐도 뼈대가 보이거든요. AWS에 공개된 실제 Sentinel-2 영상 한 장으로 직접 해봤습니다.
+
+먼저 HTTP 헤더만 살짝(`curl -I`):
+
+```text
+Content-Type: image/tiff; application=geotiff; profile=cloud-optimized
+Accept-Ranges: bytes
+Content-Length: 234841786          # 약 235MB
+```
+
+`profile=cloud-optimized` — 서버가 대놓고 "이건 COG야"라고 알려주네요. `Accept-Ranges: bytes`는 "조각으로 가져가도 돼"라는 뜻이고요. 그럼 진짜로 **맨 앞 128KB만** 받아(전체 235MB 중에서) 헤더를 뜯어봤습니다. 나온 뼈대는 이렇습니다.
+
+```text
+signature   : 49 49 2A 00   →  "II"(리틀엔디언) + 42(TIFF) + 첫 목차 위치
+전체 이미지 : 10980 × 10980   (내부 타일 1024 × 1024)
+오버뷰(미리 줄인 사본):
+    5490 ×  5490   (타일 512 × 512)
+    2745 ×  2745   (타일 512 × 512)
+    1373 ×  1373   (타일 512 × 512)
+     687 ×   687   (타일 512 × 512)
+```
+
+235MB짜리 위성영상의 **구조 전체**가 앞 몇십 KB 안에 들어 있던 겁니다. 나머지 234MB는 손도 안 댔고요. 눈으로 확인되죠 — **내부 타일**(1024·512 블록)과 **오버뷰 피라미드**(10980을 반씩 줄여 687까지, 5단계)가 파일에 진짜로 박혀 있습니다. COG의 두 기둥이 실물로 드러난 순간이에요.
+
+> 💡 `gdalinfo`나 `rio cogeo`(rasterio 플러그인)를 쓰면 방금 그 정보(`Block=512x512`, `Overviews: ...`)를 한 줄 명령으로 예쁘게 정리해 줍니다. 우리는 그 안에서 무슨 일이 벌어지는지 보려고 일부러 맨손(`curl`)으로 뜯어봤을 뿐이에요. QGIS·rasterio·OpenLayers도 URL만 주면 원격 COG를 바로 읽습니다.
+
+## 그래서 위성영상의 사실상 표준
+
+이 편의성 덕분에 COG는 위성 데이터 세계의 **공용어**가 됐습니다. **Sentinel-2**(유럽)와 **Landsat**(미국)이 COG로 AWS Open Data에 통째로 공개돼 있고, **Microsoft Planetary Computer**·NASA·Planet·Maxar도 COG를 씁니다. 방금 우리가 뜯어본 그 파일도 실제 Sentinel-2 장면이었죠.
+
+COG는 GeoTIFF 위에 "클라우드 규약"을 얹은 것이라, **OGC 표준**으로도 채택됐습니다(문서 21-026). 그리고 보통 **STAC**과 짝을 지어 다녀요 — COG가 "위성영상 한 장"이라면, STAC은 "그 수백만 장을 찾는 카탈로그"입니다(바로 다음 편).
+
+## 그래도 만능은 아니다
+
+COG에도 경계는 뚜렷합니다.
+
+**① 래스터 한 장을 위한 것.** 벡터·속성 분석은 <Link href='/blog/gis-15-geoparquet'>GeoParquet</Link>, 지도 타일은 <Link href='/blog/gis-14-pmtiles'>PMTiles</Link>의 몫이에요. COG는 격자 이미지 담당.
+
+**② 굽기가 선행된다.** 오버뷰를 미리 만들어 넣어야 하고, 그만큼 파일이 약간 커집니다(원본 + 피라미드). 원본을 그냥 올린다고 COG가 되는 건 아니에요.
+
+**③ 재투영은 별개 문제.** COG는 하나의 <Link href='/blog/gis-07-epsg-codes'>좌표계</Link>로 저장됩니다. 웹 지도(3857) 타일로 실시간 변환해 뿌리려면 **동적 타일러(TiTiler 같은)** 가 그 워프를 대신 해줘야 해요(심화 주제).
+
+**④ 왕복이 잦다.** Range 요청이 여러 번 오가니 대역폭보다 **지연(latency)** 에 민감합니다. <Link href='/blog/gis-14-pmtiles'>PMTiles</Link> 편에서 본 그 CDN 튜닝 이슈가 여기도 그대로예요.
+
+**⑤ 그냥 이미지 뷰어로는 부족하다.** COG도 이미지라 뷰어로 열면 보이긴 하지만, 통짜로 여는 순간 '조각만 받기' 이점이 사라지고(100GB면 아예 못 엶), 위성영상 특유의 16비트·근적외선·단일 밴드 같은 값이나 좌표계는 일반 뷰어가 해석하지 못해요. 스트리밍·해석·지도 활용엔 GDAL 계열 GIS 도구가 필요합니다.
+
+## 클라우드 네이티브 지도, 완성
+
+자, 이제 <Link href='/blog/gis-15-geoparquet'>지난 편들</Link>에서 계속 등장하던 그 가족표의 **마지막 칸까지** 채워졌습니다. 넷 다 "정적 저장소에 올려두고 HTTP Range로 필요한 조각만"이라는 **한 철학**을 공유하죠.
+
+| 포맷 | 담는 것 | 무엇을 하나 |
+| --- | --- | --- |
+| **COG** | 래스터(위성영상) | 큰 TIFF에서 보이는 영역만 (그리기) |
+| **FlatGeobuf** | 벡터 원본 피처 | bbox 조각 스트리밍 (그리기) |
+| **PMTiles** | 미리 그린 타일 | 서버 없는 지도 (그리기) |
+| **GeoParquet** | 분석용 벡터 | 대량 집계·필터 (분석) |
+
+벡터든 래스터든, 2020년대의 지리 데이터는 결국 **"거대한 파일을 정적 저장소에 올려두고, 필요한 바이트만 읽는다"** 로 수렴했어요. 서버를 없애는 이 흐름을, 우리는 포맷 넷을 거치며 완주한 셈입니다.
+
+## 정리 — 한 문장으로
+
+> **COG는 '조각내 읽히도록 재배열한 GeoTIFF'다. 내부 타일과 오버뷰를 파일에 심어, 수십 GB 위성영상을 정적 저장소에 올려두고 HTTP Range로 화면에 보이는 만큼만 뜯어온다.**
+
+| | 일반 GeoTIFF | COG |
+| --- | --- | --- |
+| 픽셀 배치 | 스트립(가로줄) | **내부 타일(블록)** |
+| 부분 읽기 | 사실상 통째로 | **HTTP Range로 조각만** |
+| 오버뷰 | 없거나 별도 파일 | **파일에 내장** |
+| 클라우드 | 비효율 | **정적 저장소로 스트리밍** |
+
+이제 우리는 위성영상 **한 장**을 클라우드에서 효율적으로 다루는 법을 알게 됐습니다. 그런데 현실의 위성 데이터는 한 장이 아니에요 — Sentinel-2 한 위성만 해도 며칠마다 전 지구를 다시 찍어, 장면이 **수천만 장**씩 쌓입니다. 그중에서 **"2024년 7월, 서울 위, 구름 10% 이하로 찍힌 영상"** 을 어떻게 찾을까요? 다음 편은 그 질문에 답하는 카탈로그 표준 — **STAC(SpatioTemporal Asset Catalog)** 입니다. COG와 STAC은 위성 데이터의 단짝이거든요.
+
+<ReferenceList
+  references={[
+    'https://www.cogeo.org/',
+    'https://guide.cloudnativegeo.org/cloud-optimized-geotiffs/intro.html',
+    'https://gdal.org/en/stable/drivers/raster/cog.html',
+    'https://registry.opendata.aws/sentinel-2-l2a-cogs/',
+    'https://cogeotiff.github.io/rio-cogeo/',
+    'https://docs.ogc.org/is/21-026/21-026.html',
+    'https://developmentseed.org/titiler/',
+    'https://openlayers.org/en/latest/examples/cog.html',
+  ]}
+/>

@@ -1,0 +1,200 @@
+import { createPostMetadata } from '@/utils/postMetadata';
+
+export const metadata = createPostMetadata({
+  title: '수천만 장에서 원하는 한 장을 찾는다 — 위성 데이터 카탈로그, STAC',
+  description:
+    '위성은 며칠마다 전 지구를 다시 찍어 장면이 수천만 장씩 쌓인다. "서울 위, 지난 7월, 구름 10% 이하 영상"을 그 속에서 어떻게 찾을까? STAC은 위성 데이터를 찾게 해주는 공통 목록 표준이다. Item 하나가 GeoJSON이고 그 안의 링크가 COG를 가리키는, COG의 단짝을 만난다.',
+  publishDate: '2026-07-27T18:00:00Z',
+  posterImage:
+    'https://storage.googleapis.com/leehyeonjun.com/gis/17/cloud-compare.png',
+  categories: ['GIS'],
+  slug: 'gis-17-stac',
+});
+
+<BlogTitle {...metadata} />
+
+> ## 수천만 장 중에서, 그 한 장을 찾아라
+>
+> 위성은 며칠마다 전 지구를 다시 찍습니다. Sentinel-2 하나만 해도 촬영된 장면이 **수천만 장.** 그중에서 **"서울 위, 지난 7월, 구름 10% 이하"** 인 걸 골라내야 한다면 어떻게 할까요? 놀랍게도, 한 번의 검색이면 조건에 맞는 목록이 **딱** 나오고, 각 항목엔 실제 영상 파일 주소까지 붙어 옵니다. 게다가 NASA도, 유럽우주국도, 마이크로소프트도 **전부 똑같은 방식**으로 답해요. 대체 어떤 약속이 있길래?
+
+지난 <Link href='/blog/gis-16-cog'>COG</Link> 편은 "찾아낸 거대한 한 장을 **효율적으로 읽는** 법"이었습니다. 그런데 애초에 **그 한 장을 어떻게 찾죠?** 수천만 장 중에서요. 그 '찾기'를 표준으로 만든 게 오늘의 주인공 **STAC(SpatioTemporal Asset Catalog)** 입니다. 이름 그대로 "**시공간(SpatioTemporal) 자산(Asset)** 카탈로그"예요.
+
+## STAC이 뭐죠? — 데이터가 아니라 '목록카드'
+
+먼저 오해를 풀고 갈게요. STAC은 **위성영상 자체가 아닙니다.** 픽셀을 담지 않아요. 대신 **"어떤 영상이, 언제, 어디를, 어떤 품질로 찍혔고, 실제 파일은 여기 있다"** 를 적어 둔 **목록(메타데이터)** 입니다.
+
+**도서관 카드 목록**을 떠올리면 딱이에요. 책(위성영상)을 일일이 뒤지는 게 아니라, 카드(STAC)로 "이 주제, 이 저자, 이 연도"를 찾고, 청구기호(파일 URL)로 책을 집어 듭니다. STAC이 하는 일이 정확히 이거예요 — **찾게 해주고, 실물이 있는 곳을 알려준다.**
+
+그럼 왜 표준이 중요할까요? 예전엔 NASA·유럽우주국·Planet이 저마다 **다른 카탈로그 API**를 썼습니다. 위성마다 검색법을 새로 배워야 했죠. STAC은 이 카드 양식을 **하나로 통일**했어요. 그래서 이제 **한 가지 방식**으로 전 세계 위성 데이터를 검색합니다.
+
+## STAC의 세 조각 — Item · Collection · Catalog
+
+STAC의 구조는 딱 세 조각입니다. 그런데 뜯어보면 **전부 우리가 이미 배운 것들의 조합**이에요.
+
+**① Item — 한 장면.** 위성이 한 번 찍은 장면 하나가 Item입니다. 그리고 놀랍게도, Item은 그냥 **<Link href='/blog/gis-11-geojson'>GeoJSON</Link> Feature**예요. 안에 든 건:
+- **geometry** — 그 장면이 덮은 촬영 범위(footprint) 폴리곤
+- **datetime** — 언제 찍혔나
+- **properties** — 구름양(`eo:cloud_cover`), 위성 이름 같은 속성들
+- **assets** — **실제 파일들의 링크.** 바로 이게 밴드별 <Link href='/blog/gis-16-cog'>COG</Link> 파일(빨강 B04, 근적외선 B08…)과 썸네일을 가리킵니다.
+
+**② Collection — 관련 Item 묶음.** 예를 들어 `sentinel-2-l2a`처럼, 같은 종류의 Item들을 묶고 공통 정보(전체 범위·라이선스·요약)를 붙인 것.
+
+**③ Catalog — 이어주는 트리.** Item과 Collection을 링크로 연결하는 순수 내비게이션 구조.
+
+> 💡 눈치채셨나요? STAC은 **새 포맷이 아니에요.** "<Link href='/blog/gis-11-geojson'>GeoJSON</Link>으로 장면을 묘사하고, 그 안의 링크로 <Link href='/blog/gis-16-cog'>COG</Link>를 가리킨다" — 이미 아는 두 조각을 엮은 겁니다. 그래서 STAC 검색 결과를 받으면, 그게 곧 지도에 바로 얹을 수 있는 GeoJSON이에요.
+
+{/* 🖼️ 이미지: Catalog(트리) → Collection(sentinel-2-l2a) → Item(GeoJSON: footprint 폴리곤 + datetime + cloud%) → assets 화살표가 S3의 COG 파일들(B04.tif, B08.tif…)을 가리키는 관계도 — gis/17/stac-model.png */}
+<BlurImage imageURL='https://storage.googleapis.com/leehyeonjun.com/gis/17/stac-model.png' title={metadata.title} />
+
+## 정적 STAC vs STAC API
+
+STAC은 두 가지 모습으로 존재합니다.
+
+- **정적 STAC** — JSON 파일들을 S3에 올려두고 링크로 연결해 둔 것. 서버 없이, 크롤러나 브라우저가 링크를 따라가며 읽습니다. <Link href='/blog/gis-14-pmtiles'>PMTiles</Link>·<Link href='/blog/gis-16-cog'>COG</Link>와 똑같은 "정적 파일" 계보예요.
+- **STAC API** — `/search` 한 곳에 **범위(bbox)·기간·구름양** 같은 조건을 던지면, 매칭된 Item들을 **GeoJSON으로** 돌려주는 검색 서버. <Link href='/blog/gis-15-geoparquet'>GeoParquet</Link> 편에서 스친 OGC API 표준 위에 얹혀 있고, 수천만 장을 순식간에 거릅니다.
+
+## 세 조각은 각각 '다른 주소'에 있다
+
+여기서 한 번 헷갈리기 쉬운 지점이 있어요. Item·Collection·Catalog는 **JSON 하나에 겹겹이 담겨 있는 게 아닙니다.** 각각 **독립된 주소(엔드포인트)** 로 존재하고, 서로를 **링크로** 가리킬 뿐이에요. Earth Search를 기준으로 보면 이렇습니다.
+
+| 조각 | 주소 | 응답의 `type` |
+| --- | --- | --- |
+| Catalog | `/v1` (루트) | `"Catalog"` |
+| Collection 목록 | `/v1/collections` | (collections 배열) |
+| Collection 하나 | `/v1/collections/sentinel-2-l2a` | `"Collection"` |
+| Item 검색 결과 | `/v1/search` | `"FeatureCollection"` |
+
+루트를 실제로 찍어보면, 카탈로그가 나머지로 가는 **문패를 전부 쥐고 있는** 게 보입니다.
+
+```bash
+curl -s https://earth-search.aws.element84.com/v1/
+```
+
+```text
+type: "Catalog",  id: "earth-search-aws"
+links:
+  data   -> /v1/collections                  ← Collection 목록으로 가는 문
+  search -> /v1/search                       ← 검색 엔드포인트
+  child  -> /v1/collections/sentinel-2-l2a   ← 개별 Collection들
+  child  -> /v1/collections/landsat-c2-l2
+  ...
+```
+
+> 💡 그래서 `/search` 응답만 열어보면 **Catalog도 Collection도 안 보입니다.** 검색은 트리를 건너뛰고 Item만 곧장 받아오는 지름길이니까요. 대신 흔적은 남습니다 — 각 Item에 `"collection": "sentinel-2-l2a"` 가 붙어 있고, `links`의 `rel: "root"` 가 카탈로그를 가리켜서 언제든 거슬러 올라갈 수 있어요.
+
+## 손으로 만져보기 — 진짜로 검색해보기
+
+말로만 하면 재미없죠. 공개 STAC API인 **Earth Search**(Element 84 운영)에 서두의 그 질문을 그대로 던져봤습니다. "서울 범위 + 2024년 7월 + 구름 10% 미만."
+
+```bash
+curl -s https://earth-search.aws.element84.com/v1/search \
+  -H 'Content-Type: application/json' -d '{
+    "collections": ["sentinel-2-l2a"],
+    "bbox": [126.9, 37.4, 127.1, 37.7],
+    "datetime": "2024-07-01T00:00:00Z/2024-07-31T23:59:59Z",
+    "query": {"eo:cloud_cover": {"lt": 10}}
+  }'
+```
+
+실제 결과는 — **0개.**
+
+```text
+"context": { "matched": 0, "returned": 0 }
+```
+
+응? 서울인데 한 장도 없다고요? 조건에서 **구름 필터만 빼고** 다시 물어보니, 7월에 찍힌 장면은 분명 6장이 있었습니다. 문제는 구름양이었어요.
+
+```text
+2024-07-05   87.5%      2024-07-20   99.6%
+2024-07-10   41.1%      2024-07-25   91.2%
+2024-07-15   66.1%      2024-07-30   93.9%
+```
+
+가장 맑은 날조차 **41%.** 10% 밑은 하나도 없죠. 답은 간단합니다 — **한국의 7월은 장마철**이니까요. STAC이 이 현실을 **검색 한 번으로** 보여준 겁니다. "없다"는 것도 훌륭한 답이에요.
+
+그럼 조건을 **가을로** 바꿔봅니다(맑은 날이 많은 계절이죠).
+
+```bash
+"datetime": "2024-10-01T00:00:00Z/2024-11-30T23:59:59Z",
+"query": {"eo:cloud_cover": {"lt": 10}}
+```
+
+이번엔 **3장**이 딱 걸립니다.
+
+```text
+날짜          구름양     Item ID
+2024-11-07    0.70%     S2B_52SCG_20241107_0_L2A
+2024-11-12    0.16%     S2A_52SCG_20241112_0_L2A   ← 거의 완벽하게 맑음
+2024-11-22    5.28%     S2A_52SCG_20241122_0_L2A
+```
+
+11월 12일 장면은 구름이 **0.16%** — 사실상 구름 한 점 없는 서울입니다. 숫자만으론 감이 안 오죠? 두 장면의 썸네일을 나란히 놓으면 `eo:cloud_cover`라는 숫자가 실제로 뭘 뜻하는지 한눈에 보입니다.
+
+{/* 🖼️ 이미지: 좌우 비교 — (좌) 2024-07-20 구름 99.6% / (우) 2024-11-12 구름 0.16%.
+    두 Item의 thumbnail asset을 그대로 합성(익명 접근):
+      흐림: .../52/S/CG/2024/7/S2B_52SCG_20240720_0_L2A/thumbnail.jpg
+      맑음: .../52/S/CG/2024/11/S2A_52SCG_20241112_0_L2A/thumbnail.jpg */}
+<BlurImage imageURL='https://storage.googleapis.com/leehyeonjun.com/gis/17/cloud-compare.png' title={metadata.title} />
+
+그리고 이 Item의 `assets`를 열어보면, 바로 이런 게 들어 있어요.
+
+```text
+assets:
+  blue (B02) : https://sentinel-cogs.s3.us-west-2.amazonaws.com/
+               sentinel-s2-l2a-cogs/52/S/CG/2024/11/S2A_52SCG_.../B02.tif
+  ... (밴드마다 개별 .tif)
+```
+
+보이시나요? 그 링크가 가리키는 게 바로 **`sentinel-cogs`의 COG 파일** — 지난 편에서 `curl`로 뜯어봤던 그 종류입니다. **STAC이 "어느 장면"인지 찾아주고, 그 안의 링크가 "실제 COG"를 가리키고, COG는 그 영상의 필요한 부분만 조각내 읽는다.** 세 편이 여기서 하나로 이어지죠.
+
+> 💡 자격증명도 필요 없어요(익명 접근). 그리고 돌려받은 결과 자체가 **GeoJSON**이라, 지도 라이브러리에 그대로 얹어 footprint를 그릴 수 있습니다. 검색 결과가 곧 지도 데이터인 셈이에요.
+
+## STAC Browser로 세계를 훑기
+
+코드가 부담스럽다면? **STAC Browser**라는 웹 UI가 있습니다. STAC 주소만 넣으면 카탈로그를 **클릭으로 탐색**하며 footprint·썸네일·메타데이터를 눈으로 볼 수 있어요. 정적이든 API든 똑같이 다룹니다.
+
+그리고 이 STAC이라는 공통 언어를 쓰는 곳이 어마어마합니다 — **NASA**(Landsat), **유럽우주국/Copernicus**, **Microsoft Planetary Computer**, **AWS Earth Search**, Planet, USGS까지. 사실상 위성 데이터를 **찾는 일의 공용어**가 됐어요.
+
+## COG와 STAC은 단짝
+
+정리하면 역할이 이렇게 갈립니다.
+
+- **STAC = 어느 장면을 찾을까 (discovery).** 수천만 장에서 조건에 맞는 걸 골라낸다.
+- **COG = 그 장면의 필요한 부분만 읽기 (access).** 골라낸 거대한 영상을 조각내 뜯어온다.
+
+둘을 합치면 **"바늘을 찾고 → 그 바늘의 필요한 조각만 뽑기"** 가 됩니다. 이게 요즘 위성 데이터를 다루는 표준 워크플로예요. 실무에선 `pystac-client`(검색), `stackstac`·`odc-stac`(검색 결과를 바로 데이터 배열로), `TiTiler`(STAC+COG를 지도 타일로) 같은 도구가 이 조합을 매끄럽게 이어줍니다. (이 도구들의 심화는 뒤 편의 몫이에요.)
+
+## 그래도 만능은 아니다
+
+- **① 데이터가 아니라 목록.** STAC은 픽셀을 담지 않아요. 실제 분석·표시는 결국 <Link href='/blog/gis-16-cog'>COG</Link>(래스터)나 <Link href='/blog/gis-15-geoparquet'>GeoParquet</Link>(벡터) 같은 실데이터로 넘어가야 합니다. STAC은 그 **입구**일 뿐.
+- **② 구현·품질 편차.** STAC은 핵심 스펙 + 확장(eo·proj·view·sar…) 구조라, 제공자마다 메타데이터를 채워 넣는 정도가 다릅니다. 카탈로그에 따라 정보가 부실할 수도 있어요.
+- **③ 정적 vs API 트레이드오프.** 정적은 서버가 없어 편하지만 복잡한 검색이 느리고, API는 빠르지만 검색 서버(stac-fastapi + pgstac 등)를 운영해야 합니다.
+- **④ 주로 지구관측(EO) 중심.** 어떤 시공간 자산에도 확장 가능하지만, 생태계가 가장 성숙한 건 위성·항공 이미지 쪽이에요.
+
+## 정리 — 한 문장으로
+
+> **STAC은 '시공간 데이터를 찾게 해주는 표준 목록'이다. Item 하나가 GeoJSON이고 그 안의 링크가 COG를 가리켜, 수천만 장에서 범위·시간·구름 조건으로 원하는 장면을 한 번에 찾아낸다.**
+
+| | STAC | COG |
+| --- | --- | --- |
+| 담는 것 | 메타데이터(목록) | 픽셀(실데이터) |
+| 역할 | **찾기**(discovery) | **읽기**(access) |
+| 생김새 | GeoJSON / JSON | GeoTIFF |
+| 한 문장 | 어느 장면이 어디 있나 | 그 장면의 필요한 부분만 |
+
+이걸로 위성 데이터를 **찾고(STAC) → 읽는(COG)** 그림이 완성됐습니다. 사실 <Link href='/blog/gis-10-shapefile'>Shapefile</Link>부터 여기까지, 우리는 웹·클라우드 시대의 **모던 포맷**을 두루 훑어왔어요. 이제 데이터 포맷 여정도 막바지입니다.
+
+마지막 편에선, 현장에서 여전히 마주치지만 앞에서 다루지 않은 **고전·기타 포맷**을 빠르게 정리할게요 — Google Earth의 **KML**, 관공서 문서의 **GML**, 그리고 D3 시각화에서 사랑받는 **TopoJSON**. 이 셋을 훑으며 **데이터 포맷 편(Phase 3)** 을 마무리합니다.
+
+<ReferenceList
+  references={[
+    'https://stacspec.org/',
+    'https://github.com/radiantearth/stac-spec',
+    'https://github.com/radiantearth/stac-api-spec',
+    'https://radiantearth.github.io/stac-browser/',
+    'https://element84.com/earth-search/',
+    'https://planetarycomputer.microsoft.com/',
+    'https://pystac-client.readthedocs.io/',
+    'https://stacindex.org/',
+  ]}
+/>
