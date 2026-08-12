@@ -444,7 +444,7 @@ out center;
 
 그런데 아직 현실적인 문제가 남았습니다. Overpass는 편의점 몇천 개엔 좋지만, **한국 전체 도로망**처럼 큰 걸 통째로 원한다면요? 107억 개 노드를 매번 API로 긁을 순 없잖아요.
 
-다음 편에서 그 답을 봅니다. **`.osm.pbf`** — 한국 전체 지도를 **200MB짜리 파일 하나**로 만드는 포맷입니다. Protocol Buffer 위에 "이전 점과의 차이만 기록하는" 영리한 트릭이 얹혀 있는데, <Link href='/blog/gis-13-flatgeobuf'>FlatGeobuf</Link>·<Link href='/blog/gis-15-geoparquet'>GeoParquet</Link> 때처럼 바이트 단위로 뜯어보고, **osmium**으로 원하는 지역만 잘라내 손에 쥐어 보겠습니다.
+다음 편에서 그 답을 봅니다. **`.osm.pbf`** — 한국 전체 지도를 **파일 하나**에 담는 포맷입니다. Protocol Buffer 위에 "이전 점과의 차이만 기록하는" 영리한 트릭이 얹혀 있는데, <Link href='/blog/gis-13-flatgeobuf'>FlatGeobuf</Link>·<Link href='/blog/gis-15-geoparquet'>GeoParquet</Link> 때처럼 바이트 단위로 뜯어보고, **osmium**으로 원하는 지역만 잘라내 손에 쥐어 보겠습니다.
 
 <ReferenceList
   references={[
