@@ -1,0 +1,425 @@
+import { createPostMetadata } from '@/utils/postMetadata';
+
+export const metadata = createPostMetadata({
+  title: '.osm.pbf와 osmium — 한국 전체 지도가 파일 하나에',
+  description:
+    '전국 도로·건물·상점이 전부 담긴 파일이 271MB다. 같은 데이터를 XML로 풀면 19.5배로 부푼다. Protocol Buffer·StringTable·delta encoding 세 겹이 어떻게 겹쳐 있는지 파이썬 표준 라이브러리만으로 직접 뜯어보고, osmium으로 서울만 잘라내 손에 쥔다.',
+  publishDate: '2026-08-12T00:00:00Z',
+  posterImage:
+    'https://storage.googleapis.com/leehyeonjun.com/gis/20/blob-chain.png',
+  categories: ['GIS'],
+  slug: 'gis-20-pbf-osmium',
+});
+
+<BlogTitle {...metadata} />
+
+> ## 전국이 파일 하나에 들어간다
+>
+> 지난 편에서 우리는 <Link href='/blog/gis-19-osm-data-model'>Overpass</Link>로 서울 편의점 7,100개를 셌습니다. 그런데 **한국 전체 도로망**이 필요하다면요? 그건 Overpass로 긁을 수 있는 규모가 아닙니다. 대신 다른 길이 있어요. 어느 서버에 가면 **파일 하나**가 놓여 있습니다. 전국의 도로·건물·상점·행정경계가 **전부** 들어 있는데, 크기가 **271MB**입니다. USB에 넣고 다닐 수 있는 크기죠. 대체 어떻게 욱여넣은 걸까요?
+
+지난 <Link href='/blog/gis-19-osm-data-model'>OpenStreetMap 데이터 모델</Link> 편에서 Node·Way·Relation과 태그를 익혔습니다. 이번엔 그 107억 개 중 **한국 몫을 통째로 내 노트북에 가져오는** 이야기예요. 그리고 그 파일이 왜 이렇게 작은지, **바이트 단위로** 뜯어봅니다.
+
+## OSM의 원래 포맷은 XML이었다
+
+먼저 출발점을 봅시다. OSM이 원래 쓰던 교환 포맷은 **XML**입니다. 지난 편에서 본 그 생김새 그대로예요.
+
+```xml
+<node id="1234567890" lat="37.5663174" lon="126.9779451" version="3" timestamp="2024-05-01T12:00:00Z"/>
+<node id="1234567891" lat="37.5663291" lon="126.9779630" version="1" timestamp="2024-05-01T12:00:00Z"/>
+```
+
+사람이 읽기엔 더없이 친절합니다. 그런데 기계 입장에서 보면 낭비가 눈에 밟혀요.
+
+- **`lat=`, `lon=`, `version=` 같은 이름이 노드마다 반복**됩니다. 3,800만 번요.
+- **좌표가 문자열**입니다. `37.5663174` 는 10글자 = 10바이트인데, 숫자로는 4바이트면 됩니다.
+- **꺾쇠와 따옴표**가 실제 데이터만큼 자리를 차지합니다.
+
+그래서 나온 게 **PBF(Protocolbuffer Binary Format)** 입니다. 결론부터 던지면, 뒤에서 직접 재본 결과가 이렇습니다.
+
+| 서울 데이터 | 크기 |
+| --- | --- |
+| XML (`.osm`) | 593,419,594 B (566.0 MiB) |
+| **PBF (`.osm.pbf`)** | **30,394,032 B (29.0 MiB)** |
+
+**19.5배.** 같은 내용인데요. 이 차이가 어디서 나오는지가 오늘의 본론입니다.
+
+## PBF의 3단 로켓
+
+한 가지 트릭이 아니라 **세 겹**이 포개져 있습니다. 지도를 먼저 펴 놓고 갑시다.
+
+| 층 | 하는 일 | 없애는 낭비 |
+| --- | --- | --- |
+| ① **Protocol Buffer** | 텍스트를 바이너리로 | 태그 이름·꺾쇠·따옴표 |
+| ② **StringTable** | 같은 문자열은 한 번만 | 반복되는 `highway`, `name` |
+| ③ **delta encoding** | 값 대신 **차이**를 기록 | 거대한 id와 좌표의 자릿수 |
+
+그리고 이 셋을 다 거친 결과를 **zlib으로 블록 단위 압축**까지 합니다. 하나씩 열어 보죠.
+
+{/* 🖼️ 이미지: PBF 파일 레이아웃 — 가로로 [uint32 길이][BlobHeader][Blob] 이 반복되는 띠. 첫 칸만 "OSMHeader"로 색이 다르고 나머지는 전부 "OSMData". 각 Blob 아래에 zlib 자물쇠 아이콘과 "압축 해제 시 최대 16MiB" 라벨 — gis/20/blob-chain.png */}
+<BlurImage imageURL='https://storage.googleapis.com/leehyeonjun.com/gis/20/blob-chain.png' title={metadata.title} />
+
+## ① 파일을 열어보면 — Blob의 사슬
+
+PBF는 통짜 덩어리가 아닙니다. **같은 모양의 조각이 줄줄이 이어진** 구조예요. 조각 하나는 이렇게 생겼습니다.
+
+```text
+[4바이트: 다음 BlobHeader의 길이]   ← 네트워크 바이트 오더 uint32
+[BlobHeader: 종류와 크기를 적은 쪽지]
+[Blob: 진짜 데이터 (보통 zlib 압축)]
+```
+
+이게 파일 끝까지 반복됩니다. 규칙은 둘뿐이에요. **BlobHeader는 64KiB 미만**, **Blob은 압축을 풀었을 때 32MiB 미만**(권장 16MiB). 그리고 **맨 앞 조각 하나만 `OSMHeader`**(bbox·생성 프로그램 같은 메타데이터)이고, **나머지는 전부 `OSMData`** 입니다.
+
+여기서 중요한 성질이 나옵니다. **블록마다 독립적으로 압축돼 있어서, 필요한 블록만 풀어 읽을 수 있습니다.** <Link href='/blog/gis-13-flatgeobuf'>FlatGeobuf</Link>·<Link href='/blog/gis-16-cog'>COG</Link>에서 봤던 그 발상이죠.
+
+말로만 하면 재미없으니 **직접 열어봤습니다.** 라이브러리 없이 파이썬 표준 라이브러리 `struct`와 `zlib`만으로 사슬을 따라가는 코드예요.
+
+```python
+import struct, zlib
+
+f = open('seoul.osm.pbf', 'rb')
+while True:
+    head = f.read(4)
+    if len(head) < 4:
+        break
+    hlen = struct.unpack('>I', head)[0]   # 다음 BlobHeader 길이
+    bh   = f.read(hlen)                   # BlobHeader
+    # BlobHeader에서 type(필드1)과 datasize(필드3)를 꺼낸 뒤
+    blob = f.read(datasize)               # Blob
+    raw  = zlib.decompress(zlib_data)     # 압축 해제
+```
+
+서울 파일(29MB)에 물어본 결과입니다.
+
+```text
+파일: seoul.osm.pbf  (30,394,032 bytes)
+블록 총 439개 (OSMHeader 1, OSMData 438)
+
+   # type           헤더           압축             원본      압축률
+   0 OSMHeader      17           75             63   119.0%
+   1 OSMData        17      223,309        489,107    45.7%
+   2 OSMData        17      331,170        811,082    40.8%
+   3 OSMData        17      114,637        231,972    49.4%
+   4 OSMData        17       58,895        112,612    52.3%
+ ...
+   합                     30,386,571     77,356,371    39.3%
+```
+
+읽어낼 게 몇 가지 있습니다.
+
+- **블록 439개** — 헤더 하나에 데이터 438개. 조각조각 나뉘어 있죠.
+- **zlib이 39.3%로 줄입니다.** 뒤집으면 **압축을 풀면 2.55배로 부풉니다.**
+- **`OSMHeader`만 압축률이 119%** 예요. 63바이트짜리를 압축했더니 75바이트가 됐습니다. **너무 작아서 zlib 헤더가 본전을 못 뽑은** 겁니다. 압축이 항상 이득은 아니라는 걸 여기서 눈으로 봅니다.
+
+그런데 잠깐. 압축을 풀어봐야 77MB인데, XML은 566MB였습니다. **zlib을 걷어내고도 7.3배 차이가 남아요.** 진짜 마법은 압축이 아니라 **그 안의 구조**에 있다는 뜻입니다.
+
+## ② StringTable — 같은 문자열을 한 번만
+
+첫 번째 구조적 트릭입니다. 생각해 보면 OSM 데이터엔 **똑같은 문자열이 미친 듯이 반복**됩니다. `highway`라는 키만 해도 한국에 수백만 번 나오죠. XML은 그걸 **매번 적습니다.**
+
+PBF는 블록마다 **StringTable**을 하나 두고, 그 안에 등장하는 모든 문자열(키·값·역할·사용자명)을 **한 번씩만** 넣습니다. 실제 데이터는 문자열 대신 **번호**로 가리켜요.
+
+실제로 첫 블록의 StringTable을 꺼내 봤습니다.
+
+```text
+StringTable: 11,843개 문자열
+  index 0 = b'' ← 구분자로 예약
+  index 1 = ''
+  index 2 = 'int_name'
+  index 3 = 'Seongnam'
+  index 4 = 'name'
+  index 5 = '성남시'
+  index 6 = 'name:af'
+  index 7 = 'name:ar'
+  index 8 = 'سونغنام'
+```
+
+`name`이라는 키가 **index 4** 하나로 정리됐습니다. 이 블록 안에서 `name` 태그를 쓰는 수천 개 객체가 전부 "4"라고만 적으면 돼요. 문자열 4바이트가 **번호 1바이트**가 됩니다.
+
+**index 0은 비어 있고 쓰이지 않습니다.** 일부러 비워 둔 자리예요 — 태그 목록을 `키·값·키·값…` 으로 죽 늘어놓고 **0을 만나면 다음 객체로 넘어간다**는 구분자로 쓰기 때문입니다.
+
+> 💡 `'성남시'` 와 `'سونغنام'`(아랍어 성남)이 나란히 있는 게 보이시나요? OSM은 `name:ko`·`name:ar` 처럼 **언어별 이름**을 다 담습니다. 지난 편에서 본 "태그는 자유"의 실물이에요. 그리고 이렇게 언어가 늘어날수록 StringTable의 이득도 커집니다.
+
+{/* 🖼️ 이미지: 좌우 대비 — (좌) XML: name="…" highway="…" 이 줄마다 반복되며 같은 단어가 빨갛게 여러 번 강조 / (우) PBF: 위쪽에 StringTable 박스(0=구분자, 4=name, 5=성남시…)가 있고 아래 객체들은 숫자 4, 5만 참조하는 화살표 — gis/20/stringtable.png */}
+<BlurImage imageURL='https://storage.googleapis.com/leehyeonjun.com/gis/20/stringtable.png' title={metadata.title} />
+
+## ③ DenseNodes — 값 대신 '차이'를 적는다
+
+여기가 하이라이트입니다. 그리고 **직접 재보고 나서 제 예상이 틀렸다는 걸 알게 된** 대목이기도 해요.
+
+먼저 구조부터. PBF는 노드를 하나씩 저장하지 않고 **열 단위(columnwise)** 로 눕힙니다. <Link href='/blog/gis-15-geoparquet'>GeoParquet</Link> 편에서 본 그 발상이죠.
+
+```text
+행으로 저장하면 (XML 방식)
+  노드1(id, lat, lon) 노드2(id, lat, lon) 노드3(id, lat, lon) …
+
+열로 저장하면 (DenseNodes)
+  id  배열: [id1, id2, id3, …]
+  lat 배열: [lat1, lat2, lat3, …]
+  lon 배열: [lon1, lon2, lon3, …]
+```
+
+그리고 각 배열에 **delta encoding**을 겁니다. 값을 그대로 쓰는 대신 **바로 앞 값과의 차이**만 적는 거예요. 좌표는 소수점이 아니라 **정수**로 다룹니다. 지난 편에서 본 그 소수점 7자리가 여기서 쓰여요.
+
+```text
+복원 공식:  위도 = 0.000000001 × (lat_offset + granularity × lat)
+            granularity 기본값 = 100 (나노도) → 1e-7도 ≈ 적도에서 1cm
+```
+
+실제 파일에서 첫 8개 노드를 꺼내 봤습니다.
+
+```text
+DenseNodes: 노드 8,000개가 열 단위로 누워 있다 (granularity=100)
+
+  i        id 델타     lat 델타     lon 델타        복원 위도        복원 경도
+  0   26,608,957 375,592,037 1,267,842,025   37.5592037  126.7842025
+  1  217,958,107    785,744    2,740,265     37.6377781  127.0582290
+  2            3     10,395      -12,719     37.6388176  127.0569571
+  3            1     -5,026        7,226     37.6383150  127.0576797
+  4            4     -9,430       16,373     37.6373720  127.0593170
+  5            9    -38,123       24,901     37.6335597  127.0618071
+  6            7     -5,807        7,810     37.6329790  127.0625881
+  7            4     26,513      -22,563     37.6356303  127.0603318
+```
+
+첫 줄은 기준점이라 절대값입니다(`37.5592037`이 통째로 들어 있죠). 그 다음부터가 차이예요. **id 델타를 보세요 — 3, 1, 4, 9, 7, 4.** 한 자릿수입니다.
+
+### 잠깐, `id 델타`가 뭐죠?
+
+좌표 델타는 직관적입니다. 앞 노드의 위도를 빼면 되니까요. 그런데 **id에 델타를 건다**는 건 무슨 뜻일까요?
+
+지난 편에서 본 Node를 다시 꺼내 봅시다.
+
+```xml
+<node id="1234567890" lat="37.5663174" lon="126.9779451"/>
+        └─── 이 고유 번호
+```
+
+노드마다 붙는 이 **고유 번호도 하나의 열**입니다. 그러니 좌표와 똑같이 앞 값을 빼면 돼요. 실제로 델타를 복원해 진짜 id를 계산해 봤습니다.
+
+| i | 저장된 델타 | 복원한 진짜 id |
+| --- | --- | --- |
+| 0 | 26,608,957 | 26,608,957 |
+| 1 | 217,958,107 | 244,567,064 |
+| 2 | **3** | 244,567,0**67** |
+| 3 | **1** | 244,567,0**68** |
+| 4 | **4** | 244,567,0**72** |
+| 5 | **9** | 244,567,0**81** |
+
+`3`은 **"앞 노드보다 번호가 3 큰 노드"** 라는 뜻이었습니다. `244,567,064` 다음이 `244,567,067`이니까요.
+
+### 왜 하필 한 자릿수인가
+
+두 가지가 겹쳐서입니다.
+
+**① 파일이 id 순으로 정렬돼 있습니다.** 조금 뒤 `fileinfo`에서 볼 `sorting=Type_then_ID`가 그 뜻이에요. 정렬돼 있으니 델타는 항상 양수고 조금씩만 커집니다.
+
+**② OSM은 id를 번호표처럼 순서대로 나눠줍니다.** 누군가 건물 하나를 그리면 모서리 노드 넷이 `…064`, `…065`, `…066`, `…067` 처럼 **연달아** 받아요. 한 번의 편집에서 태어난 것들이 번호상 이웃이 되는 겁니다.
+
+실제 분포를 세어 보면 이렇습니다.
+
+```text
+델타 7,999개 중
+  정확히 1 (연속 번호)      1,702개   21.3%
+  2~9                    3,394개   42.4%
+  10~99                  2,454개   30.7%
+  100 이상                  449개    5.6%
+```
+
+**64%가 한 자릿수.** 중간중간 번호가 비는 건 삭제된 노드가 남긴 구멍, 그리고 **이건 서울만 잘라낸 파일**이라 사이 번호를 가진 서울 밖 노드가 빠졌기 때문이에요. 위 표에서 `i=1`의 `217,958,107`이라는 큰 점프도 같은 이치입니다 — 아주 초기에 만들어진 노드 다음에 한참 뒤에 태어난 노드가 오니 번호가 2억이나 벌어진 거죠.
+
+이게 왜 이득이냐면:
+
+```text
+절대 id로 저장:  244,567,067  →  varint 5바이트
+델타로 저장:               3  →  varint 1바이트
+```
+
+### 그런데 좌표는 생각만큼 안 줄어든다
+
+솔직히 저는 좌표 델타도 이렇게 작을 줄 알았습니다. 아니더군요. lat 델타의 중앙값이 **19,992** 였어요. 그래서 **델타로 적을 때와 절대값으로 적을 때 실제 바이트를 나란히 재봤습니다.**
+
+| 항목 | 델타로 저장 | 절대값으로 저장 | 절감 |
+| --- | --- | --- | --- |
+| `id` | 8,426 B | 38,996 B | **78.4%** |
+| `lat` | 20,758 B | 40,000 B | 48.1% |
+| `lon` | 20,907 B | 40,000 B | 47.7% |
+| **합계** | **50,091 B** | **118,996 B** | **57.9%** |
+
+한 블록(노드 8,000개)에서 **57.9% 절감.** 그런데 **id와 좌표의 성적이 확연히 갈립니다.** 왜 그런지는 델타가 varint로 몇 바이트를 먹는지 분포를 보면 드러나요.
+
+```text
+id   중앙 델타          5   1B:96%  2B:4%   3B:1%
+lat  중앙 델타     19,992   1B:1%   2B:46%  3B:54%
+lon  중앙 델타     22,563   1B:1%   2B:44%  3B:55%
+```
+
+**id는 96%가 1바이트에 끝납니다.** 앞에서 본 그대로죠 — 정렬된 데다 번호가 순차 발급되니까요. 반면 **좌표는 절반 이상이 3바이트**입니다.
+
+갈리는 이유는 이겁니다. **파일이 id 순으로 정렬됐다는 건, 좌표 순으로는 정렬되지 않았다는 뜻**이에요. id가 연달아 붙은 두 노드가 강남과 은평에 흩어져 있을 수 있습니다. 그래서 좌표 델타는 "작긴 한데 그렇게까지 작지는 않은" 값이 되고, 절감도 48% 선에 머물러요.
+
+> 💡 정리하면 **delta encoding의 진짜 수혜자는 id**입니다. 좌표는 덤이에요. 흔히 "좌표가 비슷해서 차이가 작다"고 설명되지만, **실제로 재보면 id 쪽 효과가 압도적**입니다. 지리적 근접성이 아니라 **정렬 순서**가 만들어낸 이득이라는 게 핵심이고요.
+
+{/* 🖼️ 이미지: 위아래 대비 — (위) 절대값 저장: 26608957, 26608960, 26608961 … 거대한 숫자들이 5바이트 칸을 가득 채움 / (아래) 델타 저장: 26608957 다음부터 3, 1, 4, 9 … 1바이트 칸만 차지. 우측에 78.4% 절감 배지 — gis/20/delta-encoding.png */}
+<BlurImage imageURL='https://storage.googleapis.com/leehyeonjun.com/gis/20/delta-encoding.png' title={metadata.title} />
+
+## 실측 — XML과 나란히 놓아보기
+
+이제 세 겹이 다 겹친 결과를 봅시다. 서울 데이터(노드 300만, way 47.7만, relation 1.3만)를 **같은 내용 그대로** 네 가지 방식으로 저장해 재봤습니다.
+
+| 파일 | 크기 | PBF 대비 |
+| --- | --- | --- |
+| `seoul.osm` (XML 원본) | 593,419,594 B (566.0 MiB) | **19.53배** |
+| `seoul.osm.gz` (gzip -9) | 59,980,658 B (57.2 MiB) | 1.97배 |
+| `seoul.osm.bz2` (bzip2 -9) | 48,468,269 B (46.2 MiB) | 1.59배 |
+| **`seoul.osm.pbf`** | **30,394,032 B (29.0 MiB)** | — |
+
+**XML 566MB가 PBF 29MB로, 94.9% 감소.**
+
+재미있는 건 압축본과의 비교예요. PBF 공식 문서는 자기 포맷을 이렇게 소개합니다 — *"gzip 압축한 planet의 약 절반 크기이고, bzip2 압축본보다 약 30% 작다."* 위 숫자로 검산해 보면:
+
+- gzip 대비 **50.7%** → "약 절반" ✅
+- bzip2 대비 **37.3% 작음** → "약 30% 작다" ✅ (오히려 더 좋음)
+
+**문서의 주장이 실측과 맞습니다.** 그리고 이게 왜 중요하냐면 — XML을 gzip으로 압축해도 **읽으려면 통째로 풀어야** 합니다. PBF는 압축돼 있는 채로 **필요한 블록만** 골라 풀 수 있고, 심지어 더 작아요. 크기와 접근성을 동시에 가져가는 셈입니다.
+
+## 사용해 보기
+
+이론은 됐고 실제로 파일을 만들어 봅시다. 도구는 **osmium**입니다. OSM 데이터를 다루는 표준 칼이에요.
+
+```bash
+# Ubuntu / WSL
+sudo apt install osmium-tool
+
+# macOS
+brew install osmium-tool
+```
+
+### ① 받기
+
+**Geofabrik**이 대륙·국가·지역 단위로 잘라 매일 갱신해 배포합니다.
+
+```bash
+curl -L -O https://download.geofabrik.de/asia/south-korea-latest.osm.pbf
+```
+
+> 💡 **`-L`을 빼면 245바이트짜리 HTML을 받습니다.** `-latest` 는 실제 파일이 아니라 그날 날짜 파일(`south-korea-260811.osm.pbf`)로 **302 리다이렉트**하는 별칭이거든요. 리다이렉트를 안 따라가면 "찾았습니다" 안내 페이지만 손에 쥡니다.
+
+### ② 안에 뭐가 들었나
+
+```bash
+osmium fileinfo -e south-korea-latest.osm.pbf
+```
+
+```text
+  Size: 285,141,792
+  Bounding boxes: (124.3188,32.36076,132.3386,38.64966)
+  Options:
+    pbf_dense_nodes=true
+    sorting=Type_then_ID
+    osmosis_replication_timestamp=2026-08-11T20:22:05Z
+  Timestamps:
+    First: 2007-04-12T07:23:05Z
+    Last:  2026-08-11T18:51:00Z
+  Number of nodes:     38,115,436
+  Number of ways:       3,749,607
+  Number of relations:     64,298
+  Sum of buffer sizes: 3,394,159,992 (3.236 GB)
+```
+
+한국 전체가 **노드 3,811만·way 375만·relation 6.4만**입니다. 앞서 본 `pbf_dense_nodes=true`와 `sorting=Type_then_ID`가 여기 찍혀 있죠 — 우리가 뜯어본 그 구조가 맞다는 확인입니다.
+
+두 줄이 특히 눈에 띕니다. **`First: 2007-04-12`** — 한국 땅에 처음 찍힌 OSM 데이터가 2007년 4월입니다. 그리고 **`3.236 GB`** — 285MB 파일이 메모리에 다 펼치면 **3.2GB**가 된다는 뜻이에요. 디스크에서 11.9배로 부풀어 오릅니다.
+
+### ③ 서울만 자르기
+
+전국이 필요 없다면 잘라냅니다.
+
+```bash
+osmium extract -b 126.76,37.42,127.18,37.70 \
+  -o seoul.osm.pbf south-korea-latest.osm.pbf
+```
+
+285MB에서 **30MB**가 나왔고, 42초 걸렸습니다.
+
+> ⚠️ **좌표 순서를 조심하세요.** 지난 편 Overpass에서 쓴 서울 범위는 `37.42,126.76,37.70,127.18` 이었습니다. 그런데 osmium에 넣은 건 `126.76,37.42,127.18,37.70` 이에요. **같은 숫자 넷인데 순서가 다릅니다.**
+>
+> | 도구 | 순서 |
+> | --- | --- |
+> | Overpass | `남,서,북,동` (위도 먼저) |
+> | **osmium** | `왼쪽,아래,오른쪽,위` (경도 먼저) |
+>
+> <Link href='/blog/gis-08-coordinate-transformation'>좌표 변환</Link> 편의 lon/lat 뒤바뀜, <Link href='/blog/gis-18-kml-gml-topojson'>GML</Link>의 축 순서에 이어 **세 번째**입니다. 이 바닥에서 좌표 순서는 영원한 지뢰예요. 결과가 텅 비거나 엉뚱한 바다가 나오면 **가장 먼저 순서를 의심**하세요.
+
+`--strategy` 옵션도 알아둘 만합니다. 기본값 `complete_ways`는 경계에 걸친 way가 잘리지 않도록 바깥 노드까지 챙겨 옵니다. `simple`은 빠르지만 잘린 채로 두고, `smart`는 멀티폴리곤 relation까지 온전하게 맞춰요.
+
+### ④ 도로만 거르기
+
+라우팅용이라면 건물·상점은 짐입니다. 태그로 걸러냅니다.
+
+```bash
+osmium tags-filter -o seoul-roads.osm.pbf seoul.osm.pbf w/highway
+```
+
+`w/highway` 는 **way 중에서 `highway` 키를 가진 것**만 남기라는 뜻입니다. 접두사는 `n`(node)·`w`(way)·`r`(relation)·`a`(area)이고, 생략하면 전부를 뒤져요. `w/highway=motorway,trunk` 처럼 값을 좁힐 수도 있고요.
+
+**30MB가 9.4MB로.** 10초 걸렸습니다.
+
+### 깔때기 전체
+
+```text
+한국 전체 PBF   285,141,792 B  (271.9 MiB)
+  ↓ osmium extract  (서울만, 42초)
+서울 PBF         30,394,032 B  ( 29.0 MiB)   -89.3%
+  ↓ osmium tags-filter  (도로만, 10초)
+서울 도로 PBF     9,849,002 B  (  9.4 MiB)   -67.6%
+```
+
+**전국 271MB에서 출발해 서울 도로망 9.4MB로.** 전체로 보면 96.5%가 깎였습니다. 이 9.4MB짜리 파일이 오늘의 결과물이에요.
+
+{/* 🖼️ 이미지: 3단 깔때기 — 위에서부터 "한국 전체 271.9MiB" → "서울 29.0MiB" → "서울 도로 9.4MiB" 로 좁아지는 깔때기. 각 단계 사이에 osmium extract / osmium tags-filter 명령이 라벨로 붙고 감소율 -89.3% / -67.6% 표시 — gis/20/pipeline.png */}
+<BlurImage imageURL='https://storage.googleapis.com/leehyeonjun.com/gis/20/pipeline.png' title={metadata.title} />
+
+## 이 파일로 뭘 하나
+
+지금 손에 든 `.osm.pbf`는 **이 시리즈 후반부의 공통 출발점**입니다.
+
+- **PostGIS에 적재** — `osm2pgsql`이 이 파일을 읽어 Node·Way·Relation을 우리에게 익숙한 점·선·면 테이블로 번역합니다. 지난 편에서 말한 "읽는 쪽이 고생한다"의 그 고생을 대신 해주는 도구죠. (Phase 6)
+- **라우팅 그래프** — `osm2pgrouting`이 `highway` 태그가 붙은 way를 간선으로, 교차점 노드를 정점으로 바꿔 최단경로를 계산합니다. 방금 만든 `seoul-roads.osm.pbf`가 정확히 그 입력이에요. (Phase 8)
+- **벡터타일 굽기** — `tippecanoe`로 타일을 구울 때도 원본이 필요한데, 대개 이 파일에서 출발합니다. (Phase 11)
+
+이걸로 **Phase 4가 끝났습니다.** 지난 편에서 OSM이 세상을 담는 방식(Node·Way·Relation·태그)을 배웠고, 이번 편에서 그 데이터를 **내 손에 파일로** 가져왔어요.
+
+## 정리 — 한 문장으로
+
+> **PBF는 XML을 바이너리로 바꾸고(Protocol Buffer), 반복 문자열을 번호로 접고(StringTable), 정렬된 id를 차이로 적어(delta encoding), 마지막으로 블록마다 zlib을 씌운 포맷이다. 그 결과 같은 데이터가 19.5배 작아지고, 압축된 채로 필요한 블록만 골라 읽힌다.**
+
+| | XML (`.osm`) | PBF (`.osm.pbf`) |
+| --- | --- | --- |
+| 형태 | 텍스트 | 바이너리 |
+| 서울 크기 | 566.0 MiB | **29.0 MiB** |
+| 문자열 반복 | 매번 기록 | StringTable에 한 번 |
+| 좌표 | 문자열 | 정수 + 델타 |
+| 부분 읽기 | 불가 (통째로) | **블록 단위 가능** |
+| 사람이 읽기 | ✅ | ❌ |
+| 용도 | 소량 교환·디버깅 | **대량 배포·처리** |
+
+이제 데이터는 손에 있습니다. 그런데 파일은 파일일 뿐이에요. **"강남역 반경 500m 안의 편의점"** 같은 질문을 던지려면 파일을 뒤지는 걸로는 안 됩니다. 질문에 답하도록 만들어진 물건이 따로 필요하죠.
+
+다음 편부터 **Phase 6 — PostGIS**입니다. 평범한 PostgreSQL에 확장 하나를 켜면 공간 데이터베이스로 변신하는데, 그 `CREATE EXTENSION postgis;` 한 줄이 정확히 무엇을 바꾸는지부터 시작합니다. 오늘 만든 `.osm.pbf`를 거기에 밀어 넣는 것도 곧이고요.
+
+<ReferenceList
+  references={[
+    'https://wiki.openstreetmap.org/wiki/PBF_Format',
+    'https://wiki.openstreetmap.org/wiki/OSM_XML',
+    'https://protobuf.dev/programming-guides/encoding/',
+    'https://osmcode.org/osmium-tool/',
+    'https://docs.osmcode.org/osmium/latest/osmium-extract.html',
+    'https://docs.osmcode.org/osmium/latest/osmium-tags-filter.html',
+    'https://docs.osmcode.org/osmium/latest/osmium-fileinfo.html',
+    'https://docs.osmcode.org/osmium/latest/osmium-cat.html',
+    'https://download.geofabrik.de/',
+    'https://github.com/openstreetmap/OSM-binary',
+    'https://osm2pgsql.org/',
+  ]}
+/>

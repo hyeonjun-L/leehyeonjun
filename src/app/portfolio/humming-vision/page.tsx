@@ -22,6 +22,7 @@ import Skill from '../_components/Skill';
 export const metadata: Metadata = {
   title: '이현준 | 허밍비전',
   description: '이현준 허밍비전 프로젝트 자세히 보기 페이지',
+  robots: { index: false, follow: true },
 };
 
 const page = () => {

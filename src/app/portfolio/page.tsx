@@ -8,6 +8,7 @@ import Project from './_components/Project';
 export const metadata: Metadata = {
   title: '이현준 | 포트폴리오',
   description: '이현준 포트폴리오 보기 페이지',
+  robots: { index: false, follow: true },
 };
 
 const page = () => {
