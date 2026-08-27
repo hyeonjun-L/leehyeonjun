@@ -1,0 +1,577 @@
+import { createPostMetadata } from '@/utils/postMetadata';
+
+export const metadata = createPostMetadata({
+  title: 'Shapefile을 PostGIS에 넣기 — 글자가 깨지고 좌표가 어긋난다',
+  description:
+    '한국 시군구 Shapefile을 PostGIS에 넣으면 서귀포시가 ¼­±ÍÆ÷½Ã가 된다. 게다가 파일은 자기 좌표계가 무엇인지 알려주지 않는다. shp2pgsql과 ogr2ogr로 251개 시군구를 넣으며 인코딩·SRID·측지계 세 함정을 실측으로 통과한다. 잘못 지정하면 317m 어긋난다.',
+  publishDate: '2026-08-21T00:00:00Z',
+  posterImage:
+    'https://storage.googleapis.com/leehyeonjun.com/gis/22/two-paths.png',
+  categories: ['GIS'],
+  slug: 'gis-22-load-shapefile',
+});
+
+<BlogTitle {...metadata} />
+
+> ## 서귀포시가 ¼­±ÍÆ÷½Ã가 되었다
+>
+> <Link href='/blog/gis-21-postgis-start'>지난 편</Link>에서 PostGIS를 세웠지만 데이터베이스는 **텅 비어 있습니다.** 점 두 개 찍어 거리를 잰 게 전부였죠. 이제 진짜 데이터를 넣어 봅시다. 한국 시군구 경계 **251개**가 든 Shapefile을 받아, 배운 대로 명령 한 줄을 실행합니다. 그리고 조회해 보면 — **`¼­±ÍÆ÷½Ã`**. 서귀포시가 있어야 할 자리에 저게 앉아 있습니다. 게다가 좌표를 위경도로 바꾸려 하니 **"알 수 없는 SRID"** 라며 거부당하고요.
+
+오늘은 파일을 DB로 옮기는 두 가지 길(**`shp2pgsql`** · **`ogr2ogr`**)을 걸어보면서, 그 길목에 놓인 **함정 셋**을 통과합니다. 전부 실제로 넣어보고 재 봤습니다.
+
+> 데이터: `southkorea-maps` 저장소의 **통계청 2012년 시군구 경계** (251개 지역, 좌표점 1,213,783개). <Link href='/blog/gis-18-kml-gml-topojson'>TopoJSON 편</Link>에서 쓴 그 저장소입니다. 측정일 2026-08-21, PostGIS 3.5.2.
+
+## 먼저 데이터를 받는다
+
+`southkorea-maps` 저장소에서 통계청 시군구 경계를 받습니다. <Link href='/blog/gis-10-shapefile'>Shapefile 편</Link>에서 "하나의 Shapefile은 실은 파일 묶음"이라고 했으니, **네 개를 다 받아야** 합니다.
+
+```bash
+BASE=https://raw.githubusercontent.com/southkorea/southkorea-maps/master/kostat/2012/shp
+
+for ext in shp shx dbf prj; do
+  curl -LO "$BASE/skorea-municipalities-2012.$ext"
+done
+```
+
+뒤에서 쓸 GeoJSON도 미리 받아 둡니다.
+
+```bash
+curl -LO https://raw.githubusercontent.com/southkorea/southkorea-maps/master/kostat/2012/json/municipalities-geo-simple.json
+```
+
+> ⚠️ **같은 폴더에 이름이 비슷한 세트가 하나 더 있습니다.** `municipalities.*`(접두사 없는 쪽)는 이미 정제된 버전이라 `.cpg`에 `UTF-8`이 적혀 있고 좌표계도 WGS84예요. 
+
+## 넣기 전에 — 파일이 무엇을 말해주는지 본다
+
+받은 걸 나열하면 이렇습니다.
+
+```text
+skorea-municipalities-2012.shp   19,442,736 bytes   도형
+skorea-municipalities-2012.shx        2,108 bytes   색인
+skorea-municipalities-2012.dbf      255,429 bytes   속성 (이름, 코드…)
+skorea-municipalities-2012.prj          436 bytes   좌표계
+```
+
+여기서 **없는 것**이 오늘 이야기의 절반입니다. **`.cpg`가 없습니다.**
+
+`.cpg`는 **`.dbf`의 글자가 어떤 인코딩인지 적어두는 파일**입니다. 딱 한 줄, `UTF-8` 같은 문자열만 들어 있어요. 그런데 이 세트엔 그게 없습니다.
+
+```bash
+curl -sI "$BASE/skorea-municipalities-2012.cpg" | head -1
+# HTTP/2 404
+```
+
+**아무도 인코딩을 알려주지 않는다는 뜻입니다.** 그리고 `.prj`를 열어보면 두 번째 문제가 나옵니다.
+
+> 💡 **열기 전에 하나 짚고 갑시다.** `.prj`의 내용을 흔히 **WKT**라고 부르는데, <Link href='/blog/gis-21-postgis-start'>지난 편</Link>에서 배운 그 WKT와 **이름만 같고 다른 물건**입니다.
+>
+> | | 도형 WKT | 좌표계 WKT |
+> | --- | --- | --- |
+> | 적는 것 | 도형 하나 | **좌표계 정의** |
+> | 생김새 | `POINT(127 37.5)` | `PROJCS["…", PARAMETER[…]]` |
+> | 만나는 곳 | `ST_AsText()`, SQL | **`.prj` 파일** |
+>
+> 둘 다 OGC가 만든 "기계도 읽고 사람도 읽는 텍스트 표기"라 작명이 겹쳤을 뿐, 문법도 용도도 남남이에요. 아래 나올 건 **오른쪽** 것입니다.
+
+```text
+PROJCS["Bessel_1841_Transverse_Mercator",
+  GEOGCS["GCS_Bessel_1841", DATUM["D_Bessel_1841",
+    SPHEROID["Bessel_1841", 6377397.155, 299.1528128]],
+    UNIT["Degree", 0.0174532925199433]],
+  PARAMETER["False_Easting",   200000.0],
+  PARAMETER["False_Northing",  500000.0],
+  PARAMETER["Central_Meridian",127.0028902777778],
+  PARAMETER["Latitude_Of_Origin", 38.0],
+  UNIT["Meter", 1.0]]
+```
+
+`UNIT`이 두 번 나오는 게 눈에 띌 겁니다. 안쪽 `GEOGCS`의 것은 **원래 위경도가 도(degree) 단위**라는 뜻이고, 맨 끝 `PROJCS`의 `Meter`가 **평면에 펼친 뒤의 단위**예요. 즉 이 파일의 좌표는 **미터**입니다.
+
+좌표계 정보는 있습니다. 그런데 **EPSG 코드가 어디에도 없어요.** `AUTHORITY` 항목이 통째로 빠져 있습니다. <Link href='/blog/gis-10-shapefile'>Shapefile 편</Link>에서 *"이게 5179인지 4326인지 아무도 모름"* 이라고 했던 그 상황의 실물입니다.
+
+### 번호가 없으면 — 세 단계로 알아낸다
+
+곧 도구에 **"이 데이터는 몇 번 좌표계다"** 라고 알려줘야 하는데 파일이 번호를 안 줍니다. 다행히 **외워서 알아맞히는 일이 아닙니다.** 순서가 있어요.
+
+**① 기계에게 먼저 물어본다.** GDAL에 `.prj`를 던져주면 **"이거 몇 번 좌표계야?"** 를 대신 찾아보는 도구가 있습니다.
+
+```bash
+gdalsrsinfo -o epsg skorea-municipalities-2012.prj
+```
+
+```text
+EPSG:-1
+```
+
+**못 찾았습니다.** `projinfo --identify`로 물어도 `Identification match count: 0` 이 나와요.
+
+왜 못 찾을까요? `.prj`가 *"Bessel 타원체를 쓰는 횡축 메르카토르"* 라고만 말하지 *"한국측지계 1985"* 라고는 안 하기 때문입니다. **Bessel을 쓰는 좌표계는 세계에 여럿**이라 기계가 하나로 좁히질 못해요. (대부분의 파일은 이 단계에서 끝납니다. 이 파일이 유난한 겁니다.)
+
+**② 파라미터로 데이터베이스를 검색한다.** 기계가 못 맞혔다고 해서 사람이 외워야 하는 건 아닙니다. <Link href='/blog/gis-21-postgis-start'>지난 편</Link>에서 본 그 **`spatial_ref_sys` 8,500행**을 우리가 직접 뒤지면 되거든요. `.prj`의 값을 조건으로 걸어서요.
+
+```sql
+SELECT srid, substring(proj4text from '\+lon_0=[0-9.]+') AS lon_0,
+             substring(proj4text from '\+ellps=[a-zA-Z0-9]+') AS ellps
+FROM spatial_ref_sys
+WHERE proj4text LIKE '%+proj=tmerc%'      -- 횡축 메르카토르
+  AND proj4text LIKE '%+lat_0=38 %'       -- 기준위도 38
+  AND proj4text LIKE '%+x_0=200000 %'     -- 가원점
+  AND proj4text LIKE '%+y_0=500000 %'
+ORDER BY srid;
+```
+
+8,500개가 **20개로 줄어듭니다.**
+
+```text
+ srid  |          lon_0           |    ellps
+-------+--------------------------+--------------
+  2097 | 127                      | bessel
+  5170 | 127                      | bessel
+  5173 | 125.0028902777778        | bessel
+  5174 | 127.0028902777778        | bessel     ←
+  5176 | 129.0028902777778        | bessel
+  5181 | 127                      | GRS80
+  ... (총 20개)
+```
+
+한국 TM 계열이 통째로 나왔죠. 여기에 `.prj`의 `Central_Meridian` 값 하나만 더 걸면 끝입니다.
+
+```sql
+  AND proj4text LIKE '%+lon_0=127.00289%'
+```
+
+```text
+  srid  | auth  | 이름
+--------+-------+------------------------------------------------
+   5174 | EPSG  | Korean 1985 / Modified Central Belt
+ 102086 | ESRI  | Korean_1985_Modified_Korea_Central_Belt (deprecated)
+```
+
+**둘로 좁혀졌고, 사실 같은 좌표계입니다.** `102086`은 ESRI가 매긴 옛 번호(폐기됨)라 우리가 쓸 건 **`EPSG:5174`**. 외운 게 아니라 **찾아낸** 겁니다.
+
+**③ 지도에 올려 확인한다.** 마지막은 검산입니다. 잘못 짚었으면 데이터가 엉뚱한 나라에 가 있을 테니까요. 좌표 범위의 중앙점을 후보별로 위경도로 바꿔봤습니다.
+
+```bash
+ogrinfo -al -so skorea-municipalities-2012.shp | grep Extent
+# Extent: (-11603.223, -42413.197) - (638652.979, 569052.000)
+```
+
+> 💡 `.prj`가 아예 없는 파일도 흔한데, 그럴 땐 **이 숫자만으로도** 감이 옵니다. 값이 `-180 ~ 180` 범위면 위경도, **수십만이면 미터 투영**, 수백만이면 가원점이 큰 좌표계(5179는 `x_0=1000000`)예요. 크기로도 검산됩니다 — 가로 650km · 세로 611km면 제주·울릉까지 포함한 남한과 맞아떨어지죠. 피트로 쳤다면 198km밖에 안 돼 경기도만 해집니다.
+
+이제 아무 점이나 하나 골라 후보별로 위경도로 바꿔봅니다. 두 모서리를 평균 내 **중앙점**을 쓰면 편해요.
+
+```text
+X = (-11603.223 + 638652.979) / 2 ≈ 313524
+Y = (-42413.197 + 569052.000) / 2 ≈ 263319
+```
+
+```bash
+echo "313524 263319" | cs2cs EPSG:5174 EPSG:4326    # 후보를 바꿔가며
+```
+
+> 💡 굳이 중앙점일 필요는 없습니다. 데이터 안의 아무 좌표나 찍어도 돼요. 다만 중앙은 **`Extent` 한 줄만 보고 바로 계산**되는 데다, 좌표계를 잘못 짚으면 확실히 엉뚱한 데로 날아가서 판정이 깔끔합니다. 가장자리 점은 아슬아슬하게 걸치는 경우가 생기거든요.
+
+| 가정한 SRID | 위도 | 경도 | 어디인가 |
+| --- | --- | --- | --- |
+| **5174** | 36.3204 | 127.7059 | **한반도 중부** ✅ |
+| 5181 | 36.3177 | 127.7051 | 한반도 중부 (317m 차이) |
+| 5179 | 22.6212 | 120.3446 | 대만 ❌ |
+| 5186 | 35.4165 | 127.6972 | 100km쯤 남쪽 ❌ |
+| 32652 (UTM) | 2.3813 | 127.3230 | 인도네시아 ❌ |
+
+5174가 한반도 중부에 정확히 떨어집니다. 반대로 **5179로 착각했다면 전국 지도가 대만에 떠 있을 테니** 모를 수가 없죠. `cs2cs` 없이 **QGIS에 올려보는 것만으로도** 같은 판정이 됩니다.
+
+> 💡 **외워야 할 건 없습니다.** ②의 SQL이 후보를 찾아주고 ③이 검산해 줍니다. 굳이 하나 기억한다면 *"`Bessel`이면 옛 동경측지계, `GRS80`이면 세계측지계"* 정도 — 5174와 5181처럼 **317m 차이로 붙어 있는 쌍**을 가를 때 쓰입니다.
+>
+> 그리고 이 과정이 오늘 명령마다 붙는 **`-s 5174`의 근거**예요. 파일이 말해주지 않으니 사람이 알아내서 넣어 주는 것이고, **틀리면 조용히 어긋납니다.**
+
+## 담을 데이터베이스부터
+
+넣을 곳이 필요하니 하나 만듭니다. <Link href='/blog/gis-21-postgis-start'>지난 편</Link>에서 한 그대로예요.
+
+```bash
+docker exec -i gis createdb -U postgres kor
+docker exec -i gis psql -U postgres -d kor -c "CREATE EXTENSION postgis;"
+```
+
+## 길 ① shp2pgsql — SQL을 만들어 준다
+
+PostGIS가 함께 설치해 주는 정식 도구입니다.
+
+```bash
+shp2pgsql -s 5174 skorea-municipalities-2012 sgg \
+  | docker exec -i gis psql -U postgres -d kor
+```
+
+조각을 나눠 읽으면 이렇습니다.
+
+```text
+shp2pgsql  -s 5174  skorea-municipalities-2012  sgg  |  docker exec -i gis psql -U postgres -d kor
+    │         │              │                   │   │              │
+    │         │              │                   │   │              └ 컨테이너 안 psql로 흘려보냄
+    │         │              │                   │   └ 앞의 출력을 뒤로 넘김
+    │         │              │                   └ 만들 테이블 이름
+    │         │              └ 읽을 파일 (확장자 없음)
+    │         └ 이 데이터의 좌표계는 5174다  ← 방금 역추적한 그 번호
+    └ 프로그램 이름
+```
+
+> 💡 `shp2pgsql`은 **호스트에서**, `psql`은 **컨테이너 안에서** 돕니다. 파일은 내 컴퓨터에 있고 데이터베이스는 컨테이너에 있으니 자연스러운 분업이에요. 파이프로 넘길 땐 `-it`이 아니라 **`-i`** 를 씁니다 — `-t`는 터미널을 붙이라는 뜻이라 `stdin is not a tty` 로 죽거든요.
+
+**파일명에 확장자가 없는 게 눈에 띌 겁니다.** 방금 네 개를 받았는데 하나만 적었죠. `shp2pgsql`이 **묶음 이름만 보고 넷을 알아서 찾아 읽기** 때문입니다 — 도형은 `.shp`, 이름은 `.dbf`, 좌표계는 `.prj`에서요.
+
+### 이 도구는 DB를 건드리지 않는다
+
+이름에 `pgsql`이 붙어 헷갈리는데, **`shp2pgsql`은 데이터베이스에 접속조차 하지 않습니다.** 하는 일은 **SQL 텍스트를 화면에 뿌리는 것**뿐이에요. 파이프를 빼고 실행하면 바로 보입니다.
+
+```bash
+shp2pgsql -s 5174 skorea-municipalities-2012 sgg
+```
+
+```sql
+SET CLIENT_ENCODING TO UTF8;
+BEGIN;
+CREATE TABLE "sgg" (gid serial, "code" varchar(254), …);
+INSERT INTO "sgg" (…) VALUES ('39020','서귀포시',…);
+INSERT INTO "sgg" (…) VALUES ('39010','제주시',…);
+…
+COMMIT;
+```
+
+`|`는 그 텍스트를 **`psql`의 입력으로 흘려보내는** 장치이고, 받은 `psql`이 한 줄씩 실행합니다. 그래서 파일로 받아뒀다가 나중에 실행해도 결과가 같아요.
+
+```bash
+shp2pgsql -s 5174 skorea-municipalities-2012 sgg > load.sql   # 저장만
+head -20 load.sql                                            # 눈으로 확인
+docker exec -i gis psql -U postgres -d kor < load.sql        # 나중에 실행
+```
+
+**"생성될 SQL을 눈으로 볼 수 있다"** 는 게 이 도구의 강점입니다. 뒤에 볼 `ogr2ogr`은 자기가 DB에 직접 꽂아버려서 중간 산출물이 없거든요.
+
+자, 그럼 실행해 봅시다. 결과는 — **멈춥니다.**
+
+```text
+Shapefile type: Polygon
+Postgis type: MULTIPOLYGON[2]
+Unable to convert data value to UTF-8 (iconv reports "Illegal byte sequence").
+Current encoding is "UTF-8". Try "LATIN1" (Western European), or one of the
+values described at http://www.postgresql.org/docs/current/static/multibyte.html.
+```
+
+**첫 한글 행에서 죽었습니다.** 만들어진 SQL이 340바이트뿐이에요 — `CREATE TABLE`까지만 쓰고 끝났습니다.
+
+```sql
+SET CLIENT_ENCODING TO UTF8;
+BEGIN;
+CREATE TABLE "sgg" (gid serial, "code" varchar(254), "name" varchar(254),
+                    "name_eng" varchar(254), "base_year" varchar(254));
+ALTER TABLE "sgg" ADD PRIMARY KEY (gid);
+SELECT AddGeometryColumn('','sgg','geom','5174','MULTIPOLYGON',2);
+-- 여기서 끝. INSERT가 하나도 없다.
+```
+
+`BEGIN;`은 있는데 `COMMIT;`이 없죠. 그래서 트랜잭션이 롤백되고 **테이블조차 남지 않습니다.** 실패가 시끄러운 건 좋은 일이에요 — 다음에 볼 조용한 실패보다 백 배 낫습니다.
+
+## 함정 ① 에러가 시키는 대로 하면 조용히 깨진다
+
+에러 메시지를 다시 보세요. **`Try "LATIN1"`** 이라고 친절하게 권합니다. 시키는 대로 해 봅시다.
+
+```bash
+shp2pgsql -W LATIN1 -s 5174 skorea-municipalities-2012 sgg_latin1 \
+  | docker exec -i gis psql -U postgres -d kor
+```
+
+이번엔 **성공합니다.** 38MB짜리 SQL이 나오고 251행이 전부 들어갑니다. 에러 하나 없이요. 그리고 조회하면 이게 나옵니다.
+
+```text
+ gid | LATIN1로 읽었을 때  | CP949로 읽었을 때 | 원본 바이트
+-----+---------------------+-------------------+--------------------------
+   1 | ¼­±ÍÆ÷½Ã            | 서귀포시           | bc ad b1 cd c6 f7 bd c3
+ 100 | Ãµ¾È½Ã¼­ºÏ±¸        | 천안시서북구       | c3 b5 be c8 bd c3 bc ad …
+ 200 | ³²±¸                | 남구               | b3 b2 b1 b8
+```
+
+**바이트는 그대로인데 해석이 틀렸습니다.** `bc ad`를 CP949로 읽으면 `서`, Latin-1로 읽으면 `¼`+`­` 두 글자. 인코딩은 **바이트에 붙어 있는 성질이 아니라 읽는 사람의 약속**이라, 잘못 약속하면 이렇게 됩니다.
+
+무서운 건 **아무것도 잘못된 게 없어 보인다**는 점이에요. 행 수도 맞고 에러도 없습니다. 몇 달 뒤 누가 "이 데이터 왜 이래요?" 하고 물어볼 때까지 모릅니다.
+
+정답은 이 파일이 실제로 쓰는 인코딩, **CP949**입니다.
+
+```bash
+shp2pgsql -W CP949 -s 5174 skorea-municipalities-2012 sgg \
+  | docker exec -i gis psql -U postgres -d kor
+```
+
+```text
+ gid |   name
+-----+----------
+   1 | 서귀포시
+ 100 | 천안시서북구
+ 200 | 남구
+```
+
+
+> 💡 **왜 CP949인가.** 한국 공공기관 데이터는 오랫동안 이 인코딩을 썼습니다. `EUC-KR`을 확장한 마이크로소프트 코드페이지라 윈도우 한국어판의 기본값이었고, GIS 데이터를 만드는 도구도 대개 윈도우에서 돌았거든요. 그래서 **`.cpg`가 없는 한국 Shapefile을 만나면 CP949부터 의심**하는 게 실무 감각입니다. `EUC-KR`로도 대부분 열립니다.
+
+## 함정 ② SRID를 빠뜨리면
+
+인코딩은 넘겼습니다. 그런데 명령마다 붙는 `-s 5174`, 저건 **우리가 `.prj`를 읽고 손으로 적어 넣은 값**이었죠. 안 적으면 어떻게 될까요?
+
+```bash
+shp2pgsql -W CP949 skorea-municipalities-2012 sgg_nosrid \
+  | docker exec -i gis psql -U postgres -d kor
+```
+
+성공합니다. 251행 다 들어가고요. 그런데 <Link href='/blog/gis-21-postgis-start'>지난 편</Link>에서 "적재 후 가장 먼저 볼 창구"라고 했던 `geometry_columns`를 열어보면:
+
+```sql
+SELECT f_table_name, srid, type FROM geometry_columns;
+```
+
+```text
+ f_table_name | srid |     type
+--------------+------+--------------
+ sgg          | 5174 | MULTIPOLYGON
+ sgg_nosrid   |    0 | MULTIPOLYGON     ← 0
+```
+
+**`srid = 0`.** "좌표계를 모른다"는 뜻입니다. 좌표값은 멀쩡히 들어있는데 **그게 무슨 좌표인지 DB가 모르는** 상태죠. 그래서 변환을 시도하면 거부당합니다.
+
+```sql
+SELECT ST_Transform(geom, 4326) FROM sgg_nosrid LIMIT 1;
+```
+
+```text
+ERROR:  ST_Transform: Input geometry has unknown (0) SRID
+```
+
+<Link href='/blog/gis-21-postgis-start'>지난 편</Link>에서 `geometry` 타입 25바이트를 뜯을 때 **SRID가 값 안에 4바이트로 들어 있다**고 했죠. 그 자리에 0이 박힌 겁니다.
+
+그래서 **넣기 전에 `.prj`를 읽어 SRID를 알아내는 일**이 선택이 아니라 필수입니다. 앞에서 5174를 지목한 그 과정 말이죠.
+
+## 함정 ③ 이 데이터는 동경측지계였다
+
+앞에서 후보를 좁힐 때 **5181이 끝까지 살아남았죠.** 지도에 올려도 5174와 구별이 안 됐으니까요. 그 둘의 정의를 나란히 놓아 봅시다.
+
+```text
+5174 : +proj=tmerc +lat_0=38 +lon_0=127.0028902777778 +k=1
+       +x_0=200000 +y_0=500000 +ellps=bessel
+5181 : +proj=tmerc +lat_0=38 +lon_0=127               +k=1
+       +x_0=200000 +y_0=500000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0
+```
+
+**투영법도, 가원점도, 기준위도도 전부 같습니다.** 다른 건 `lon_0`의 소수점 뒷자리와 **타원체**뿐이에요.
+
+그리고 그 타원체가 이야기의 핵심입니다. **`bessel`** — <Link href='/blog/gis-05-shape-of-earth'>지구의 진짜 모양</Link> 편에서 다룬 그 **베셀 타원체**이고, <Link href='/blog/gis-07-epsg-codes'>EPSG</Link> 편에서 말한 **동경측지계**입니다. 일제강점기에 들여와 2010년 세계측지계 전환 전까지 쓰던 기준이죠. 5181은 그 자리를 GRS80으로 바꾼 **세계측지계 쌍둥이**고요.
+
+번호가 한 끗 차이라 헷갈려서 5181로 지정하는 일이 흔합니다. 그러면 어떻게 될까요?
+
+얼마나 어긋나는지 재봤습니다. 서귀포시 중심점을 두 방식으로 위경도로 바꿔보면:
+
+```sql
+WITH c AS (SELECT ST_Centroid(geom) g FROM sgg WHERE gid = 1)
+SELECT ST_AsText(ST_Transform(g, 4326))                        AS 제대로,
+       ST_AsText(ST_Transform(ST_SetSRID(g, 5181), 4326))      AS 잘못,
+       ST_Distance(ST_Transform(g, 4326)::geography,
+                   ST_Transform(ST_SetSRID(g, 5181), 4326)::geography) AS 차이
+FROM c;
+```
+
+| | 결과 |
+| --- | --- |
+| 5174로 제대로 | `POINT(126.580843 33.324061)` |
+| 5181로 잘못 | `POINT(126.580033 33.321284)` |
+| **차이** | **317.0 m** |
+
+**317미터.** 소수점 셋째 자리가 살짝 다를 뿐인데 실제로는 도시 블록 몇 개 거리입니다. 지도에 올려도 "대충 맞아 보여서" 더 위험하죠.
+
+<Link href='/blog/gis-08-coordinate-transformation'>좌표 변환</Link> 편의 **함정 ④ — 측지계를 무시한 변환**이 바로 이겁니다. 투영을 되돌리는 것만으로는 안 되고, **타원체가 다르면 지구 중심 기준으로 좌표계를 밀어주는 계산(datum shift)** 이 따라와야 하는데, SRID를 잘못 주면 PostGIS가 엉뚱한 타원체로 그걸 해버립니다.
+
+{/* 🖼️ 이미지: 서귀포시 지도 위에 점 두 개 — 5174로 변환한 위치와 5181로 변환한 위치가 317m 떨어져 찍히고 사이에 축척 막대. 아래에 두 proj4 문자열을 나란히 놓고 다른 부분(ellps=bessel vs GRS80, lon_0)만 색으로 강조 — gis/22/srid-chain.png */}
+<BlurImage imageURL='https://storage.googleapis.com/leehyeonjun.com/gis/22/srid-chain.png' title={metadata.title} />
+
+## 길 ② ogr2ogr — 한 줄로 직접 넣는다
+
+<Link href='/blog/gis-10-shapefile'>Shapefile</Link>·<Link href='/blog/gis-13-flatgeobuf'>FlatGeobuf</Link>·<Link href='/blog/gis-18-kml-gml-topojson'>KML</Link> 편에서 계속 만난 GDAL의 그 만능 변환기입니다. PostGIS도 출력 대상 중 하나일 뿐이에요.
+
+```bash
+ogr2ogr -f PostgreSQL \
+  "PG:host=localhost port=5432 dbname=kor user=postgres password=postgres" \
+  skorea-municipalities-2012.shp \
+  -nln sgg_ogr -a_srs EPSG:5174 -nlt PROMOTE_TO_MULTI \
+  -lco FID=gid -lco GEOMETRY_NAME=geom \
+  --config SHAPE_ENCODING CP949
+```
+
+`shp2pgsql`이 SQL을 뱉고 우리가 파이프로 넘기는 구조였다면, 이쪽은 **자기가 DB에 직접 연결해서 넣습니다.** 그래서 `docker exec`이 필요 없어요 — 컨테이너가 5432를 열어 두었으니 **호스트에서 그냥 접속**하면 됩니다. 옵션도 대응됩니다 — `-a_srs`가 `-s`, `SHAPE_ENCODING`이 `-W`, `-nln`이 테이블 이름이죠.
+
+> ⚠️ **`-lco` 두 줄을 빼면 칼럼 이름이 달라집니다.** `-lco`는 *layer creation option*, 테이블을 만들 때 주는 옵션인데 이게 없으면 GDAL이 자기 기본값으로 짓거든요.
+>
+> | | `shp2pgsql` | `ogr2ogr` 기본값 |
+> | --- | --- | --- |
+> | 식별자 | `gid` | **`ogc_fid`** |
+> | 도형 | `geom` | **`wkb_geometry`** |
+>
+> 적재 자체는 멀쩡히 되지만, 나중에 두 테이블을 조인하려 하면 `column o.gid does not exist` 로 막힙니다. **도구를 섞어 쓸 때는 이름부터 맞춰두는 게** 편해요.
+
+두 경로가 정말 같은 결과를 내는지 확인해 봤습니다.
+
+```sql
+SELECT count(*) AS matched,
+       count(*) FILTER (WHERE NOT ST_Equals(a.geom, o.geom)) AS differ
+FROM sgg a JOIN sgg_ogr o ON a.gid = o.gid;
+```
+
+```text
+ matched | differ
+---------+--------
+     251 |      0
+```
+
+**251개 전부 도형이 동일합니다.** 길이 달라도 도착지는 같아요.
+
+> ⚠️ **`-nlt PROMOTE_TO_MULTI`를 빼면 이렇게 됩니다.**
+>
+> ```text
+> Warning 1: Geometry to be inserted is of type Multi Polygon,
+>            whereas the layer geometry type is Polygon.
+> ERROR 1: COPY statement failed.
+> ```
+>
+> GDAL은 **첫 피처만 보고 도형 타입을 단정**합니다. 첫 시군구가 단일 폴리곤이면 테이블을 `POLYGON`으로 만들어 버리고, 섬이 딸린 지역(멀티폴리곤)이 나오는 순간 무너지죠. 한국 행정구역엔 섬이 흔하니 이 옵션은 사실상 필수입니다.
+
+### GeoJSON은 훨씬 순합니다
+
+같은 저장소의 GeoJSON을 **같은 명령**으로 넣어 봅시다.
+
+```bash
+ogr2ogr -f PostgreSQL \
+  "PG:host=localhost port=5432 dbname=kor user=postgres password=postgres" \
+  municipalities-geo-simple.json \
+  -nln sgg_json -nlt PROMOTE_TO_MULTI
+```
+
+`-a_srs`도, 인코딩 지정도 **없습니다.** 그런데 잘 들어갑니다.
+
+```text
+ f_table_name | srid | rows
+--------------+------+------
+ sgg_json     | 4326 |  251
+```
+
+**SRID가 알아서 4326으로** 잡혔죠. <Link href='/blog/gis-11-geojson'>GeoJSON 편</Link>에서 본 이유입니다 — RFC 7946이 **인코딩은 UTF-8, 좌표계는 WGS84로 못 박아** 뒀거든요. 선택의 여지가 없으니 함정도 없습니다.
+
+| | Shapefile | GeoJSON |
+| --- | --- | --- |
+| 인코딩 | `.cpg`에 적힘, **없으면 미궁** | **UTF-8 고정** |
+| 좌표계 | `.prj`에 WKT, **EPSG 코드는 없을 수도** | **4326 고정** |
+| 넣을 때 | `-a_srs`·인코딩 지정 필요 | 그냥 넣으면 됨 |
+| 용량 (251개 시군구) | 19.4 MB | 0.6 MB (간소화본) |
+
+## 어느 길로 갈까
+
+넣는 방법은 사실 넷입니다.
+
+| 방법 | 이럴 때 |
+| --- | --- |
+| **`shp2pgsql`** | Shapefile만 다룰 때. SQL을 눈으로 확인·수정하고 싶을 때 |
+| **`ogr2ogr`** | 그 밖의 거의 모든 경우. 입력 포맷이 뭐든 같은 명령 |
+| QGIS | 한 번만, 눈으로 확인하며 넣을 때. 레이어를 DB 연결에 끌어다 놓으면 끝 |
+| `COPY` | 이미 CSV·SQL로 풀어놓은 데이터. 가장 빠르지만 도형은 직접 만들어야 함 |
+
+**기본은 `ogr2ogr`** 로 두는 게 편합니다. Shapefile·GeoJSON·GeoPackage·PBF를 같은 문법으로 처리하니까요. `shp2pgsql`은 **생성될 SQL을 먼저 보고 싶을 때** 꺼냅니다 — 파이프를 파일로 바꿔 저장하고 열어보면 됩니다.
+
+{/* 🖼️ 이미지: 두 경로 대비 — 위: Shapefile → shp2pgsql → (SQL 텍스트 38MB) → psql → DB, 중간에 "SQL을 눈으로 볼 수 있다" 라벨. 아래: Shapefile → ogr2ogr → (직접 연결) → DB, "한 줄로 끝" 라벨 — gis/22/two-paths.png */}
+<BlurImage imageURL='https://storage.googleapis.com/leehyeonjun.com/gis/22/two-paths.png' title={metadata.title} />
+
+> 💡 **GDAL이 PostgreSQL을 모른다고 할 때가 있습니다.** `ogr2ogr -f PostgreSQL` 이 `Unable to find driver`로 죽으면 설치본에 그 드라이버가 안 들어간 겁니다 — GDAL은 빌드할 때 어떤 드라이버를 넣을지 고르거든요. `ogr2ogr --formats | grep -i postgre` 로 확인하고, 없으면 QGIS나 OSGeo4W에 딸린 GDAL을 쓰거나 도커 이미지(`ghcr.io/osgeo/gdal`)로 우회합니다.
+
+## 넣고 나서 확인할 것 세 가지
+
+데이터가 들어갔으니 점검합니다.
+
+**① 좌표계가 제대로 붙었나.** 앞에서 본 `geometry_columns`가 그 창구입니다.
+
+```sql
+SELECT f_table_name, srid, type FROM geometry_columns;
+```
+
+`srid`가 0이면 SRID 지정을 빠뜨린 겁니다. 지금 고치면 한 줄이고, 나중에 발견하면 이미 그 좌표로 만든 결과물을 다 되짚어야 합니다.
+
+**② 도형이 멀쩡한가.**
+
+```sql
+SELECT count(*) AS total,
+       count(*) FILTER (WHERE NOT ST_IsValid(geom)) AS invalid,
+       sum(ST_NPoints(geom)) AS points
+FROM sgg;
+```
+
+```text
+ total | invalid |  points
+-------+---------+---------
+   251 |       0 | 1213783
+```
+
+**깨진 도형 0개.** 다행히 이 데이터는 깨끗하지만, 공공 데이터를 다루다 보면 자기교차 폴리곤 같은 게 섞여 있어 나중에 `ST_Intersects`가 통째로 실패합니다. **넣은 직후에 세어 보는 습관**이 값어치 있어요. (고치는 방법은 뒤 Phase에서 따로 다룹니다.)
+
+**③ 인덱스를 걸었나.** <Link href='/blog/gis-21-postgis-start'>지난 편</Link>에서 말했듯 타입만 `geometry`라고 공간 인덱스가 저절로 생기지 않습니다. 먼저 있는지부터 봅니다.
+
+```sql
+SELECT indexname, indexdef FROM pg_indexes WHERE tablename = 'sgg';
+```
+
+```text
+   indexname   |                        indexdef
+--------------+--------------------------------------------------------------
+ sgg_pkey     | CREATE UNIQUE INDEX sgg_pkey ON public.sgg USING btree (gid)
+ sgg_geom_idx | CREATE INDEX sgg_geom_idx ON public.sgg USING gist (geom)
+```
+
+**`indexdef`의 `USING gist`를 확인하세요.** 개수만 세면 안 됩니다 — `USING btree (geom)` 도 에러 없이 만들어지는데 그건 공간 검색에 안 쓰이거든요. `geom` 칼럼에 **`gist`가 걸려 있는지**가 봐야 할 전부입니다.
+
+없으면 걸어줍니다.
+
+```sql
+CREATE INDEX sgg_geom_idx ON sgg USING GIST (geom);
+ANALYZE sgg;
+```
+
+`shp2pgsql`은 `-I` 옵션으로, `ogr2ogr`은 기본으로 만들어 주기도 하니 위 조회로 먼저 확인하면 됩니다.
+
+> 💡 **인덱스가 없어도 에러는 안 납니다.** 결과도 똑같이 맞아요. 그냥 느려질 뿐인데, 그게 함정입니다. 같은 쿼리를 인덱스를 쓸 때와 안 쓸 때로 나눠 재보면 **1.8ms vs 20.2ms** — 251행짜리 장난감 데이터에서도 11배입니다. 행이 수십만으로 늘면 `Seq Scan`은 정직하게 그만큼 느려지고요.
+>
+> 확인하려면 `EXPLAIN ANALYZE`를 앞에 붙여 **`Index Scan`이 찍히는지** 보면 됩니다. `Seq Scan`이 나오면 인덱스가 놀고 있는 거예요. 제대로 읽는 법은 **Phase 9**에서 다룹니다.
+
+> 💡 참고로 이 테이블의 실제 용량은 **19MB**입니다. 그런데 `pg_relation_size`로 재면 48kB밖에 안 나와요. 폴리곤 하나가 워낙 커서 **본체가 아니라 TOAST라는 별도 저장소**에 나가 앉기 때문입니다. 공간 데이터 용량을 볼 땐 `pg_total_relation_size`를 써야 합니다.
+
+## 정리 — 한 문장으로
+
+> **Shapefile을 PostGIS에 넣는 일의 절반은 파일이 말해주지 않는 것을 알아내는 일이다. `.cpg`가 없으면 인코딩을, `.prj`에 EPSG 코드가 없으면 SRID를 사람이 지목해 줘야 하고, 둘 중 하나만 틀려도 글자가 깨지거나 좌표가 수백 미터 어긋난다.**
+
+| 함정 | 증상 | 처방 |
+| --- | --- | --- |
+| 인코딩 | `서귀포시` → `¼­±ÍÆ÷½Ã` | `-W CP949` / `SHAPE_ENCODING=CP949` |
+| SRID 누락 | `srid=0`, `ST_Transform` 거부 | `-s 5174` / `-a_srs EPSG:5174` |
+| SRID 오지정 | 조용히 **317m** 어긋남 | `.prj` 파라미터로 역추적 |
+| 도형 타입 | `COPY statement failed` | `-nlt PROMOTE_TO_MULTI` |
+
+이제 데이터베이스에 진짜 데이터가 251행 들어 있습니다. `WHERE`도 걸 수 있고 인덱스도 탑니다.
+
+다음 편은 **`osm2pgsql`** 입니다. <Link href='/blog/gis-20-pbf-osmium'>우리가 만든 `.osm.pbf`</Link>를 넣을 차례인데, 오늘과는 완전히 다른 이야기예요. Shapefile은 "표 하나가 테이블 하나"로 곧게 대응됐지만, OSM의 <Link href='/blog/gis-19-osm-data-model'>Node·Way·Relation</Link>은 그렇지 않습니다. **점·선·면 테이블로 어떻게 쪼갤지를 도구가 결정**해야 하고, 그 결정을 우리가 바꿀 수도 있습니다.
+
+<ReferenceList
+  references={[
+    'https://postgis.net/docs/using_postgis_dbmanagement.html',
+    'https://postgis.net/docs/manual-3.5/postgis_installation.html#shp2pgsql_usage',
+    'https://gdal.org/en/stable/programs/ogr2ogr.html',
+    'https://gdal.org/en/stable/drivers/vector/pg.html',
+    'https://gdal.org/en/stable/drivers/vector/shapefile.html',
+    'https://gdal.org/en/stable/drivers/vector/geojson.html',
+    'https://epsg.io/5174',
+    'https://epsg.io/5181',
+    'https://github.com/southkorea/southkorea-maps',
+    'https://www.postgresql.org/docs/17/storage-toast.html',
+    'https://datatracker.ietf.org/doc/html/rfc7946',
+  ]}
+/>
