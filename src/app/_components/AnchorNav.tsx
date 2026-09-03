@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname, useSearchParams } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { Fragment, useCallback, useContext, useEffect, useState } from 'react';
 import { HIDE_PATH } from '@/constants/constants';
 import { DoubleArrowSVG } from '@/icons/index';
@@ -25,10 +25,15 @@ const AnchorNav = () => {
     keep: boolean;
   }>({ view: [], keep: false });
   const pathname = usePathname();
-  const searchParams = useSearchParams();
 
   const generateIdFromText = (text: string) => {
     return text.replace(/\s+/g, '-').toLowerCase();
+  };
+
+  const scrollToHeading = (id: string) => {
+    document
+      .getElementById(id)
+      ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
   const createHeadings = useCallback((allHeadings: NodeListOf<Element>) => {
@@ -138,15 +143,16 @@ const AnchorNav = () => {
     };
   }, [createHeadings, pathname]);
 
+  // 앵커 클릭은 Link의 onClick이 처리한다(scroll={false}라 Next이 스크롤하지 않는다).
+  // 이 이펙트는 해시가 붙은 URL로 직접 진입한 경우만 담당한다.
   useEffect(() => {
-    if (window.location.hash) {
-      const decodedHash = decodeURIComponent(window.location.hash);
-      const element = document.getElementById(decodedHash.substring(1));
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    }
-  }, [searchParams]);
+    if (!window.location.hash) return;
+
+    const decodedHash = decodeURIComponent(window.location.hash);
+
+    scrollToHeading(decodedHash.substring(1));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname]);
 
   return (
     <>
@@ -168,6 +174,7 @@ const AnchorNav = () => {
                   <Link
                     href={`#${id}`}
                     scroll={false}
+                    onClick={() => scrollToHeading(id)}
                     className={`${ANCHOR_HEADER_MARGIN[--currentLevel]} relative line-clamp-2 max-w-full break-words dark:hover:text-white`}
                     replace
                   >
