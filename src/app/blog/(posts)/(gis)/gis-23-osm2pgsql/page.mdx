@@ -21,7 +21,7 @@ export const metadata = createPostMetadata({
 
 > 이 글은 PostGIS가 설치된 데이터베이스 하나가 준비돼 있다고 가정합니다. 없다면 <Link href='/blog/gis-21-postgis-start'>PostGIS 시작하기</Link> 편에 도커로 30초 만에 띄우는 방법이 있습니다.
 >
-> 측정 환경: osm2pgsql **2.3.1**, PostGIS 3.5.2, 측정일 2026-09-02.
+> 측정 환경: osm2pgsql **2.3.1**, PostGIS 3.5.2, 측정일 2026-09-02. 아래 편의점 대조표만 **2026-09-03**에 다시 쟀습니다.
 
 ## 왜 1:1이 안 되나
 
@@ -490,17 +490,21 @@ osm2pgsql took 8s overall.
 
 제대로 들어갔는지 검산해 봅시다. 같은 질문을 **완전히 다른 경로**로도 물어볼 수 있거든요 — OSM에는 **Overpass API**라는 원격 조회 서비스가 있어서, 파일을 내려받지 않고도 "이 범위의 편의점 개수"를 물을 수 있습니다.
 
-같은 지역을 두 방법으로 세어 봤습니다.
+같은 지역을 두 방법으로 **같은 날** 세어 봤습니다(2026-09-03 측정).
 
-| | Overpass API (원격 조회) | flex (오늘, 로컬 적재) |
+| | Overpass API (원격 조회) | flex (로컬 적재) |
 | --- | --- | --- |
-| 전체 | 7,100 | **7,101** |
-| 점(Node) | 6,986 | **6,987** |
-| 면(Way) | 114 | **114** |
+| 전체 | 7,100 | **7,100** |
+| 점(Node) | 6,987 | **6,987** |
+| 면(Way) | 113 | **113** |
 
-**노드 하나 차이.** 두 측정 사이에 누군가 편의점을 하나 더 그린 겁니다. 원본이 같은 OSM 데이터이니 **맞아떨어지는 게 정상**이고, 실제로 맞았습니다.
+**한 행도 다르지 않습니다.** 원본이 같은 OSM 데이터이니 맞아떨어지는 게 정상이고, 실제로 정확히 맞았습니다. 파일을 받아 로컬에 적재한 경로와 원격 API에 물은 경로가 같은 답을 냈으니, **Lua로 짠 필터가 의도한 대로 걸렀다**는 뜻이에요.
 
-> 💡 Overpass 쪽 숫자는 <Link href='/blog/gis-19-osm-data-model'>OpenStreetMap 데이터 모델</Link> 편에서 잰 것입니다. 거기서 **"같은 편의점인데 어떤 건 점이고 어떤 건 건물 폴리곤"** 이라는 걸 발견했었는데, 오늘 `process_way`에서 닫힌 Way의 중심점을 뽑은 게 정확히 그 114개를 처리한 것이었어요.
+> 💡 **이 숫자는 시간이 지나면 달라집니다.** <Link href='/blog/gis-19-osm-data-model'>OpenStreetMap 데이터 모델</Link> 편에서 같은 쿼리를 2026년 8월 7일에 돌렸을 때는 **Node `6,986`개 + Way `114`개**였어요. 합계는 7,100으로 같은데 **점이 하나 늘고 면이 하나 줄었습니다.** 면으로 그려져 있던 편의점 하나가 점으로 다시 그려지면 이렇게 됩니다.
+>
+> 그 편에서 **"같은 편의점인데 어떤 건 점이고 어떤 건 건물 폴리곤"** 이라는 걸 발견했었는데, 오늘 `process_way`에서 닫힌 Way의 중심점을 뽑은 게 정확히 그 면들을 처리한 것이었어요.
+
+> ⚠️ **`overpass-api.de`가 아예 응답하지 않을 때가 있습니다.** 공용 인스턴스라 부하가 걸리면 HTTP 에러도 아니고 연결 자체가 안 됩니다(이 표를 다시 재는 동안에도 그랬어요). 쿼리를 의심하기 전에 **다른 인스턴스로 같은 쿼리를 보내 보세요** — 같은 OSM 데이터베이스를 보니 결과는 같습니다. 가용한 목록은 [OSM 위키의 Overpass API 인스턴스 문서](https://wiki.openstreetmap.org/wiki/Overpass_API#Public_Overpass_API_instances)에 정리돼 있고, 위 숫자는 그중 하나로 받았습니다.
 
 그리고 버려졌던 것들이 살아 있습니다.
 
@@ -570,6 +574,7 @@ SELECT jsonb_pretty(tags) FROM convenience WHERE name IS NOT NULL LIMIT 1;
     'https://osm2pgsql.org/news/2024/09/19/release-2.0.0.html',
     'https://osm2pgsql.org/examples/',
     'https://hub.docker.com/r/iboates/osm2pgsql',
+    'https://wiki.openstreetmap.org/wiki/Overpass_API#Public_Overpass_API_instances',
     'https://download.geofabrik.de/asia/south-korea.html',
     'https://www.postgresql.org/docs/17/datatype-json.html',
   ]}

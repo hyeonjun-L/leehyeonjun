@@ -1,0 +1,521 @@
+import { createPostMetadata } from '@/utils/postMetadata';
+
+export const metadata = createPostMetadata({
+  title: 'DE-9IM — 헷갈리는 공간 관계 함수 열 개가 실은 문자열 하나다',
+  description:
+    '서울 25개 구 중 인접한 쌍은 35개인가 56개인가. ST_Touches·ST_Intersects·ST_Overlaps가 서로 다른 답을 내놓는데 셋 다 맞다. 종로구와 중구의 경계선에서 뽑은 점은 ST_Contains로 세면 어느 구에도 속하지 않고, ST_Covers로 세면 양쪽에 속한다. 함수 열 개가 실은 아홉 글자짜리 문자열 하나라는 것을 전부 실측으로 확인했다.',
+  publishDate: '2026-09-03T00:00:00Z',
+  posterImage:
+    'https://storage.googleapis.com/leehyeonjun.com/gis/24/nine-cells.png',
+  categories: ['GIS'],
+  slug: 'gis-24-de9im',
+});
+
+<BlogTitle {...metadata} />
+
+> ## 같은 질문에 세 개의 답이 나왔다
+>
+> 서울 25개 구를 두 개씩 짝지어 **"서로 인접한 쌍이 몇 개인가"** 를 세어 봤습니다. PostGIS에는 두 도형이 어떤 관계인지 묻는 함수가 여럿 있는데, 그중 셋에 같은 질문을 던졌더니 답이 전부 다릅니다. **닿아 있나**(`ST_Touches`) — 35쌍. **만나기는 하나**(`ST_Intersects`) — 56쌍. **겹쳐 있나**(`ST_Overlaps`) — 21쌍. 마지막 게 이상합니다. 구청 경계 스물한 쌍이 서로 겹쳐 있다니, 그럴 리가 없잖아요.
+
+셋 다 맞습니다. 같은 두 도형을 두고 **서로 다른 질문**을 했을 뿐이에요. 그리고 그 질문들은 전부 **아홉 글자짜리 문자열 하나**에서 나옵니다.
+
+오늘은 이름이 비슷비슷해서 매번 문서를 다시 열게 되는 그 함수들이 **실은 함수가 아니라는 것**을 확인합니다. 전부 하나의 문자열에 마스크를 씌운 것이고, 그 문자열은 직접 찍어볼 수 있어요.
+
+> 측정 환경: PostGIS **3.5.2**, GEOS **3.9.0**, PostgreSQL 17, 측정일 2026-09-03.
+>
+> 💡 GEOS 버전을 같이 적는 이유가 있습니다. 오늘 다룰 판정을 실제로 수행하는 건 PostGIS가 아니라 **GEOS**라는 기하 연산 라이브러리예요. PostGIS는 데이터를 넘겨주고 답을 받아 적을 뿐입니다.
+
+### 오늘 쓸 데이터
+
+앞선 글들에서 적재해 둔 테이블 셋을 그대로 씁니다. 오늘 쿼리를 읽는 데는 이 표 세 줄이면 충분해요.
+
+| 테이블 | 내용 | SRID | 어디서 넣었나 |
+| --- | --- | --- | --- |
+| `sgg` | 통계청 2012년 시군구 경계 **251개** (서울 25개 구 포함) | 5174 | <Link href='/blog/gis-22-load-shapefile'>`shp2pgsql`</Link> |
+| `planet_osm_line` · `planet_osm_polygon` | 서울 OSM 도로와 면 | 3857 | <Link href='/blog/gis-23-osm2pgsql'>`osm2pgsql` 기본 출력</Link> |
+| `convenience` | 서울 편의점 **7,100개** | 4326 | <Link href='/blog/gis-23-osm2pgsql'>`osm2pgsql` flex 출력</Link> |
+
+직접 만들어 보실 거라면 각 링크에 명령이 그대로 있고, PostGIS가 깔린 데이터베이스 자체가 없다면 <Link href='/blog/gis-21-postgis-start'>PostGIS 시작하기</Link> 편에 도커로 띄우는 방법이 있습니다. **없어도 오늘 글은 읽힙니다** — 숫자는 전부 본문에 적어 두었어요.
+
+> ⚠️ **셋의 SRID가 다릅니다.** `sgg`는 5174, `convenience`는 4326, `planet_osm_*`는 3857이에요. 서로 다른 좌표계의 도형을 한 함수에 넣으면 PostGIS가 거부하거나 조용히 틀린 답을 냅니다. 그래서 오늘 두 테이블을 엮는 쿼리에는 전부 `ST_Transform`이 붙어요. 이 번호들이 각각 무엇인지는 <Link href='/blog/gis-07-epsg-codes'>한국이 EPSG:5179를 쓰는 이유</Link> 편에서 다뤘습니다.
+
+### 오늘 나올 함수들
+
+지금까지 이 시리즈는 데이터를 **넣는** 일만 했습니다. 데이터베이스에 도형이 들어 있으니 이제 물어볼 수 있는데, 물어보는 창구가 바로 이 함수들이에요. 전부 **두 도형을 받아 참/거짓 하나를 돌려줍니다.**
+
+```text
+ST_Intersects   조금이라도 만나나
+ST_Disjoint     전혀 안 만나나 — Intersects의 반대
+ST_Contains     A가 B를 품고 있나
+ST_Within       Contains의 인자를 뒤집은 것
+ST_Covers       경계에 걸친 것까지 품은 걸로 볼 때
+ST_Touches      닿기만 하고 안 겹치나
+ST_Crosses      가로지르나
+ST_Overlaps     서로 물고 있나
+ST_Equals       같은 도형인가
+```
+
+한글 설명을 붙여 놨지만 **이걸로는 실제 판정을 예측할 수 없습니다.** "품고 있나"와 "경계에 걸친 것까지"의 차이가 어디서 갈리는지, "닿는다"와 "만난다"가 왜 다른 숫자를 내는지 이 표는 말해주지 않아요. 그게 이 함수들이 헷갈리는 이유이기도 합니다.
+
+그러니 아홉 개를 각각 외우는 건 오늘 목표가 **아닙니다.** 정반대예요 — **외울 게 하나뿐**이라는 걸 보이려고 합니다.
+
+> 💡 **아홉 개를 체계적으로 훑고 싶다면** PostGIS 공식 워크샵의 [Spatial Relationships](https://postgis.net/workshops/postgis-intro/spatial_relationships.html) 장이 함수마다 예제를 붙여 다룹니다. 오늘 글은 그걸 대신하려는 게 아니라 **아홉 개를 하나로 줄이는 쪽**이에요. 재미있는 건 그 워크샵도 [DE-9IM](https://postgis.net/workshops/postgis-intro/de9im.html)을 열네 장이나 뒤(26장)에 따로 떼어 놓는다는 점입니다. **그 둘이 실은 같은 것**이라는 게 오늘의 논지예요.
+
+## 아홉 칸이 전부다
+
+도형 하나를 평면에 놓으면 세상이 **셋으로 갈립니다.**
+
+```text
+내부 (Interior)   도형이 차지한 안쪽
+경계 (Boundary)   그 가장자리 — 폴리곤이면 테두리 선, 선이면 양 끝점
+외부 (Exterior)   나머지 전부
+```
+
+도형이 **둘**이면 각각 셋씩이니 조합이 **3 × 3 = 9가지**입니다. A의 내부가 B의 내부와 만나는가, A의 내부가 B의 경계와 만나는가… 이렇게 아홉 번 물어보는 거예요.
+
+그리고 각 칸에는 "만나는가/아닌가"가 아니라 **만난다면 그 교집합이 몇 차원인가**를 적습니다.
+
+| 적히는 값 | 뜻 |
+| --- | --- |
+| `F` | 만나지 않음 (교집합이 빈 집합) |
+| `0` | **점**으로 만남 (0차원) |
+| `1` | **선**으로 만남 (1차원) |
+| `2` | **면**으로 만남 (2차원) |
+
+이 "차원까지 적는다"는 확장이 이름에 그대로 들어 있습니다 — **D**imensionally **E**xtended **9**-**I**ntersection **M**odel, 줄여서 **DE-9IM**. 아홉 칸을 정해진 순서로 한 줄에 펼치면 아홉 글자짜리 문자열이 됩니다.
+
+```text
+    │ B의 내부  B의 경계  B의 외부
+────┼──────────────────────────────
+A내부│   II        IB        IE        →  앞 세 글자
+A경계│   BI        BB        BE        →  가운데 세 글자
+A외부│   EI        EB        EE        →  뒤 세 글자
+```
+
+{/* 🖼️ 이미지: 아홉 칸 해부도 — 위쪽에 서로 걸친 두 폴리곤 A·B를 그리고, 아래에 3×3 격자. 행 라벨은 "A의 내부/경계/외부", 열 라벨은 "B의 내부/경계/외부". 각 칸마다 해당 교집합에 해당하는 부분만 도형 위에 색으로 강조한 작은 썸네일과 그 칸에 적히는 값(2/1/0/F)을 함께 표시. 오른쪽에 아홉 칸을 한 줄로 편 문자열 212101212 를 크게 놓고, 각 글자에서 대응하는 칸으로 얇은 선을 연결 — gis/24/nine-cells.png */}
+{/* <BlurImage imageURL='https://storage.googleapis.com/leehyeonjun.com/gis/24/nine-cells.png' title={metadata.title} /> */}
+
+## 직접 찍어본다 — ST_Relate
+
+이 문자열은 **눈으로 볼 수 있습니다.** `ST_Relate`가 그 아홉 칸을 그대로 돌려주거든요.
+
+10×10 사각형 하나를 두고 점 세 개를 서로 다른 자리에 놓아 봤습니다.
+
+```sql
+WITH sq AS (SELECT 'POLYGON((0 0, 10 0, 10 10, 0 10, 0 0))'::geometry AS g)
+SELECT p.label,
+       ST_Relate(p.pt, sq.g)   AS matrix,
+       ST_Contains(sq.g, p.pt) AS contains,
+       ST_Covers(sq.g, p.pt)   AS covers,
+       ST_Touches(sq.g, p.pt)  AS touches
+FROM sq, (VALUES ('내부',    'POINT(5 5)'::geometry),
+                 ('경계 위', 'POINT(5 0)'::geometry),
+                 ('외부',    'POINT(20 20)'::geometry)) AS p(label, pt);
+```
+
+```text
+  label  |  matrix   | contains | covers | touches
+---------+-----------+----------+--------+---------
+ 내부    | 0FFFFF212 | t        | t      | f
+ 경계 위 | F0FFFF212 | f        | t      | t        ← contains와 covers가 갈린다
+ 외부    | FF0FFF212 | f        | f      | f
+```
+
+`matrix` 칸에 찍힌 게 그 아홉 글자입니다. 첫 줄 `0FFFFF212`를 한 글자씩 읽어 봅시다.
+
+```text
+0 F F   F F F   2 1 2
+│ │ │   └─┴─┘   │ │ └ 점의 외부 ∩ 사각형의 외부 = 넓은 면      → 2
+│ │ │     │     │ └── 점의 외부 ∩ 사각형의 경계 = 테두리 선    → 1
+│ │ │     │     └──── 점의 외부 ∩ 사각형의 내부 = 안쪽 면      → 2
+│ │ │     └────────── 점에는 경계가 없다 (항상 F F F)
+│ │ └──────────────── 점의 내부 ∩ 사각형의 외부 = 없음         → F
+│ └────────────────── 점의 내부 ∩ 사각형의 경계 = 없음         → F
+└──────────────────── 점의 내부 ∩ 사각형의 내부 = 그 점 자체   → 0
+```
+
+가운데 세 글자가 `FFF`로 고정된 건 **점에는 경계라는 게 없기 때문**입니다. 빈 집합과의 교집합은 언제나 빈 집합이라 `F`가 세 개 박히죠. 마지막 `2`도 사실상 고정입니다 — 유한한 두 도형의 바깥끼리는 무한한 평면을 공유하니까요.
+
+그러니 **실제로 정보를 담는 건 몇 글자 안 됩니다.** 점 세 개를 비교해 보면 앞의 세 글자만 움직이는 게 보여요.
+
+```text
+내부    0FFFFF212      점이 사각형 안쪽에 있다
+경계 위 F0FFFF212      점이 테두리 위에 있다
+외부    FF0FFF212      점이 바깥에 있다
+```
+
+**`0`이 첫 칸에서 둘째 칸으로, 셋째 칸으로 옮겨 다닐 뿐입니다.** 점 하나가 어디 있느냐가 그 한 글자의 위치로 표현되는 거예요.
+
+## 함수는 마스크다
+
+여기서부터가 오늘의 핵심입니다. `ST_Contains` 같은 함수들은 **저 문자열에 패턴을 씌워 맞춰보는 것**이 전부입니다.
+
+패턴에는 두 글자가 더 쓰입니다.
+
+| 기호 | 뜻 |
+| --- | --- |
+| `T` | 만나기만 하면 된다 (`0`·`1`·`2` 중 무엇이든) |
+| `*` | 이 칸은 상관없다 |
+
+`ST_Contains`의 패턴은 **`T*****FF*`** 입니다. 소리 내어 읽으면 이렇게 됩니다.
+
+```text
+T * * * * * F F *
+│           │ └── A의 외부 ∩ B의 경계 = 없어야 한다
+│           └──── A의 외부 ∩ B의 내부 = 없어야 한다
+└──────────────── A의 내부 ∩ B의 내부 = 만나야 한다
+```
+
+*"둘의 내부가 만나고, B는 A의 바깥으로 조금도 삐져나가지 않는다."* — 그게 "A가 B를 포함한다"의 정의입니다. 문장을 그대로 아홉 칸에 옮긴 것뿐이에요.
+
+나머지도 마찬가지입니다.
+
+| 함수 | 패턴 |
+| --- | --- |
+| `ST_Equals` | `T*F**FFF*` |
+| `ST_Disjoint` | `FF*FF****` |
+| `ST_Intersects` | `ST_Disjoint`의 부정 |
+| `ST_Contains` | `T*****FF*` |
+| `ST_Within` | `T*F**F***` |
+| `ST_Covers` | `T*****FF*` 또는 `*T****FF*` 또는 `***T**FF*` 또는 `****T*FF*` |
+| `ST_Touches` | `FT*******` 또는 `F**T*****` 또는 `F***T****` |
+| `ST_Crosses` (선/면) | `T*T******` |
+| `ST_Overlaps` (면/면) | `T*T***T**` |
+
+### 정말 같은 답을 내는지 확인한다
+
+말로만 하면 믿기 어려우니 **같은 데이터에 함수와 패턴을 나란히 돌려** 봤습니다. 서울 편의점이 각 구 안에 들어가는지를 `ST_Contains`로 한 번, `ST_Relate` 패턴으로 한 번 셉니다.
+
+```sql
+SELECT count(*) FILTER (WHERE ST_Contains(s.geom, c.g))            AS contains,
+       count(*) FILTER (WHERE ST_Relate(s.geom, c.g, 'T*****FF*')) AS pattern
+FROM sgg s, LATERAL (SELECT ST_Transform(geom, 5174) AS g FROM convenience) c
+WHERE s.code LIKE '11%' AND s.geom && c.g;
+```
+
+```text
+ contains | pattern
+----------+---------
+     6691 |    6691
+```
+
+**6,691 대 6,691.** 편의점 7,100개 중 서울 25개 구 경계 안에 든 게 6,691개인데, 두 방법이 한 개도 다르지 않습니다. (나머지 409개는 서울 밖입니다 — <Link href='/blog/gis-23-osm2pgsql'>지난 편</Link>에서 자른 bbox가 경기도 일부까지 걸쳐 있었거든요.)
+
+같은 방식으로 `ST_Within`·`ST_Intersects`·`ST_Touches`도 각자의 패턴과 맞춰 봤고 전부 일치했습니다.
+
+여기서 따라 나오는 항등식이 둘 있습니다.
+
+```sql
+SELECT count(*) AS 전체,
+       count(*) FILTER (WHERE ST_Within(a.geom, b.geom) = ST_Contains(b.geom, a.geom)) AS 일치
+FROM sgg a JOIN sgg b ON a.gid <> b.gid
+WHERE a.code LIKE '11%' AND b.code LIKE '11%';
+```
+
+```text
+ 전체 | 일치
+------+------
+  600 |  600
+```
+
+**`ST_Within(a, b)`은 `ST_Contains(b, a)`와 완전히 같습니다.** 인자 순서만 뒤집은 같은 함수예요. 패턴을 보면 당연한데, `T*F**F***`는 `T*****FF*`의 행과 열을 바꾼 것이거든요. 마찬가지로 `ST_Disjoint`는 `ST_Intersects`의 정확한 부정이고, 300쌍 전부에서 확인됐습니다.
+
+> 💡 **그럼 `ST_Relate`만 쓰면 되지 않나요?** 답은 낼 수 있지만 느립니다. `ST_Contains` 같은 명명된 함수에는 **경계상자 인덱스 조건이 자동으로 붙는데** `ST_Relate`에는 안 붙어서, 같은 쿼리가 10배 넘게 느려집니다. 그러니 평소에는 명명된 함수를 쓰고, `ST_Relate`는 **구조를 이해할 때와 이름 없는 관계를 표현해야 할 때** 꺼내는 게 맞습니다. 인덱스가 있는데도 안 빨라지는 경우들은 **Phase 7**에서, 쿼리 계획을 직접 읽는 법은 **Phase 9**에서 따로 다룹니다.
+
+## 경계 위의 점은 어디에도 없다
+
+앞의 표에서 한 줄이 이상했습니다. 경계 위의 점에 대해 **`ST_Contains`는 거짓, `ST_Covers`는 참**이었죠. 장난감 사각형이라 그런 걸까요? 실제 행정구역으로 해봅시다.
+
+종로구와 중구가 **맞닿은 경계선을 뽑아내고, 그 선 위의 점 하나**를 집어 든 다음, 251개 시군구 중 몇 개가 이 점을 자기 것이라 하는지 셉니다.
+
+```sql
+WITH edge AS (
+  SELECT ST_Intersection(a.geom, b.geom) AS line
+  FROM sgg a, sgg b
+  WHERE a.code = '11010' AND b.code = '11020'
+), pt AS (
+  SELECT ST_PointN(ST_GeometryN(ST_LineMerge((SELECT line FROM edge)), 1), 5) AS g
+)
+SELECT ST_AsText(g) AS 경계점,
+       (SELECT count(*) FROM sgg s WHERE ST_Contains(s.geom, pt.g))   AS contains,
+       (SELECT count(*) FROM sgg s WHERE ST_Covers(s.geom, pt.g))     AS covers,
+       (SELECT count(*) FROM sgg s WHERE ST_Intersects(s.geom, pt.g)) AS intersects
+FROM pt;
+```
+
+```text
+                   경계점                    | contains | covers | intersects
+---------------------------------------------+----------+--------+------------
+ POINT(199011.05476278576 451763.3883015542) |        0 |      2 |          2
+```
+
+**`ST_Contains`로 세면 0개입니다.** 서울 한복판에 분명히 있는 점인데 **어느 구에도 속하지 않아요.** 같은 점을 `ST_Covers`로 세면 2개 — 종로구와 중구 양쪽에 속합니다.
+
+이유는 이미 패턴에 적혀 있었습니다. `ST_Contains`의 `T*****FF*`는 첫 칸에 `T`, 즉 **내부끼리 만날 것**을 요구합니다. 그런데 경계선 위의 점은 종로구의 *내부*에도, 중구의 *내부*에도 없어요. 양쪽 다 **경계**에 걸쳐 있죠. 그래서 첫 칸이 `F`가 되고 판정이 무너집니다.
+
+`ST_Covers`에 패턴이 네 개나 붙어 있던 게 이걸 위해서입니다. 첫 번째 패턴이 실패해도 `*T****FF*`(B의 내부가 A의 *경계*와 만남)가 받아주거든요.
+
+> 💡 `sgg`에서 구를 고를 때 이름 대신 **`code`로 골랐다**는 점을 눈여겨보세요. `sgg` 251행에는 `중구`가 **6개**, `남구`가 6개, `동구`가 6개 있습니다. 서울·부산·대구·인천·대전·울산에 다 있으니까요. 이름으로 조인하면 종로구 하나에 중구 여섯 개가 붙어 여섯 배로 부풀어 오릅니다.
+
+이게 실무에서 조용히 사람을 잡는 지점입니다.
+
+- 배달 가능 지역 판정에서 주소 좌표가 경계에 딱 걸리면 **`ST_Contains`는 "배달 불가"** 라고 답합니다
+- 학군·행정동별 집계에서 경계상의 건물은 **`ST_Contains`면 어느 동에도 안 세어지고, `ST_Covers`면 두 동에서 각각 세어집니다**
+
+합계가 안 맞는데 원인을 못 찾는 상황의 절반은 여기서 옵니다. 그리고 **어느 쪽이 맞는지는 기술이 정해주지 않아요.** 하나도 빠뜨리면 안 되는 집계라면 `ST_Covers`로 세고 중복을 따로 처리해야 하고, 하나가 두 번 세어지면 안 되는 집계라면 `ST_Contains`로 세고 누락을 따로 주워야 합니다. **함수를 고르는 일이 곧 정책을 고르는 일**입니다.
+
+{/* 🖼️ 이미지: 경계 위의 점 — 종로구와 중구가 맞닿은 경계선을 확대해 그리고 그 선 위에 점 하나를 크게 찍는다. 좌우 두 패널로 대비: (좌) "ST_Contains → 0개 구" — 양쪽 구가 모두 회색으로 빠지고 점도 회색, 아래에 패턴 T*****FF* 의 첫 칸 T를 빨갛게 표시하고 "내부끼리 만나야 하는데 점은 어느 내부에도 없다". (우) "ST_Covers → 2개 구" — 두 구가 각자 색으로 칠해지고 점이 반씩 두 색, 아래에 *T****FF* 를 초록으로 표시하고 "경계와 만나도 인정" — gis/24/boundary-point.png */}
+{/* <BlurImage imageURL='https://storage.googleapis.com/leehyeonjun.com/gis/24/boundary-point.png' title={metadata.title} /> */}
+
+## 선이 면을 만날 때 — 다리와 강변도로
+
+지금까지는 점이었습니다. **선**이 면을 만나면 경우의 수가 늘어나요. 스쳐 지나갈 수도, 가로지를 수도, 통째로 안에 들어 있을 수도 있죠.
+
+한강을 놓고 재봅시다. <Link href='/blog/gis-23-osm2pgsql'>지난 편</Link>에서 넣은 OSM 데이터에 한강이 **면**으로 들어 있습니다(`osm_id = -3769500`, `natural=water`, 25.2 km²). 여기에 서울 도로를 전부 부딪쳐 봅니다.
+
+```sql
+WITH han AS (SELECT way AS g FROM planet_osm_polygon WHERE osm_id = -3769500)
+SELECT count(*) FILTER (WHERE ST_Intersects(l.way, h.g)) AS intersects,
+       count(*) FILTER (WHERE ST_Crosses(l.way, h.g))    AS crosses,
+       count(*) FILTER (WHERE ST_Within(l.way, h.g))     AS within,
+       count(*) FILTER (WHERE ST_Touches(l.way, h.g))    AS touches
+FROM planet_osm_line l, han h
+WHERE l.highway IS NOT NULL AND l.way && h.g;
+```
+
+```text
+ intersects | crosses | within | touches
+------------+---------+--------+---------
+         93 |      62 |     31 |       0
+```
+
+**한강에 닿는 도로는 93개인데, 실제로 건너는 건 62개**입니다. 나머지 31개는 강 위에 통째로 들어 있고요(`within`) — 강 안쪽에서 시작해 안쪽에서 끝나는 다리 중간 토막들입니다.
+
+`ST_Touches`가 **0**인 게 재미있습니다. "닿는다"는 이름과 달리, `ST_Touches`는 **경계에만 살짝 닿고 내부로는 절대 들어오지 않는** 경우만 참이거든요. 도로가 강가에 정확히 접선으로 스치기만 하는 일은 실제 데이터에 없습니다.
+
+### 기하가 태그를 다시 찾아낸다
+
+`ST_Crosses`가 골라낸 62개가 정말 다리인지 확인할 방법이 있습니다. OSM에는 사람이 손으로 붙인 **`bridge` 태그**가 따로 있거든요. 기하로 찾은 것과 사람이 적어둔 것을 맞춰 봅니다.
+
+```sql
+WITH han AS (SELECT way AS g FROM planet_osm_polygon WHERE osm_id = -3769500)
+SELECT count(*) AS 건너는_도로,
+       count(*) FILTER (WHERE l.bridge IS NOT NULL) AS bridge_태그있음
+FROM planet_osm_line l, han h
+WHERE l.highway IS NOT NULL AND ST_Crosses(l.way, h.g);
+```
+
+```text
+ 건너는_도로 | bridge_태그있음
+-------------+-----------------
+          62 |              61
+```
+
+**62개 중 61개.** 좌표만 보고 "이건 강을 가로지른다"고 판정한 결과가, 사람이 붙인 태그와 거의 완벽하게 맞습니다. 그럼 남은 하나는 뭘까요?
+
+```text
+   osm_id   |   name   | highway  | bridge
+------------+----------+----------+--------
+ 1456486557 | 수석대교 | proposed |
+```
+
+**아직 지어지지 않은 다리**입니다. `highway=proposed` — 계획만 그려둔 노선이라 `bridge` 태그가 붙을 단계가 아니었던 거예요. 기하는 정직하게 "이 선은 강을 가로지른다"고 답했고, 그 답이 맞습니다.
+
+> ⚠️ **도로 이름으로 세지 마세요.** `강변북로`를 세어 보면 way 조각이 **198개**인데, 그중 강을 건너는 건 6개, 닿기만 하는 건 4개, 나머지 188개는 강에 닿지도 않습니다. OSM에서 도로는 <Link href='/blog/gis-19-osm-data-model'>여러 개의 Way로 잘려</Link> 저장되고, 교차로·터널·다리마다 조각이 나뉘거든요. 그러니 "강변북로는 강을 건너지 않는다" 같은 문장은 데이터 위에서 성립하지 않습니다. **판정의 단위는 도로 이름이 아니라 way 하나**입니다.
+
+### 선과 면의 행렬표
+
+앞에서 점으로 했던 걸 선으로 반복하면 이렇게 나옵니다.
+
+| 선분의 위치 | 행렬 | Contains | Covers | Crosses | Touches |
+| --- | --- | --- | --- | --- | --- |
+| 사각형 내부를 지남 | `102FF1FF2` | t | t | f | f |
+| **경계선 위에 완전히 얹힘** | `FF2101FF2` | **f** | **t** | f | t |
+| 안팎을 관통 | `1F20F1102` | f | f | **t** | f |
+| 끝점만 살짝 접촉 | `FF2F01102` | f | f | f | t |
+
+두 번째 줄이 아까 점에서 본 그 함정의 선 버전입니다. **경계선 위에 완전히 놓인 선분은 `ST_Contains`가 거짓**이에요. 폴리곤의 테두리를 따라 그어진 도로가 그 폴리곤 "안"에 없다고 나오는 거죠.
+
+폴리곤끼리도 같은 식입니다.
+
+| 두 폴리곤의 관계 | 행렬 | 참이 되는 함수 |
+| --- | --- | --- |
+| 하나가 다른 것 안에 | `212FF1FF2` | `ST_Contains` |
+| 서로 걸쳐 있음 | `212101212` | `ST_Overlaps` |
+| 변만 맞댐 | `FF2F11212` | `ST_Touches` |
+| 완전히 같음 | `2FFF1FFF2` | `ST_Equals`·`ST_Contains` |
+| 멀리 떨어짐 | `FF2FF1212` | `ST_Disjoint` |
+
+> 💡 넷째 줄을 보세요. 완전히 같은 두 폴리곤은 **`ST_Equals`도 참이고 `ST_Contains`도 참**입니다. `T*****FF*`를 만족하니까요. "포함한다"는 말의 일상적 어감과 달리 **도형은 자기 자신을 포함합니다.** 진짜로 더 큰 것만 원한다면 `ST_ContainsProperly`가 따로 있습니다.
+
+## 겹칠 리 없는 것이 겹친다
+
+이제 맨 앞에 남겨둔 숫자를 회수할 차례입니다. `ST_Overlaps`가 잡아낸 **21쌍**이요.
+
+```sql
+SELECT a.name, b.name, round(ST_Area(ST_Intersection(a.geom, b.geom))::numeric, 2) AS 겹친면적
+FROM sgg a JOIN sgg b ON a.gid < b.gid
+WHERE a.code LIKE '11%' AND b.code LIKE '11%' AND ST_Overlaps(a.geom, b.geom)
+ORDER BY 3 DESC LIMIT 5;
+```
+
+```text
+   name   |  name  | 겹친면적
+----------+--------+----------
+ 영등포구 | 구로구 |     0.26
+ 성북구   | 종로구 |     0.22
+ 구로구   | 양천구 |     0.21
+ 강남구   | 성동구 |     0.05
+ 마포구   | 은평구 |     0.04
+```
+
+단위는 **제곱미터**입니다. 가장 크게 겹친 영등포구와 구로구가 **0.26 m²** — A4 용지 네 장쯤 되는 넓이예요. 21쌍을 전부 더해도 **1.02 m²** 입니다.
+
+즉 이건 행정 구역이 실제로 겹친 게 아니라, **경계선을 디지털로 그리는 과정에서 두 도형의 좌표가 소수점 아래에서 미세하게 어긋난 것**입니다. GIS에서 흔히 **슬리버(sliver)** 라고 부르는 그 틈이죠.
+
+> 💡 <Link href='/blog/gis-22-load-shapefile'>이 데이터를 넣을 때</Link> `ST_IsValid`로 검사해서 **깨진 도형이 0개**임을 확인했었습니다. 그런데도 이런 일이 생깁니다. **유효성은 도형 하나에 대한 판정**이거든요 — 자기교차가 없는지, 링이 제대로 닫혔는지. 251개가 저마다 흠 없이 유효해도, **그 둘이 서로 어떻게 놓였는지는 아무도 검사하지 않습니다.**
+
+문제는 DE-9IM이 이 1 m²를 **정직하게 읽는다**는 겁니다.
+
+```sql
+SELECT ST_Relate(a.geom, b.geom) AS matrix
+FROM sgg a, sgg b WHERE a.code = '11010' AND b.code = '11020';
+```
+
+```text
+  matrix
+-----------
+ 212111212
+```
+
+**첫 글자가 `2`** 입니다. "종로구의 내부와 중구의 내부가 **면 차원으로** 만난다" — 넓이를 가진 영역을 공유한다는 뜻이에요. `ST_Touches`가 요구하는 첫 칸은 `F`인데 여기는 `2`이니, 이 쌍은 `ST_Touches`에서 탈락하고 `ST_Overlaps`로 잡힙니다.
+
+그래서 맨 앞의 셈이 맞아떨어집니다. 이 글을 열었던 그 쿼리예요.
+
+```sql
+SELECT count(*) FILTER (WHERE ST_Touches(a.geom, b.geom))    AS touches,
+       count(*) FILTER (WHERE ST_Intersects(a.geom, b.geom)) AS intersects,
+       count(*) FILTER (WHERE ST_Overlaps(a.geom, b.geom))   AS overlaps
+FROM sgg a JOIN sgg b ON a.gid < b.gid
+WHERE a.code LIKE '11%' AND b.code LIKE '11%';
+```
+
+```text
+ touches | intersects | overlaps
+---------+------------+----------
+      35 |         56 |       21
+```
+
+```text
+ST_Touches    35 쌍   경계만 맞댄 정상적인 인접
+ST_Overlaps   21 쌍   슬리버 때문에 미세하게 겹친 인접
+──────────────────────────────────────────────────
+ST_Intersects 56 쌍   둘을 합친 것
+```
+
+**35 + 21 = 56.** 둘 다에 해당하는 쌍도, 어느 쪽도 아닌 쌍도 0개임을 따로 세어 확인했습니다. 두 함수는 서로를 배제하도록 정의돼 있고, 실제 데이터가 정확히 그렇게 갈렸어요.
+
+교훈은 이렇습니다. **DE-9IM은 정확하고, 실제 데이터는 정확하지 않습니다.** "인접한 구를 찾아라"를 `ST_Touches`로만 구현하면 서울에서만 21쌍을 조용히 놓칩니다. 그래서 실무에서는 정의상 더 엄밀한 `ST_Touches` 대신 **느슨한 `ST_Intersects`를 쓰는 편이 오히려 안전한** 경우가 많아요. 도형 자체를 고쳐 슬리버를 없애는 방법(`ST_MakeValid`·`ST_Snap`)은 Phase 7에서 따로 다룹니다.
+
+## "같다"도 네 가지다
+
+마지막으로 가장 단순해 보이는 관계를 봅시다. 같은 사각형을 **꼭짓점 도는 방향만 반대로** 써서 두 값을 만들고, 네 가지 방법으로 "같냐"고 물어봤습니다.
+
+```sql
+WITH pair AS (SELECT 'POLYGON((0 0, 10 0, 10 10, 0 10, 0 0))'::geometry AS a,
+                     'POLYGON((0 0, 0 10, 10 10, 10 0, 0 0))'::geometry AS b)
+SELECT ST_Equals(a, b) AS st_equals, (a = b) AS 등호,
+       (a ~= b) AS 물결등호, ST_OrderingEquals(a, b) AS ordering FROM pair;
+```
+
+```text
+ st_equals | 등호 | 물결등호 | ordering
+-----------+------+----------+----------
+ t         | f    | t        | f
+```
+
+넷이 서로 다른 것을 봅니다.
+
+| | 무엇을 보는가 |
+| --- | --- |
+| `ST_Equals` | **차지하는 공간이 같은가** — 꼭짓점 순서는 무관 |
+| `=` | 좌표가 순서까지 똑같은가 |
+| `~=` | **경계상자만** 같은가 |
+| `ST_OrderingEquals` | 좌표와 순서가 같은가 |
+
+> ⚠️ **`~=`는 도형을 보지 않습니다.** 얼마나 안 보는지 재봤습니다.
+>
+> ```sql
+> SELECT 'LINESTRING(0 0, 10 10)'::geometry
+>      ~= 'POLYGON((0 0, 10 0, 10 10, 0 10, 0 0))'::geometry AS 물결등호;
+> ```
+>
+> ```text
+>  물결등호
+> ----------
+>  t
+> ```
+>
+> **대각선 하나와 사각형이 "같다"** 고 나옵니다. 둘의 경계상자가 `(0 0, 10 10)`으로 똑같아서요. 이름이 등호를 닮았다는 이유로 `~=`를 쓰면 이런 답을 받습니다. 도형이 같은지 묻고 싶으면 **`ST_Equals`** 를 쓰세요.
+
+같은 부류가 하나 더 있습니다. **`&&` 연산자**요.
+
+```sql
+SELECT count(*) FILTER (WHERE a.geom && b.geom)              AS 경계상자,
+       count(*) FILTER (WHERE ST_Intersects(a.geom, b.geom)) AS 실제
+FROM sgg a JOIN sgg b ON a.gid < b.gid
+WHERE a.code LIKE '11%' AND b.code LIKE '11%';
+```
+
+```text
+ 경계상자 | 실제
+----------+------
+       71 |   56
+```
+
+**`&&`는 71쌍, `ST_Intersects`는 56쌍.** 경계상자로만 보면 15쌍이 더 통과합니다. 구를 감싼 사각형끼리는 겹치지만 실제 경계는 안 만나는 쌍들이죠.
+
+그렇다고 `&&`가 틀린 건 아닙니다. **이게 공간 인덱스가 하는 일**이거든요. 먼저 `&&`로 후보를 싸게 추려내고, 살아남은 것만 비싼 정확 판정에 넘기는 2단 구조예요. 앞에서 쓴 쿼리에 `s.geom && c.g`가 붙어 있던 게 그 1단이고, <Link href='/blog/gis-22-load-shapefile'>지난 편</Link>에서 걸어둔 GiST 인덱스가 그걸 가속합니다. 이 구조는 **Phase 9**에서 제대로 뜯습니다.
+
+{/* 🖼️ 이미지: 함수 지도 — 헷갈리는 함수들을 한 장에 배치한 2×2 사분면. 가로축은 "경계를 인정하는가(왼쪽: 내부만 / 오른쪽: 경계 포함)", 세로축은 "대칭인가(위: 대칭 / 아래: 비대칭)". 각 사분면에 함수를 놓는다 — ST_Contains·ST_Within(왼쪽아래), ST_Covers·ST_CoveredBy(오른쪽아래), ST_Equals·ST_Overlaps(왼쪽위), ST_Touches·ST_Intersects(오른쪽위), ST_Crosses는 선/면 전용이라 옆에 별도 박스. 각 함수 이름 아래에 자기 패턴 문자열을 작은 고정폭 글씨로 병기하고, ST_Contains와 ST_Covers 사이에는 "경계 위의 점이 갈리는 지점"이라는 화살표 — gis/24/predicate-map.png */}
+{/* <BlurImage imageURL='https://storage.googleapis.com/leehyeonjun.com/gis/24/predicate-map.png' title={metadata.title} /> */}
+
+## 정리 — 한 문장으로
+
+> **공간 관계 함수는 열 개가 아니라 하나다. 두 도형의 내부·경계·외부가 만나는 아홉 칸을 `ST_Relate`가 문자열로 뱉고 나머지 함수는 전부 거기에 마스크를 씌운 것이라, 경계 위의 점은 `ST_Contains`에선 어디에도 속하지 않고 `ST_Covers`에선 양쪽에 속한다 — 함수를 고르는 일이 곧 경계를 어떻게 셀지 정하는 일이다.**
+
+묻고 싶은 것에서 함수로 거꾸로 찾아가는 표입니다.
+
+| 묻고 싶은 것 | 쓸 함수 | 경계 위는? |
+| --- | --- | --- |
+| 이 주소가 우리 배달 구역인가 | `ST_Contains` / `ST_Within` | **제외** |
+| 경계 위 건물도 빠뜨리지 않고 집계해야 한다 | `ST_Covers` / `ST_CoveredBy` | **포함** |
+| 이 구역에 조금이라도 걸치는 것 전부 | `ST_Intersects` | 포함 |
+| 이 구와 경계를 맞댄 구는 어디인가 | `ST_Touches` | — |
+| 이 강을 건너는 도로만 (강변도로 제외) | `ST_Crosses` | — |
+| 두 상권이 서로 잠식하고 있는가 | `ST_Overlaps` | — |
+| 두 경로로 넣은 데이터가 일치하는가 | `ST_Equals` (`=`·`~=` 아님) | — |
+| 위 표에 없는 관계를 직접 정의 | `ST_Relate` + 패턴 | 내가 정함 |
+
+이제 두 도형 사이에 무엇이든 물어볼 수 있습니다. 그런데 지금까지 한 일은 전부 **"예/아니오"를 받아내는 것**이었어요. 있는 도형을 두고 관계만 물었죠.
+
+다음 편은 **없는 도형을 만드는 쪽**입니다. `ST_Buffer`로 소방서 반경 500m를 그려내고, `ST_Union`으로 여러 구를 하나로 합치고, `ST_Centroid`·`ST_Area`로 도형에서 수를 뽑아냅니다. 오늘 배운 관계 함수가 그때 진짜로 쓰여요 — **버퍼를 만들어 놓고 그 안에 무엇이 들었는지 묻는 것**이 공간 분석의 기본형이거든요.
+
+<ReferenceList
+  references={[
+    'https://postgis.net/docs/reference.html#Spatial_Relationships',
+    'https://postgis.net/docs/ST_Relate.html',
+    'https://postgis.net/docs/ST_Contains.html',
+    'https://postgis.net/docs/ST_Within.html',
+    'https://postgis.net/docs/ST_Covers.html',
+    'https://postgis.net/docs/ST_Touches.html',
+    'https://postgis.net/docs/ST_Crosses.html',
+    'https://postgis.net/docs/ST_Overlaps.html',
+    'https://postgis.net/docs/ST_Equals.html',
+    'https://postgis.net/workshops/postgis-intro/spatial_relationships.html',
+    'https://postgis.net/workshops/postgis-intro/de9im.html',
+    'https://www.ogc.org/standards/sfa/',
+    'https://libgeos.org/specifications/de9im/',
+    'https://www.postgresql.org/docs/17/indexes-types.html',
+  ]}
+/>
