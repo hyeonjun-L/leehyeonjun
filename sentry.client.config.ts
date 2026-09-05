@@ -19,6 +19,11 @@ Sentry.init({
   // in development and sample at a lower rate in production
   replaysSessionSampleRate: 0.1,
 
+  // GTM이 주입한 서드파티 스크립트에서 나는 오류 — 우리 번들에 jQuery는 없다.
+  // 최상단 프레임이 <anonymous>면 denyUrls가 매치되지 않아 ignoreErrors가 실제로 막는다.
+  ignoreErrors: ['jQuery is not defined', "Can't find variable: jQuery"],
+  denyUrls: [/googletagmanager\.com/, /google-analytics\.com/],
+
   // You can remove this option if you're not planning to use the Sentry Session Replay feature:
   integrations: [
     Sentry.replayIntegration({
