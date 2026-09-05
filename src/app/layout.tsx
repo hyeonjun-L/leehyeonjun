@@ -2,7 +2,6 @@ import { GoogleAnalytics, GoogleTagManager } from '@next/third-parties/google';
 import './styles/globals.css';
 import './styles/carousel.css';
 import localFont from 'next/font/local';
-import { cookies } from 'next/headers';
 import ActivityNav from '@/app/_components/ActivityNav';
 import {
   SITE_AUTHOR,
@@ -20,6 +19,7 @@ import JsonLd from './_components/JsonLd';
 import NprogressBarProvider from './_components/ProgressbarProvider';
 import RouterNav from './_components/RouterNav';
 import WebVitals from './_components/WebVitals';
+import { DEFAULT_THEME, THEME_CLASS, THEME_INIT_SCRIPT } from './_lib/theme';
 import { ContextProvider } from './Provider';
 import type { Metadata } from 'next';
 
@@ -103,24 +103,25 @@ const websiteJsonLd = {
   ],
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
   settingModal,
 }: {
   children: React.ReactNode;
   settingModal: React.ReactNode;
 }) {
-  const cookieStore = await cookies();
-  const theme = cookieStore.get('theme')?.value ?? 'Dark';
-
   return (
+    // 아래 스크립트가 className을 고쳐 서버와 달라지므로 경고를 덮는다.
     <html
       lang="ko"
-      className={
-        theme === 'Dark' ? 'theme-light dark text-dark-text' : 'theme-dark'
-      }
+      className={THEME_CLASS[DEFAULT_THEME]}
+      suppressHydrationWarning
     >
       <head>
+        {/* 인라인 스크립트는 파서를 멈추고 그 자리에서 실행된다 → <body> 파싱 전에
+            클래스가 확정돼 깜빡임이 없다. next/script beforeInteractive는 첫 페인트
+            뒤에 실행되고 type="module"은 defer가 되니, 둘 다 쓰면 안 된다. */}
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
         <meta
           name="naver-site-verification"
           content="b9297bed53014d32edd615ee741712e2f9846cd3"

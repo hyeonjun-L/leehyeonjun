@@ -1,5 +1,6 @@
 import JsonLd from '@/app/_components/JsonLd';
 import { SITE_NAME, SITE_URL } from '@/constants/site';
+import { formatPostDate } from '@/utils/formatDate';
 import { getPosts } from '@/utils/posts';
 import BlurImage from './BlurImage';
 import { CategoryBadgeList } from './CategoryBadge';
@@ -55,9 +56,7 @@ const BlogTitle = async ({
         {title}
       </h1>
       <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-White-menu-text dark:text-dark-text">
-        <time dateTime={publishDate}>
-          {new Date(publishDate).toLocaleDateString()}
-        </time>
+        <time dateTime={publishDate}>{formatPostDate(publishDate)}</time>
         {readingTime ? (
           <>
             <span aria-hidden>·</span>

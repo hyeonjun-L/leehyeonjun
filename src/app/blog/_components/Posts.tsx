@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import getPlaceholderImage from '@/utils/dynamicBlurDataUrl';
+import { formatPostDate } from '@/utils/formatDate';
 import { getAllViews } from '@/utils/views';
 import { CategoryBadgeList } from './CategoryBadge';
 import { Post } from '@/types/types';
@@ -60,7 +61,7 @@ const Posts = async ({ posts }: PostsProps) => {
                   </p>
                   <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-White-menu-text dark:text-dark-text">
                     <time dateTime={publishDate}>
-                      {new Date(publishDate).toLocaleDateString()}
+                      {formatPostDate(publishDate)}
                     </time>
                     {readingTime ? (
                       <>

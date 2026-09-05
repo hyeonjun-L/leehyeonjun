@@ -1,17 +1,13 @@
 'use client';
-import Cookies from 'js-cookie';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { applyThemeClass, storeTheme, type Theme } from '@/app/_lib/theme';
 import { BrushSVG, CloseSVG, MusicSvg } from '@/icons/index';
 import Modal from './Modal';
 import Music from './Music';
 import Thema from './Theme';
 
-interface SettingModalProps {
-  selectTheme: string;
-}
-
-const SettingModal = ({ selectTheme }: SettingModalProps) => {
+const SettingModal = () => {
   const router = useRouter();
   const [selectMenu, setSelectMenu] = useState(0);
 
@@ -19,21 +15,16 @@ const SettingModal = ({ selectTheme }: SettingModalProps) => {
     router.back();
   };
 
-  const changeThemeHandler = (theme: string) => {
-    Cookies.set('theme', theme);
-    router.refresh();
+  const changeThemeHandler = (theme: Theme) => {
+    storeTheme(theme);
+    applyThemeClass(theme);
   };
 
   const MENU_LIST = [
     {
       title: '테마',
       SVGComponent: <BrushSVG className="size-4 fill-black dark:fill-white" />,
-      Component: (
-        <Thema
-          selectTheme={selectTheme}
-          changeThemeHandler={changeThemeHandler}
-        />
-      ),
+      Component: <Thema changeThemeHandler={changeThemeHandler} />,
     },
     // {
     //   title: '글자',

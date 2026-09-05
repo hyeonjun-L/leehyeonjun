@@ -1,11 +1,5 @@
-import { cookies } from 'next/headers';
 import SettingModal from '../@settingModal/(.)setting/_components/SettingModal';
 
-const page = async () => {
-  const cookieStore = await cookies();
-  const theme = cookieStore.get('theme')?.value ?? 'Dark';
-
-  return <SettingModal selectTheme={theme} />;
-};
+const page = () => <SettingModal />;
 
 export default page;
