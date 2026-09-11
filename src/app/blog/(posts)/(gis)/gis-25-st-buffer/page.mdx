@@ -3,7 +3,7 @@ import { createPostMetadata } from '@/utils/postMetadata';
 export const metadata = createPostMetadata({
   title: 'ST_Buffer와 공간 분석 — 500m 버퍼가 397m로 줄어든다',
   description:
-    '서울 소방서 반경 500m 안의 건물을 세었더니 23,695개. 좌표계 한 줄을 바꾸자 36,607개가 됐다. osm2pgsql이 붙여준 EPSG:3857에서 500은 미터가 아니라 397m였고, ST_Buffer가 그린 원은 실은 꼭짓점 33개짜리 32각형이라 499.93m 거리의 유치원 하나를 놓쳤다. 소방서 커버리지라는 과제 하나를 끝까지 풀면서 ST_Buffer·ST_Union·ST_Intersection·ST_Centroid·ST_Area를 전부 실측했다.',
+    '서울 소방서 반경 500m 안의 건물을 세었더니 23,695개. 좌표계 한 줄을 바꾸자 36,607개가 됐다. osm2pgsql이 붙여준 EPSG:3857에서 500은 미터가 아니라 397m였고, ST_Buffer가 그린 원은 실은 모서리 32개짜리 다각형이라 499.93m 거리의 유치원 하나를 놓쳤다. 소방서 커버리지라는 과제 하나를 끝까지 풀면서 ST_Buffer·ST_Union·ST_Intersection·ST_Centroid·ST_Area를 전부 실측했다.',
   publishDate: '2026-09-09T00:00:00Z',
   posterImage:
     'https://storage.googleapis.com/leehyeonjun.com/gis/25/buffer-shrink.png',
@@ -75,7 +75,7 @@ SELECT count(*) AS 소방서 FROM fire;
 
 **121개.** 점만 봤다면 35개로 시작할 뻔했습니다.
 
-> 💡 여기서 쓴 `ST_Centroid`는 나중에 다시 붙잡을 겁니다. **면을 점으로 바꾸는 게 안전한 일인지** 아직 확인하지 않았거든요. 5절에서 계산서를 받습니다.
+> 💡 여기서 쓴 `ST_Centroid`는 나중에 다시 붙잡을 겁니다. **면을 점으로 바꾸는 게 안전한 일인지** 아직 확인하지 않았거든요. 5절에서 다시 보겠습니다.
 
 ## 1. 반경을 그린다 — ST_Buffer
 
@@ -307,12 +307,14 @@ FROM (SELECT b.osm_id, min(ST_Distance(b.geom, f.geom)) AS d
   393.1 |  499.6
 ```
 
-**393.1m에서 499.6m 사이.** 12,720개가 전부 그 도넛에 들어 있습니다. 397m보다 가까운 건 하나도 없어요 — 그것들은 이미 첫 번째 셈에서 잡혔으니까요.
+**393.1m에서 499.6m 사이.** 12,720개가 전부 그 좁은 띠에 몰려 있습니다. 소방서 바로 옆 건물은 한 채도 없어요 — 그것들은 이미 첫 번째 셈에서 잡혔으니까요.
+
+> 💡 하한이 397m가 아니라 **393.1m**인 게 눈에 걸리실 겁니다. 397m 원 안이면 진작 잡혔어야 하니까요. 실제로 그 최단 건물을 꺼내 보면 3857 눈금으로 **498.08** — **500 안쪽인데도 버퍼가 놓쳤습니다.** 반지름과는 다른 두 번째 원인이 있다는 뜻인데, 바로 다음 절의 주제입니다.
 
 **건물은 처음부터 거기 있었고, 조회한 자리도 같았습니다.** 그물이 작았을 뿐이에요.
 
 {/* 🖼️ 이미지: 소방서 한 점을 중심으로 두 개의 원 — 안쪽에 "3857에서 ST_Buffer(way, 500) → 실제 396.6m" 점선 원, 바깥에 "5179에서 500m" 실선 원. 두 원 사이 도넛 띠를 색으로 채우고 그 안에 건물 실루엣들을 흩뿌린 뒤 "여기 있던 12,720개" 라벨. 아래쪽에 cos(37.6°) × 500 = 396.1 수식을 작게 — gis/25/buffer-shrink.png */}
-{/* <BlurImage imageURL='https://storage.googleapis.com/leehyeonjun.com/gis/25/buffer-shrink.png' title={metadata.title} /> */}
+<BlurImage imageURL='https://storage.googleapis.com/leehyeonjun.com/gis/25/buffer-shrink.png' title={metadata.title} />
 
 ## 2. 그런데 그건 원이 아니었다
 
@@ -333,7 +335,7 @@ SELECT (SELECT count(*) FROM bld_m b, fs WHERE ST_Intersects(b.geom, ST_Buffer(f
 **같은 좌표계, 같은 500인데 답이 다릅니다.** 이유는 `ST_Buffer`가 돌려준 도형을 열어 보면 나옵니다.
 
 ```sql
-SELECT ST_NPoints(ST_Buffer(geom, 500))                       AS 꼭짓점,
+SELECT ST_NPoints(ST_Buffer(geom, 500))                       AS 점개수,
        round(ST_Area(ST_Buffer(geom, 500))::numeric, 2)       AS 버퍼넓이,
        round((pi() * 500 * 500)::numeric, 2)                  AS 진짜원,
        round((ST_Area(ST_Buffer(geom,500)) / (pi()*500*500) * 100)::numeric, 3) AS 비율
@@ -341,14 +343,24 @@ FROM fire_m WHERE osm_id = 2279744031;
 ```
 
 ```text
- 꼭짓점 | 버퍼넓이  |  진짜원   |  비율
+ 점개수 | 버퍼넓이  |  진짜원   |  비율
 --------+-----------+-----------+--------
      33 | 780361.29 | 785398.16 | 99.359
 ```
 
-**꼭짓점이 33개입니다.** 원이 아니라 **32각형**이에요.
+**점이 33개뿐입니다.** 원이 아니라 **32각형**이에요.
 
-당연하다면 당연합니다. PostGIS의 `geometry`에는 원이라는 타입이 없습니다. 저장할 수 있는 건 꼭짓점 목록뿐이니, "원"을 만들라고 하면 **원에 가까운 다각형**을 그려줄 수밖에 없어요.
+당연하다면 당연합니다. PostGIS의 `geometry`에는 원이라는 타입이 없습니다. 저장할 수 있는 건 좌표 목록뿐이니, "원"을 만들라고 하면 **원에 가까운 다각형**을 그려줄 수밖에 없어요.
+
+> 💡 **33인데 왜 32각형인가요?** `ST_NPoints`가 하나를 더해 준 게 아니라, **도형 자체에 점이 33개 들어 있습니다.** 폴리곤의 링은 반드시 닫혀 있어야 해서 `ST_Buffer`가 만들 때부터 **첫 점을 마지막에 한 번 더 저장**하거든요. `quad_segs = 1` 버퍼를 그대로 출력해 보면 보입니다.
+>
+> ```text
+> POLYGON((952911.01 1956402.16, 952411.01 1955902.16, 951911.01 1956402.16,
+>          952411.01 1956902.16, 952911.01 1956402.16))
+>          └─ 첫 점과 마지막 점이 같다. 모서리는 4개, 저장된 점은 5개
+> ```
+>
+> 그래서 링이 늘면 그만큼 같이 늡니다 — 구멍 하나 뚫린 사각형은 링이 둘이라 `ST_NPoints`가 **10**이에요.
 
 그래서 넓이가 모자랍니다. 반지름 500m 원의 진짜 넓이는 `π × 500² = 785,398.16 m²`인데 버퍼는 **780,361.29 m²**, **99.359%** 입니다. 다각형이 원 안쪽에 내접하니까 **5,037 m²가 부족**한 거죠.
 
@@ -356,7 +368,7 @@ FROM fire_m WHERE osm_id = 2279744031;
 
 ```sql
 SELECT q AS quad_segs,
-       ST_NPoints(ST_Buffer(geom, 500, q))                  AS 꼭짓점,
+       ST_NPoints(ST_Buffer(geom, 500, q))                  AS 점개수,
        round(ST_Area(ST_Buffer(geom, 500, q))::numeric, 1)  AS 넓이,
        round((ST_Area(ST_Buffer(geom,500,q)) / (pi()*500*500) * 100)::numeric, 3) AS 원_대비
 FROM fire_m, unnest(ARRAY[1,2,4,8,16,64]) q
@@ -364,7 +376,7 @@ WHERE osm_id = 2279744031 ORDER BY q;
 ```
 
 ```text
- quad_segs | 꼭짓점 |   넓이   | 원_대비
+ quad_segs | 점개수 |   넓이   | 원_대비
 -----------+--------+----------+---------
          1 |      5 | 500000.0 |  63.662
          2 |      9 | 707106.8 |  90.032
@@ -374,7 +386,7 @@ WHERE osm_id = 2279744031 ORDER BY q;
         64 |    257 | 785319.3 |  99.990
 ```
 
-맨 윗줄이 재미있습니다. `quad_segs = 1`이면 꼭짓점 5개 — **정사각형**입니다. 넓이 비율 **63.662%**는 `2/π`고요. 원에 내접하는 정사각형의 넓이가 정확히 그만큼이거든요.
+맨 윗줄이 재미있습니다. `quad_segs = 1`이면 점 5개, 즉 모서리 4개 — **정사각형**입니다. 넓이 비율 **63.662%**는 `2/π`고요. 원에 내접하는 정사각형의 넓이가 정확히 그만큼이거든요.
 
 ### 그 0.641%에 유치원이 하나 있었다
 
@@ -441,7 +453,7 @@ SELECT (SELECT count(DISTINCT b.osm_id) FROM bld_m b JOIN fire_m f ON ST_Interse
 > 💡 `ST_DWithin`을 쓸 이유가 하나 더 있는데, **속도**입니다. 같은 답을 내면서 훨씬 빠르거든요. 다만 "인덱스가 있는데도 왜 어떤 함수는 안 빨라지나"는 그 자체로 한 편 분량이라 **Phase 7**에서 따로 다룹니다. 오늘은 정확성만 봤습니다.
 
 {/* 🖼️ 이미지: 32각형과 진짜 원을 크게 겹쳐 그린 확대도. 다각형이 원에 내접해 변마다 초승달 틈이 생기는 걸 보이고, 그중 한 틈에 유치원 아이콘을 찍고 "499.93m" 지시선. 왼쪽 위에 quad_segs 1(정사각형)·2·4·8·16을 작은 썸네일로 나란히 놓고 각각 63.662% / 90.032% / 97.450% / 99.359% / 99.839% 표기 — gis/25/not-a-circle.png */}
-{/* <BlurImage imageURL='https://storage.googleapis.com/leehyeonjun.com/gis/25/not-a-circle.png' title={metadata.title} /> */}
+<BlurImage imageURL='https://storage.googleapis.com/leehyeonjun.com/gis/25/not-a-circle.png' title={metadata.title} />
 
 ## 3. 겹친 것을 합친다 — ST_Union
 
@@ -567,7 +579,7 @@ ORDER BY 2 DESC;
 > ⚠️ **이 숫자를 소방 서비스의 품질로 읽으면 안 됩니다.** 소방서 위치는 OSM 자원봉사자가 그린 것이라 누락이 있을 수 있고, 무엇보다 **500m 직선거리는 출동 시간이 아닙니다.** 실제로 중요한 건 도로를 따라 몇 분인지고, 그건 직선 반경으로 답할 수 없어요. 도로망을 그래프로 놓고 도달권을 구하는 이야기는 **Phase 8**의 주제입니다.
 
 {/* 🖼️ 이미지: 서울 25개 구 경계 위에 ST_Union한 소방서 500m 커버리지를 반투명하게 얹은 지도. 커버리지가 촘촘한 중구 쪽과 성긴 관악구 쪽에 각각 23.5% / 3.0% 라벨을 달고, 지도 아래에 25개 구 커버율 가로 막대를 정렬해 배치 — gis/25/coverage.png */}
-{/* <BlurImage imageURL='https://storage.googleapis.com/leehyeonjun.com/gis/25/coverage.png' title={metadata.title} /> */}
+<BlurImage imageURL='https://storage.googleapis.com/leehyeonjun.com/gis/25/coverage.png' title={metadata.title} />
 
 ## 5. 도형에서 수를 뽑는다 — ST_Centroid · ST_Area
 
@@ -638,6 +650,10 @@ WHERE amenity='fire_station' AND NOT ST_Contains(way, ST_Centroid(way));
 ```
 
 **두 곳이 나갔습니다.** 은평소방서는 자기 건물에서 5.1m 떨어진 곳에 중심점이 찍혔어요 — ㄱ자나 ㄷ자로 꺾인 건물이면 이렇게 됩니다.
+
+{/* 🖼️ 이미지: 나간이미지 — gis/25/out.png */}
+<BlurImage imageURL='https://storage.googleapis.com/leehyeonjun.com/gis/25/out.png' title={metadata.title} />
+
 
 최종 집계가 달라지는지도 재봤습니다.
 
