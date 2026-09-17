@@ -1,0 +1,1042 @@
+import { createPostMetadata } from '@/utils/postMetadata';
+
+export const metadata = createPostMetadata({
+  title: 'geometry vs geography — 두바이가 1,727km 멀어졌다',
+  description:
+    '지난 편이 남긴 규칙은 "재기 전에 미터 좌표계로 옮긴다"였다. 시키는 대로 서울과 두바이를 EPSG:5179로 옮겨 쟀더니 8,523.5km가 나왔다. 실제 거리는 6,795.7km다. 에러도 경고도 없었다. 같은 자가 서울 안에서는 3.3m밖에 안 틀리는데, 그 3.3m마저 오차가 아니라 5179에 적혀 있던 축척계수 0.9996이었다. geometry와 geography가 무엇이 다른지를 바이트 단위로, 함수 242개 대 31개로, 그리고 서울–LA 중간점 두 개가 1만 km 떨어지는 것으로 실측했다.',
+  publishDate: '2026-09-14T00:00:00Z',
+  posterImage:
+    'https://storage.googleapis.com/leehyeonjun.com/gis/26/ruler-breaks.png',
+  categories: ['GIS'],
+  slug: 'gis-26-geometry-vs-geography',
+});
+
+<BlogTitle {...metadata} />
+
+> ## 두바이가 1,727km 멀어졌다
+>
+> <Link href='/blog/gis-25-st-buffer'>지난 편</Link>이 마지막에 남긴 규칙은 한 줄이었습니다. **"거리든 넓이든, 재기 전에 미터 좌표계로 옮긴다."** 한국이니까 `EPSG:5179`죠. 그래서 시키는 대로 했습니다. 서울시청과 두바이에 점을 하나씩 찍고, 둘 다 5179로 옮긴 뒤 `ST_Distance`를 불렀어요. **8,523.5km**가 나왔습니다.
+>
+> 같은 두 점에 `::geography` 열한 글자를 대신 붙이면 **6,795.7km**입니다. **차이가 1,727.7km.** 규칙을 어긴 게 아니라 **그대로 따랐을 뿐**인데요. 에러는 없었습니다. 경고도 없었고요.
+
+오늘은 그 `::geography`가 무엇인지 봅니다. 사실 이 시리즈는 이미 세 번이나 그걸 써 놓고 한 번도 설명하지 않았어요 — <Link href='/blog/gis-21-postgis-start'>gis-21</Link>에서 거리를 잴 때, <Link href='/blog/gis-22-load-shapefile'>gis-22</Link>에서 317m 오차를 잴 때, 지난 편에서 3857 왜곡을 잴 때. **밀린 빚입니다.**
+
+갚아야 할 게 정확히 둘이에요. **같은 두 점이 `8,770.9`m와 `8,767.6`m로 갈리는 그 3.3m가 어디서 오는지**, 그리고 **좌표계 변환이 필요 없는 그 편함의 대가로 무엇을 포기하는지.** 둘 다 오늘 갚습니다. 결론부터 말하면 3.3m의 범인은 제가 gis-21에 적어둔 것과 다르고, 위 훅의 1,727km와 그 3.3m는 **같은 현상을 두 줌 레벨에서 본 것**입니다.
+
+> 측정 환경: PostGIS **3.5.2**, GEOS 3.9.0, PROJ **7.2.1**, PostgreSQL 17, 측정일 2026-09-14.
+
+### 오늘 쓸 데이터
+
+앞선 글들에서 적재해 둔 테이블을 그대로 씁니다. 나머지 점들은 손으로 찍습니다.
+
+| 테이블 | 내용 | SRID | 어디서 넣었나 |
+| --- | --- | --- | --- |
+| `sgg` | 통계청 2012년 시군구 경계 **251개** | 5174 | <Link href='/blog/gis-22-load-shapefile'>`shp2pgsql`</Link> |
+| `fire_m` · `conv_m` | 서울 소방서 **121개**, 편의점 **7,100개** | 5179 | <Link href='/blog/gis-25-st-buffer'>지난 편의 작업 테이블</Link> |
+
+**없어도 오늘 글은 읽힙니다** — 숫자는 전부 본문에 적어 두었어요. 직접 해 보실 거라면 각 링크에 명령이 그대로 있고, PostGIS가 깔린 데이터베이스 자체가 없다면 <Link href='/blog/gis-21-postgis-start'>PostGIS 시작하기</Link> 편에 도커로 띄우는 방법이 있습니다.
+
+## 1. 자를 들고 서울 밖으로 나간다
+
+`ST_Transform(geom, 5179)`을 우리는 "좌표계 변환"이라고 불러 왔습니다. 그런데 오늘은 다르게 불러 보겠습니다 — **한국 모양으로 깎아 만든 자를 꺼내는 일**이라고요. 이 비유가 왜 정확한지는 이 절이 끝나면 아실 겁니다.
+
+### 같은 쿼리, 좌표만 바꾼다
+
+훅의 쿼리입니다. 두 점을 찍고, 한 번은 `::geography`로, 한 번은 지난 편의 규칙대로 5179로 옮겨서 잽니다.
+
+```sql
+WITH p AS (SELECT ST_SetSRID(ST_MakePoint(126.9779, 37.5663), 4326) a,   -- 서울시청
+                  ST_SetSRID(ST_MakePoint( 55.2708, 25.2048), 4326) b)   -- 두바이
+SELECT round((ST_Distance(a::geography, b::geography)/1000)::numeric, 1)                 AS geography_km,
+       round((ST_Distance(ST_Transform(a,5179), ST_Transform(b,5179))/1000)::numeric, 1) AS km_5179
+FROM p;
+```
+
+```text
+ geography_km | km_5179
+--------------+---------
+       6795.7 |  8523.5
+```
+
+**1,727.7km 차이.** 맞는 쪽은 `geography`입니다 — 지구 표면을 따라 잰 값이거든요. 5179가 **25.4% 부풀린** 겁니다. 왜 그런지는 이 절 끝에서 5179의 사용설명서를 펼쳐 보면 나옵니다.
+
+두바이가 5179에서 어디에 찍혔는지 보면 바로 납득이 갑니다.
+
+```sql
+SELECT ST_AsText(ST_Transform(ST_SetSRID(ST_MakePoint(55.2708, 25.2048), 4326), 5179));
+```
+
+```text
+POINT(-7282935.623173307 4143871.704737712)
+```
+
+**X가 마이너스 728만입니다.** 5179는 중앙자오선에 `+x_0=1000000`, 그러니까 100만 미터를 더해 두는 좌표계라 한국 안에서는 X가 항상 양수예요. 두바이는 중앙자오선에서 **828만 미터 서쪽**에 찍혔습니다. 적도 둘레가 40,075km인 지구에서요.
+
+### 더 멀수록 더 틀리는 것도 아니다
+
+그럼 "멀면 위험하다"로 정리하면 될까요. 서울시청에서 도시 아홉 곳까지를 같은 두 방법으로 재 봤습니다.
+
+앞에서 나온 **중앙자오선**은 5179가 지구를 펼칠 때 기준으로 삼은 **동경 127.5도 선**입니다. 5179는 이 선 위에서 가장 정확하니까, 도시마다 이 선에서 경도로 얼마나 떨어졌는지를 같이 적습니다. 그리고 하나 더, 그 도시 자리에서 5179의 눈금이 몇 배로 늘어나 있는지도 잽니다. 도시에서 동쪽으로 0.01도 옆에 점을 하나 더 찍고, 그 짧은 거리를 5179로 잰 값을 실제 값으로 나누면 됩니다.
+
+```sql
+WITH c(name, lon, lat) AS (VALUES                    -- 도시 이름, 경도(longitude), 위도(latitude)
+  ('도쿄', 139.6917, 35.6895), ('싱가포르', 103.8198, 1.3521), ('방콕', 100.5018, 13.7563),
+  ('델리', 77.2090, 28.6139),  ('두바이', 55.2708, 25.2048),   ('이스탄불', 28.9784, 41.0082),
+  ('런던', -0.1276, 51.5072),  ('뉴욕', -74.0060, 40.7128),    ('LA', -118.2437, 34.0522)
+), d AS (
+  SELECT c.name,
+         LEAST(abs(c.lon - 127.5), 360 - abs(c.lon - 127.5))             AS dlon,
+         ST_Distance(seoul::geography, city::geography)                   AS geog_m,
+         ST_Distance(ST_Transform(seoul, 5179), ST_Transform(city, 5179)) AS m_5179,
+         ST_Distance(ST_Transform(city, 5179), ST_Transform(east, 5179))
+           / ST_Distance(city::geography, east::geography)                AS scale
+  FROM c,
+       ST_SetSRID(ST_MakePoint(126.9779, 37.5663), 4326)   AS seoul,  -- 서울시청
+       ST_SetSRID(ST_MakePoint(c.lon, c.lat), 4326)        AS city,   -- 비교할 도시
+       ST_SetSRID(ST_MakePoint(c.lon + 0.01, c.lat), 4326) AS east    -- 그 도시에서 동쪽으로 0.01도
+)
+SELECT name,
+       round(dlon::numeric, 1)                          AS "Δlon",
+       round((geog_m / 1000)::numeric, 1)               AS geog_km,
+       round((m_5179 / 1000)::numeric, 1)               AS km_5179,
+       round((100 * (m_5179 / geog_m - 1))::numeric, 1) AS "오차_%",
+       round(scale::numeric, 3)                         AS 그자리_눈금
+FROM d ORDER BY "오차_%";
+```
+
+맨 위의 `c`는 도시 아홉 곳을 `이름 · 경도(lon) · 위도(lat)` 세 칸짜리 표로 그 자리에서 만든 것이고, `d`에서 도시마다 필요한 값을 한 번씩 계산해 둡니다. 결과의 열은 이렇게 읽습니다.
+
+```text
+Δlon         그 도시가 동경 127.5도 선에서 경도로 몇 도 떨어졌나
+geog_km      서울시청에서 그 도시까지, 지구 표면을 따라 잰 거리
+km_5179      같은 두 점을 5179로 옮긴 뒤 평면에서 잰 거리
+오차_%       km_5179가 geog_km보다 몇 % 긴가
+그자리_눈금  그 도시 자리에서 실제 1m가 5179에서는 몇 m로 읽히나
+```
+
+```text
+   name   | Δlon  | geog_km | km_5179 | 오차_% | 그자리_눈금
+----------+-------+---------+---------+--------+-------------
+ 도쿄     |  12.2 |  1155.1 |  1160.2 |    0.4 |       1.015
+ 뉴욕     | 158.5 | 11077.4 | 11258.4 |    1.6 |       1.041
+ 싱가포르 |  23.7 |  4659.2 |  4803.1 |    3.1 |       1.092
+ 방콕     |  27.0 |  3718.5 |  3857.8 |    3.7 |       1.115
+ 런던     | 127.6 |  8880.2 |  9367.1 |    5.5 |       1.149
+ 델리     |  50.3 |  4695.7 |  5201.2 |   10.8 |       1.357
+ 이스탄불 |  98.5 |  7973.0 |  9225.9 |   15.7 |       1.499
+ LA       | 114.3 |  9606.7 | 11266.4 |   17.3 |       1.524
+ 두바이   |  72.2 |  6795.7 |  8523.5 |   25.4 |       1.965
+```
+
+> 💡 `Δlon`을 `abs(lon - 127.5)`로 바로 빼지 않고 `LEAST(…, 360 - …)`로 짧은 쪽을 고른 데는 이유가 있습니다. 뉴욕은 경도 −74라서 그냥 빼면 201.5도인데, 지구는 반대로 돌면 158.5도예요. 5179로 옮기는 PROJ도 짧은 쪽으로 계산합니다 — 뉴욕을 경도 −74로 넣든 +286으로 넣든 좌표가 똑같이 나와요.
+>
+> ```sql
+> SELECT ST_AsText(ST_Transform(ST_SetSRID(ST_MakePoint(-74.006, 40.7128), 4326), 5179)) AS 경도_마이너스74,
+>        ST_AsText(ST_Transform(ST_SetSRID(ST_MakePoint(285.994, 40.7128), 4326), 5179)) AS 경도_286;
+> ```
+>
+> ```text
+>               경도_마이너스74              |                 경도_286
+> -------------------------------------------+-------------------------------------------
+>  POINT(2822148.08510667 13054357.87763679) | POINT(2822148.08510667 13054357.87763679)
+> ```
+
+**오차가 작은 순서로 줄을 세웠더니, `그자리_눈금`도 한 번도 뒤집히지 않고 같이 커집니다.** 1.015에서 1.965까지요. 반면 `Δlon`과 `geog_km`은 뒤죽박죽입니다. 경도로 158.5도나 떨어져 있고 거리도 11,077km로 가장 먼 뉴욕이 **1.6%**로 두 번째로 정확하고, 그보다 4,000km 넘게 가까운 두바이가 25.4%로 가장 틀렸어요.
+
+5179로 잰 거리가 얼마나 틀리느냐는 **서울에서 얼마나 머냐가 아니라, 그 자리에서 5179의 눈금이 얼마나 늘어났냐**를 따라갑니다.
+
+그럼 뉴욕의 눈금은 왜 1.041로 거의 제자리일까요. **5179의 기준선이 선 하나가 아니라 원 하나라서**입니다. 동경 127.5도 선을 북극 너머로 계속 따라가면 지구 반대편에서 **서경 52.5도** 선으로 내려오거든요. 두 곳에서 눈금을 재 보면 같습니다.
+
+```sql
+WITH c(name, lon, lat) AS (VALUES ('동경 127.5도', 127.5, 40.7), ('서경 52.5도', -52.5, 40.7))
+SELECT name,
+       round((ST_Distance(ST_Transform(ST_SetSRID(ST_MakePoint(lon, lat), 4326), 5179),
+                          ST_Transform(ST_SetSRID(ST_MakePoint(lon + 0.01, lat), 4326), 5179))
+            / ST_Distance(ST_SetSRID(ST_MakePoint(lon, lat), 4326)::geography,
+                          ST_SetSRID(ST_MakePoint(lon + 0.01, lat), 4326)::geography))::numeric, 4) AS 눈금
+FROM c;
+```
+
+```text
+     name     |  눈금
+--------------+--------
+ 동경 127.5도 | 0.9996
+ 서경 52.5도  | 0.9996
+```
+
+**둘 다 0.9996입니다.** 2절에서 3.3m의 정체로 다시 만날 숫자예요. 뉴욕(서경 74도)은 이 반대편 기준선에서 경도로 21.5도밖에 안 떨어져 있어서 눈금이 거의 늘어나지 않았고, 두바이는 아홉 도시 중 이 원에서 가장 멀리 벗어난 자리라 두 배 가까이 늘어났습니다. `Δlon` 순서가 오차와 안 맞았던 건 이 원까지의 거리가 경도만이 아니라 위도에도 달려 있어서입니다.
+
+그러니 규칙이 없는 건 아닙니다. 다만 **"한국에서 멀면 위험하다"가 아니라 "5179의 기준 원에서 멀면 위험하다"** 이고, 그 원이 어디를 지나는지는 5179가 어떻게 만들어졌는지 알아야 보입니다. 쿼리를 짤 때마다 따질 수 있는 규칙은 아니죠.
+
+> ⚠️ **아홉 줄 중 에러가 난 줄은 하나도 없습니다.** 전부 그럴듯한 킬로미터 숫자가 조용히 돌아왔어요. 지구 반대편 도시의 좌표를 넣어도 `ST_Transform`은 계산을 거부하지 않습니다.
+
+### 5179의 설명서에는 범위가 적혀 있다
+
+여기서 짚어야 할 게 있습니다. 5179가 **불량품이라서** 이런 게 아닙니다. 애초에 한국 밖에서 쓰라고 만든 물건이 아니에요. EPSG 등록부에 사용 범위가 명시돼 있습니다.
+
+```text
+EPSG:5179  Korea 2000 / Unified CS
+  사용 범위 : Republic of Korea (South Korea) — onshore and offshore
+  위도 28.6 ~ 40.27 · 경도 122.71 ~ 134.28
+```
+
+두바이는 위도 25.2, 경도 55.3입니다. **둘 다 범위 밖이에요.** 자 자체는 정직합니다. 자기가 어디까지 유효한지 적어두고 있으니까요.
+
+### PostGIS는 그 범위를 읽지 않는다
+
+그럼 왜 아무도 말해주지 않았을까요. PostGIS가 좌표계를 어디서 가져오는지 보면 답이 나옵니다. <Link href='/blog/gis-21-postgis-start'>gis-21</Link>에서 본 `spatial_ref_sys` 테이블이죠.
+
+```sql
+\d spatial_ref_sys
+```
+
+```text
+  Column   |          Type           | Nullable
+-----------+-------------------------+----------
+ srid      | integer                 | not null
+ auth_name | character varying(256)  |
+ auth_srid | integer                 |
+ srtext    | character varying(2048) |
+ proj4text | character varying(2048) |
+```
+
+**칼럼이 다섯 개뿐이고, 사용 범위를 담는 칸이 없습니다.** 5179 행을 통째로 꺼내 봐도 마찬가지예요.
+
+```sql
+SELECT srtext FROM spatial_ref_sys WHERE srid = 5179;
+```
+
+```text
+PROJCS["Korea 2000 / Unified CS",GEOGCS["Korea 2000",DATUM[...]],
+  PROJECTION["Transverse_Mercator"],
+  PARAMETER["latitude_of_origin",38],
+  PARAMETER["central_meridian",127.5],
+  PARAMETER["scale_factor",0.9996],
+  PARAMETER["false_easting",1000000],
+  PARAMETER["false_northing",2000000],
+  UNIT["metre",1,...],AUTHORITY["EPSG","5179"]]
+```
+
+투영 방식, 중앙자오선, 축척계수, 가짜 원점 — 계산에 필요한 건 전부 있는데 **"위도 28.6~40.27에서만 쓰세요"는 없습니다.** 그러니 PostGIS는 검사를 안 하는 게 아니라 **검사할 정보를 갖고 있지 않습니다.** 공식에 숫자를 넣으면 답은 나오고, 그 답이 의미가 있는지는 아무도 안 봅니다.
+
+지난 편에서 만난 문장이 여기서 한 번 더 나옵니다. **PostGIS는 SRID를 꼬리표로만 들고 다닙니다.** 그때는 `ST_Buffer`가 단위를 몰라서 500을 미터로 착각했고, 오늘은 `ST_Transform`이 범위를 몰라서 두바이를 받아들입니다. 같은 성격의 침묵이에요.
+
+{/* 🖼️ 이미지: 한국 지도 위에 정상적으로 놓인 자(EPSG:5179) 하나 — 눈금이 고르고 위도 28.6~40.27 경도 122.71~134.28 범위를 점선 상자로 표시. 그 자를 지구본 위로 길게 잡아늘려 두바이까지 닿게 그리고, 늘어난 구간에서 눈금 간격이 벌어지며 자가 휘고 갈라지는 모습. 두바이 쪽 끝에 "8,523.5km"와 그 아래 실제 "6,795.7km"를 대비시키고 "에러 없음" 도장. 왼쪽 아래에 두바이의 5179 좌표 POINT(-7282935.6, 4143871.7)를 작게 — gis/26/ruler-breaks.png */}
+<BlurImage imageURL='https://storage.googleapis.com/leehyeonjun.com/gis/26/ruler-breaks.png' title={metadata.title} />
+
+## 2. 3.3m는 오차가 아니라 0.9996이다
+
+이제 빚 하나를 갚습니다. 서울 안으로 돌아와서, 같은 비교를 좁은 거리에 대고 해 보죠.
+
+### 전편을 안 읽었어도 되게, 숫자부터
+
+<Link href='/blog/gis-21-postgis-start'>gis-21</Link>에서 쓴 두 점이 있습니다. 서울시청과 강남역이에요. 그때 세 가지 방법으로 거리를 쟀는데, 결과가 이랬습니다.
+
+```sql
+WITH pts AS (
+  SELECT ST_SetSRID(ST_MakePoint(126.9779, 37.5663), 4326) AS a,   -- 서울시청
+         ST_SetSRID(ST_MakePoint(127.0276, 37.4979), 4326) AS b    -- 강남역
+)
+SELECT ST_Distance(a, b)                                          AS deg,
+       ST_Distance(a::geography, b::geography)                    AS m_geography,
+       ST_Distance(ST_Transform(a,5179), ST_Transform(b,5179))    AS m_5179
+FROM pts;
+```
+
+```text
+   deg    | m_geography | m_5179
+----------+-------------+--------
+ 0.084550 |      8770.9 | 8767.6
+```
+
+첫 칸이 `0.08`인 건 **4326의 단위가 미터가 아니라 도(degree)** 라서고, 그 함정은 gis-21이 다뤘으니 넘어갑니다. 오늘 볼 건 뒤의 두 칸이에요. **8,770.9와 8,767.6 — 3.3m 차이.**
+
+gis-21에서 저는 이 3.3m를 이렇게 설명했습니다. *"`geography`는 지구를 타원체로 보고 표면을 따라 재고, `5179`는 그 지역을 평면에 펼친 뒤 자로 재거든요."*
+
+**틀린 문장은 아닌데, 범인을 잘못 짚었습니다.**
+
+### 자가 셋이다 — 그리고 구가 더 틀린다
+
+칸을 몇 개 더 붙여 보면 드러납니다. `ST_Distance`의 geography 버전에는 **세 번째 인자**가 있어요. `use_spheroid`라는 불리언인데, 기본값이 `true`입니다. `false`를 주면 타원체 대신 **완전한 구**로 계산합니다.
+
+```sql
+WITH pts AS (
+  SELECT ST_SetSRID(ST_MakePoint(126.9779, 37.5663), 4326) AS a,
+         ST_SetSRID(ST_MakePoint(127.0276, 37.4979), 4326) AS b
+)
+SELECT ST_Distance(a::geography, b::geography)                     AS 타원체,
+       ST_Distance(a::geography, b::geography, false)              AS 구,
+       ST_Distance(ST_Transform(a,5179), ST_Transform(b,5179))     AS 평면
+FROM pts;
+```
+
+```text
+    타원체     |      구       |       평면
+---------------+---------------+-------------------
+ 8770.91427873 | 8778.01927099 | 8767.614593100161
+```
+
+| 자 | 값 | 타원체 대비 |
+| --- | --- | --- |
+| **타원체** — `::geography` 기본 | 8770.914 m | 기준 |
+| **평면** — `ST_Transform(…, 5179)` | 8767.615 m | **−3.300 m** |
+| **구** — `use_spheroid := false` | 8778.019 m | **+7.105 m** |
+
+**"더 둥근" 구가 평면보다 두 배 더 틀립니다.** 그리고 방향도 반대예요. 「평면 < 구 < 타원체」 같은 순한 서열을 기대했다면 여기서 깨집니다.
+
+> 💡 여기서 쓴 "구"는 아무 구가 아닙니다. PostGIS는 WGS84 타원체의 장반경 `a`와 단반경 `b`로 **`(2a + b) / 3`** 을 계산해 반지름을 씁니다 — `6,371,008.7714`m요. 적도 반지름(6,378,137m)도 극 반지름(6,356,752m)도 아닌, 셋을 평균 낸 값이에요. 타원체 이야기 자체는 <Link href='/blog/gis-05-shape-of-earth'>지오이드와 타원체</Link> 편에 있습니다.
+
+### 3.3m는 자에 적혀 있던 숫자다
+
+그럼 평면의 −3.3m는 어디서 왔을까요. 나눠 보면 됩니다.
+
+```sql
+WITH pts AS (
+  SELECT ST_SetSRID(ST_MakePoint(126.9779, 37.5663), 4326) AS a,
+         ST_SetSRID(ST_MakePoint(127.0276, 37.4979), 4326) AS b
+)
+SELECT ST_Distance(ST_Transform(a,5179), ST_Transform(b,5179))
+     / ST_Distance(a::geography, b::geography) AS 역산_k
+FROM pts;
+```
+
+```text
+      역산_k
+-------------------
+ 0.999623792283794
+```
+
+그리고 앞 절에서 꺼내 본 5179의 파라미터에 이런 줄이 있었습니다.
+
+```text
+PARAMETER["scale_factor",0.9996]
+```
+
+**`0.9996`입니다.** <Link href='/blog/gis-08-coordinate-transformation'>gis-08</Link>의 proj4 해부표에서 `+k=0.9996`으로 이미 지나간 그 값이에요.
+
+이 숫자가 3.3m의 정체입니다. 다만 좌표계에 왜 이런 숫자가 들어 있는지부터 알아야 "정체"라는 말이 납득되니, 차근차근 풀어 보겠습니다.
+
+**5179는 둥근 지구를 원통에 옮겨 그린 지도입니다.** 그 방식의 이름이 **횡축 메르카토르**예요. 보통 메르카토르는 종이를 원통으로 말아 적도에 두르는데, 횡축은 그 원통을 **옆으로 눕혀서** 남북으로 지나는 경도선 하나에 댑니다. 5179가 원통을 댄 선이 1절에서 본 동경 127.5도, 중앙자오선이고요. 원통과 횡축 이야기는 <Link href='/blog/gis-06-map-projections'>지도 투영법</Link> 편에서 한 번 다뤘습니다.
+
+원통이 **지구에 닿은 선 위에서는 길이가 그대로** 옮겨집니다. 닿아 있으니 늘일 필요가 없죠. 그런데 그 선에서 동서로 멀어질수록 둥근 지구와 원통 사이가 벌어지고, 그 틈만큼 **잡아 늘여서** 그려야 합니다. 1절에서 기준선에서 멀수록 눈금이 커지던 게 이 때문이에요.
+
+원통을 딱 붙인 그대로라면 기준선 위는 완벽하고, **나머지는 전부 길게** 나옵니다. 한국 전체를 이 좌표계 하나로 덮으면 기준선에서 먼 서해·동해 쪽으로 갈수록 한 방향으로만 오차가 커지죠.
+
+그래서 5179는 **원통을 지구 안쪽으로 살짝 밀어 넣었습니다.** 지도 전체를 0.04% 줄여서 그린다고 생각해도 같아요. 그러면 기준선 위는 0.04% **짧아지고**, 거기서 조금 떨어진 곳에서는 늘어난 만큼과 줄인 만큼이 상쇄돼 **정확히 맞고**, 그보다 더 멀어져야 비로소 길어집니다.
+
+원통을 딱 붙였을 때와 5179를 나란히 재 보면 보입니다. 딱 붙인 쪽은 5179의 설정에서 `0.9996`만 `1`로 바꿔 만들었고, 눈금은 1절과 같은 방법으로 쟀어요.
+
+```sql
+WITH s(k1) AS (VALUES ('+proj=tmerc +lat_0=38 +lon_0=127.5 +k=1 +x_0=1000000 +y_0=2000000 +ellps=GRS80 +units=m')),  -- 5179에서 0.9996만 1로 바꾼 것
+c(name, dlon) AS (VALUES ('기준선 위', 0), ('1도 옆', 1), ('2도 옆', 2), ('3도 옆', 3), ('4도 옆', 4)),
+p AS (SELECT name, dlon,
+             ST_SetSRID(ST_MakePoint(127.5 + dlon, 37.5), 4326)        AS a,
+             ST_SetSRID(ST_MakePoint(127.5 + dlon + 0.01, 37.5), 4326) AS b    -- 동쪽으로 0.01도
+      FROM c)
+SELECT name,
+       round((ST_Distance(ST_Transform(a, k1), ST_Transform(b, k1))
+            / ST_Distance(a::geography, b::geography))::numeric, 4) AS 딱_붙였을_때,
+       round((ST_Distance(ST_Transform(a, 5179), ST_Transform(b, 5179))
+            / ST_Distance(a::geography, b::geography))::numeric, 4) AS "5179_밀어_넣음"
+FROM p, s ORDER BY dlon;
+```
+
+```text
+   name    | 딱_붙였을_때 | 5179_밀어_넣음
+-----------+--------------+----------------
+ 기준선 위 |       1.0000 |         0.9996
+ 1도 옆    |       1.0001 |         0.9997
+ 2도 옆    |       1.0004 |         1.0000
+ 3도 옆    |       1.0009 |         1.0005
+ 4도 옆    |       1.0015 |         1.0011
+```
+
+**딱 붙이면** 기준선 위는 1.0000으로 완벽하지만, 4도 떨어진 곳은 0.15% 길어집니다. **밀어 넣은 5179는** 기준선 위를 0.04% 손해 보는 대신 2도쯤에서 딱 맞고, 4도 떨어진 곳도 0.11%로 덜 늘어나요. 가운데를 조금 짧게 만들어서 먼 곳이 늘어나는 폭을 줄인 거죠. 그 "0.04% 짧게"를 숫자로 적어 둔 게 `scale_factor = 0.9996`입니다.
+
+그러니 3.3m는 **오차가 아니라 설계값**입니다. 5179 제작자가 일부러 넣은 축소율이 서울의 두 점 사이에서 그대로 관측된 거예요.
+
+앞의 역산값이 `0.999624`로 `0.9996`보다 아주 조금 컸던 것도 이 표에 답이 있습니다. 서울은 기준선에서 0.5도쯤 서쪽이라, 표의 `기준선 위`(0.9996)와 `1도 옆`(0.9997) 사이에 놓이거든요.
+
+### 서울 전역에서 검산한다
+
+두 점에서만 그런 건지, 아니면 정말 눈금 간격인지 확인할 방법이 있습니다. 지난 편에서 만든 편의점 7,100개를 전부 써서, 각자 가장 가까운 소방서까지의 거리를 **두 방법으로 재고 비율을 봅니다.**
+
+```sql
+WITH d AS (
+  SELECT c.osm_id,
+         (SELECT ST_Distance(c.geom, f.geom)
+            FROM fire_m f ORDER BY c.geom <-> f.geom LIMIT 1) AS d5179,
+         (SELECT ST_Distance(ST_Transform(c.geom,4326)::geography,
+                             ST_Transform(f.geom,4326)::geography)
+            FROM fire_m f ORDER BY c.geom <-> f.geom LIMIT 1) AS dgeog
+  FROM conv_m c)
+SELECT count(*)                              AS n,
+       round(avg(d5179)::numeric, 1)         AS avg_5179_m,
+       round(avg(dgeog)::numeric, 1)         AS avg_geog_m,
+       round(min(d5179/dgeog)::numeric, 8)   AS min_ratio,
+       round(max(d5179/dgeog)::numeric, 8)   AS max_ratio,
+       round(avg(d5179/dgeog)::numeric, 8)   AS avg_ratio
+FROM d WHERE dgeog > 0;
+```
+
+```text
+  n   | avg_5179_m | avg_geog_m | min_ratio  | max_ratio  | avg_ratio
+------+------------+------------+------------+------------+------------
+ 7100 |     1037.0 |     1037.4 | 0.99960990 | 0.99965210 | 0.99962600
+```
+
+**7,100개 전부가 0.99961에서 0.99965 사이에 들어 있습니다.** 폭이 0.000042밖에 안 돼요. 두 점에서 본 게 우연이 아니라 **서울 전역에 일정하게 깔린 눈금 간격**이었습니다.
+
+평균 거리로 보면 1,037.0m 대 1,037.4m — **0.4m 차이**입니다. 실무에서 이 차이가 문제가 되는 경우를 저는 아직 못 봤습니다.
+
+같은 데이터로 구까지 넣어 세 자를 한 번에 비교하면, 앞에서 두 점으로 본 순서가 그대로 나옵니다. 2km 안에 드는 편의점–소방서 쌍 15,848개를 전부 재서 타원체 기준으로 각각 얼마나 벗어나는지 봤어요.
+
+```sql
+WITH pairs AS (
+  SELECT ST_Distance(c.geog, f.geog)        AS d_타원체,
+         ST_Distance(c.geog, f.geog, false) AS d_구,
+         ST_Distance(cm.geom, fm.geom)      AS d_평면
+  FROM conv_m cm JOIN fire_m fm ON ST_DWithin(cm.geom, fm.geom, 2000)
+  CROSS JOIN LATERAL (SELECT ST_Transform(cm.geom,4326)::geography AS geog) c
+  CROSS JOIN LATERAL (SELECT ST_Transform(fm.geom,4326)::geography AS geog) f)
+SELECT count(*) AS 쌍,
+       round(avg(abs(d_구   - d_타원체))::numeric, 3) AS 구_평균오차_m,
+       round(avg(abs(d_평면 - d_타원체))::numeric, 3) AS 평면_평균오차_m,
+       round(max(abs(d_구   - d_타원체))::numeric, 3) AS 구_최대_m,
+       round(max(abs(d_평면 - d_타원체))::numeric, 3) AS 평면_최대_m
+FROM pairs WHERE d_타원체 > 0;
+```
+
+```text
+  쌍   | 구_평균오차_m | 평면_평균오차_m | 구_최대_m | 평면_최대_m
+-------+---------------+-----------------+-----------+-------------
+ 15848 |         1.751 |           0.489 |     4.718 |       0.775
+```
+
+**평균으로 3.6배, 최대로 6배.** 그리고 두 오차는 성격이 다릅니다. 평면 쪽은 최대가 0.775m로 좁게 묶여 있어요 — 방금 본 대로 **일정한 비율**이니까요. 구 쪽은 −4.7m에서 +3.7m까지 부호까지 바뀌며 흩어집니다. 두 점이 어느 방향으로 놓였느냐에 따라 달라지거든요. **한쪽은 예측 가능한 눈금 차이고, 다른 쪽은 그냥 오차입니다.**
+
+넓이도 같은 이야기가 됩니다. 지난 편에서 종로구 면적을 네 가지로 재고 표를 냈는데, 거기 설명 없이 들어 있던 `geography` 칸이 이겁니다.
+
+```sql
+SELECT name,
+       round(ST_Area(geom)::numeric, 1)                                   AS "5174_m2",
+       round(ST_Area(ST_Transform(geom,4326)::geography)::numeric, 1)     AS geography_m2,
+       round(ST_Area(ST_Transform(geom,4326)::geography, false)::numeric, 1) AS 구_m2
+FROM sgg WHERE name LIKE '%종로%';
+```
+
+```text
+  name  |  5174_m2   | geography_m2 |   구_m2
+--------+------------+--------------+------------
+ 종로구 | 23892610.4 |   23892213.1 | 23838838.9
+```
+
+첫 칸(5174 평면)과 둘째 칸(타원체)은 **0.0017%** 차이인데, 구로 재면 **0.22%** 벗어납니다. 거리에서 본 순서가 넓이에서도 그대로예요 — 구가 제일 멀리 나갑니다.
+
+### 그런데 `<->`는 다른 답을 낸다
+
+한 가지 더 있습니다. 지난 편에서 "가장 가까운 것"을 찾을 때 `<->` 연산자를 썼죠. 그걸 geography에 대고 `ST_Distance`와 나란히 놓으면 이렇게 됩니다.
+
+```sql
+WITH pts AS (
+  SELECT ST_SetSRID(ST_MakePoint(126.9779, 37.5663), 4326)::geography AS a,
+         ST_SetSRID(ST_MakePoint(127.0276, 37.4979), 4326)::geography AS b
+)
+SELECT ST_Distance(a, b) AS st_distance,
+       a <-> b           AS knn,
+       ST_Distance(a, b, false) AS 구
+FROM pts;
+```
+
+```text
+  st_distance  |        knn        |      구
+---------------+-------------------+---------------
+ 8770.91427873 | 8778.019270990591 | 8778.01927099
+```
+
+**`<->`가 구 값을 냅니다.** 같은 두 점, 같은 한 행 안에서 `ST_Distance`와 7.1m 다른 답이에요. 실수가 아니라 의도된 것이고, PostGIS 소스에 이유가 주석으로 붙어 있습니다 — *"must use sphere, can't get index to harmonize with spheroid"*. 인덱스가 구 기준으로 만들어져 있어서, 정렬에 쓰는 연산자도 구로 맞춰 놓은 거예요.
+
+7.1m가 순서까지 뒤집을까요. 편의점 7,100개에 대해 **`<->`로 고른 최근접 소방서**와 **`ST_Distance`로 고른 최근접 소방서**가 같은지 세어 봤습니다.
+
+```sql
+WITH c AS (SELECT ST_Transform(geom,4326)::geography AS geog FROM conv_m),
+     f AS (SELECT ST_Transform(geom,4326)::geography AS geog FROM fire_m),
+x AS (
+  SELECT c.geog,
+         (SELECT f.geog FROM f ORDER BY c.geog <-> f.geog LIMIT 1)          AS g_knn,
+         (SELECT f.geog FROM f ORDER BY ST_Distance(c.geog,f.geog) LIMIT 1) AS g_exact
+  FROM c)
+SELECT count(*) AS 뒤바뀐_행,
+       round(max(ST_Distance(geog,g_knn) - ST_Distance(geog,g_exact))::numeric, 3) AS 최대_손해_m
+FROM x WHERE NOT ST_Equals(g_knn::geometry, g_exact::geometry);
+```
+
+```text
+ 뒤바뀐_행 | 최대_손해_m
+-----------+-------------
+         8 |       4.829
+```
+
+**8곳에서 다른 소방서가 뽑혔습니다.** 7,100개 중 8개면 0.1%고, 그마저도 가장 손해 본 경우가 **4.8m 더 먼 소방서**예요. 두 소방서가 거의 같은 거리에 있던 편의점들이고, 7.1m가 그 팽팽한 승부를 뒤집은 겁니다.
+
+> 💡 **그럼 정렬도 `ST_Distance`로 하면 되지 않나요?** 정확도만 보면 그게 맞습니다. 다만 `ORDER BY`에 `ST_Distance`를 쓰면 **인덱스를 못 탑니다.** 후보를 전부 계산해 봐야 순서를 알 수 있으니까요. 소방서 121곳마다 가장 가까운 편의점을 찾아 보면 이렇게 갈립니다.
+>
+> ```sql
+> -- ① 인덱스를 타는 KNN 정렬
+> SELECT count(*) FROM fire_m f CROSS JOIN LATERAL
+>   (SELECT c.osm_id FROM conv_m c ORDER BY c.geom <-> f.geom LIMIT 1) x;
+>
+> -- ② 같은 답을 ST_Distance로 정렬
+> SELECT count(*) FROM fire_m f CROSS JOIN LATERAL
+>   (SELECT c.osm_id FROM conv_m c ORDER BY ST_Distance(c.geom, f.geom) LIMIT 1) x;
+> ```
+>
+> ```text
+> ① Index Scan            3.4 ms
+> ② Seq Scan 7,100행    289.6 ms
+> ```
+>
+> **85배입니다.** geography도 마찬가지예요 — `<->`만 인덱스를 탑니다. 그래서 **`ORDER BY`는 `<->`로 인덱스를 태우고, 화면에 찍을 숫자는 `ST_Distance`로 따로** 재는 게 기본 패턴입니다. 순위까지 정확해야 한다면 `<->`로 **후보를 넉넉히 꺼낸 뒤**(예: `LIMIT 10`) 그 안에서만 `ST_Distance`로 다시 줄을 세우면 돼요. 인덱스도 쓰고 순위도 지킵니다.
+
+{/* 🖼️ 이미지: 같은 두 점(서울시청·강남역) 사이에 자 세 개를 나란히 겹쳐 그린 그림 — (위) 타원체 표면을 따라 휘는 측지선 8770.914m, (가운데) 반지름 6,371,008.77m 구 위의 대권 8778.019m, (아래) 평면에 펼친 직선 8767.615m. 오른쪽에 편차 막대 −3.300 / 기준 / +7.105를 놓아 "구가 반대 방향으로 두 배" 가 보이게. 아래쪽에 0.999624 ≈ PARAMETER["scale_factor",0.9996] 를 등호로 연결 — gis/26/three-rulers.png */}
+<BlurImage imageURL='https://storage.googleapis.com/leehyeonjun.com/gis/26/three-rulers.png' title={metadata.title} />
+
+## 3. 캐스팅은 좌표를 한 개도 바꾸지 않는다
+
+`ST_Transform`은 좌표를 실제로 다시 계산합니다. `126.9779`가 `953...`이 되죠. 그럼 `::geography`는 뭘 바꿀까요.
+
+### 바이트를 세어 본다
+
+점 하나로 재 봅니다.
+
+```sql
+WITH p AS (SELECT ST_SetSRID(ST_MakePoint(126.9779, 37.5663), 4326) AS g)
+SELECT ST_Summary(g)                AS s_geom,
+       ST_Summary(g::geography)     AS s_geog,
+       pg_column_size(g)            AS b_geom,
+       pg_column_size(g::geography) AS b_geog,
+       ST_AsEWKB(g) = ST_AsEWKB(g::geography::geometry) AS ewkb_같음
+FROM p;
+```
+
+```text
+  s_geom  |  s_geog   | b_geom | b_geog | ewkb_같음
+----------+-----------+--------+--------+-----------
+ Point[S] | Point[GS] |     32 |     32 | t
+```
+
+**32바이트 그대로입니다.** 그리고 `geography`로 갔다가 `geometry`로 돌아온 값의 바이트 표현이 원본과 **같습니다.** <Link href='/blog/gis-21-postgis-start'>gis-21</Link>에서 점 하나를 25바이트짜리 EWKB로 뜯어봤는데, 그 바이트들이 한 개도 안 바뀐 거예요.
+
+면은 어떨까요. `sgg`의 251개 시군구 전부에 대해 차이를 재 봅니다.
+
+```sql
+SELECT count(*) AS n,
+       min(pg_column_size(ST_Transform(geom,4326)::geography)
+         - pg_column_size(ST_Transform(geom,4326))) AS min_diff,
+       max(pg_column_size(ST_Transform(geom,4326)::geography)
+         - pg_column_size(ST_Transform(geom,4326))) AS max_diff
+FROM sgg;
+```
+
+```text
+  n  | min_diff | max_diff
+-----+----------+----------
+ 251 |        8 |        8
+```
+
+**251개 전부 정확히 8바이트씩 늘었습니다.** 점 5,649개짜리 큰 면이든 작은 면이든 똑같이 8바이트예요. 좌표가 늘어난 게 아니라는 뜻이죠 — 늘어난 건 **경계상자**입니다. 평면 경계상자는 `xmin·xmax·ymin·ymax` 네 개(16바이트)인데, geography의 경계상자는 **3차원이라 여섯 개(24바이트)** 거든요. 차이가 딱 8바이트입니다. 왜 3차원인지는 4절에서 봅니다.
+
+> 💡 점에는 왜 차이가 없었냐면, **점은 경계상자를 따로 저장하지 않기 때문**입니다. 점의 경계상자는 점 자신이니 캐시할 이유가 없죠.
+
+### 달라지는 건 글자 하나
+
+`ST_Summary`의 출력을 다시 보세요. `Point[S]`가 `Point[GS]`가 됐습니다. **`G` 한 글자가 붙은 게 전부예요.**
+
+이 글자는 값 안의 플래그 바이트 하나에서 옵니다. PostGIS가 도형을 저장할 때 쓰는 헤더에 `gflags`라는 바이트가 있고, 거기 비트가 용도별로 나뉘어 있어요.
+
+```text
+gflags 바이트
+  0x01  Z 좌표가 있다
+  0x02  M 좌표가 있다
+  0x04  경계상자가 캐시돼 있다
+  0x08  측지(geodetic) — 이 값이 geography다   ← 이 비트 하나
+```
+
+그러니 `::geography`는 **변환이 아니라 해석 변경**입니다. 좌표는 그대로 두고 "이 숫자들을 평면 위의 x, y가 아니라 지구 위의 경도, 위도로 읽어라"고 표시하는 것뿐이에요. 그리고 그 표시를 보면 같은 이름의 함수가 **다른 코드로 갑니다.**
+
+### 그래서 5174는 캐스팅되지 않는다
+
+해석 변경이라는 게 왜 중요하냐면, **아무 좌표에나 붙일 수 없기 때문**입니다. `sgg`는 5174, 그러니까 미터 단위 평면 좌표죠. 붙여 보겠습니다.
+
+```sql
+SELECT geom::geography FROM sgg LIMIT 1;
+```
+
+```text
+ERROR:  Only lon/lat coordinate systems are supported in geography.
+```
+
+미터로 옮겨도 마찬가지고, 아예 **테이블을 만들 때부터** 막힙니다.
+
+```sql
+CREATE TABLE geog_5179_test (g geography(Point, 5179));
+```
+
+```text
+ERROR:  Only lon/lat coordinate systems are supported in geography.
+LINE 1: CREATE TABLE geog_5179_test (g geography(Point, 5179));
+                                       ^
+```
+
+당연합니다. `953000`이라는 숫자를 "경도 95만 도"로 읽으라고 할 수는 없으니까요. <Link href='/blog/gis-08-coordinate-transformation'>gis-08</Link>에서 `ST_SetSRID`가 꼬리표만 갈아 끼워 서울을 지구 밖으로 보냈던 그 사고를, geography는 **타입 선언 단계에서 미리 막습니다.**
+
+### "4326 전용"은 옛말이다
+
+흔히 "geography는 4326에 묶인다"고 합니다. 저도 그렇게 알고 있었는데, **PostGIS 2.2부터 사실이 아닙니다.** 에러 메시지를 다시 읽어 보세요. *"Only **lon/lat** coordinate systems"* — 4326이라고 안 합니다. 위경도 계열이면 됩니다.
+
+```sql
+SELECT count(*) AS 위경도_srid FROM spatial_ref_sys WHERE proj4text LIKE '%+proj=longlat%';
+```
+
+```text
+ 위경도_srid
+-------------
+        1152
+```
+
+**1,152개.** 실제로 한국 측지계의 지리좌표계인 `4737`로도 잘 됩니다.
+
+```sql
+SELECT ST_Distance(ST_SetSRID(ST_MakePoint(126.9779,37.5663),4737)::geography,
+                   ST_SetSRID(ST_MakePoint(127.0276,37.4979),4737)::geography) AS m_4737,
+       ST_Distance(ST_SetSRID(ST_MakePoint(126.9779,37.5663),4326)::geography,
+                   ST_SetSRID(ST_MakePoint(127.0276,37.4979),4326)::geography) AS m_4326;
+```
+
+```text
+    m_4737     |    m_4326
+---------------+---------------
+ 8770.91427864 | 8770.91427873
+```
+
+끝자리가 다른 건 두 좌표계의 타원체가 미세하게 달라서입니다 — GRS80과 WGS84요. 차이가 **0.09마이크로미터**, 8.7km에 대해 1천억 분의 1입니다. <Link href='/blog/gis-05-shape-of-earth'>gis-05</Link>에서 "둘은 사실상 같다"고 한 게 숫자로는 이 정도예요.
+
+### 한쪽만 붙여도 미터가 나온다
+
+마지막이 제일 조심할 것입니다. `ST_Distance`의 인자 **한쪽에만** geography를 주면 어떻게 될까요.
+
+```sql
+WITH p AS (
+  SELECT ST_SetSRID(ST_MakePoint(126.9779,37.5663),4326)            AS a_geom,
+         ST_SetSRID(ST_MakePoint(127.0276,37.4979),4326)::geography AS b_geog)
+SELECT ST_Distance(a_geom, b_geog)           AS 섞어서,
+       ST_Distance(a_geom, b_geog::geometry) AS 둘다_geometry
+FROM p;
+```
+
+```text
+    섞어서     |   둘다_geometry
+---------------+---------------------
+ 8770.91427873 | 0.08454968953224912
+```
+
+**같은 두 점, 같은 함수인데 단위가 다릅니다.** 왼쪽은 미터, 오른쪽은 도예요.
+
+이유는 캐스팅의 방향에 있습니다. PostGIS는 `geometry → geography`를 **암묵적(IMPLICIT) 캐스트**로 등록해 두었어요. 그래서 인자가 섞이면 PostgreSQL이 알아서 `geometry` 쪽을 `geography`로 승격시키고, `ST_Distance(geography, geography)`가 호출됩니다. 반대 방향은 명시적이라 자동으로 일어나지 않고요.
+
+> ⚠️ **칼럼 타입 하나만 바꿔도 쿼리의 단위가 바뀝니다.** 테이블 정의를 `geometry(Point,4326)`에서 `geography(Point,4326)`으로 고치면, 그 칼럼을 쓰던 **모든 `ST_Distance`와 `ST_DWithin`이 조용히 미터로 넘어갑니다.** 쿼리 문장은 한 글자도 안 바뀌었는데요. gis-21의 함정이 "도인 줄 모르고 미터로 읽는 것"이었다면, 이건 그 거울상입니다.
+
+그리고 범위를 벗어난 좌표를 캐스팅하면 **말없이 고쳐집니다.**
+
+```sql
+SELECT ST_AsText(ST_SetSRID(ST_MakePoint(181.0, 37.5663), 4326)::geography) AS lon181,
+       ST_AsText(ST_SetSRID(ST_MakePoint(126.9779, 91.0), 4326)::geography) AS lat91;
+```
+
+```text
+NOTICE:  Coordinate values were coerced into range [-180 -90, 180 90] for GEOGRAPHY
+       lon181        |       lat91
+---------------------+--------------------
+ POINT(-179 37.5663) | POINT(126.9779 89)
+```
+
+경도 181은 −179로 **감기고**, 위도 91은 89로 **접힙니다.** 경도 쪽은 맞는 처리예요 — 181도는 실제로 −179도니까요. 위도 쪽은 다릅니다. 위도 91도의 진짜 대응점은 극을 넘어간 반대편, 그러니까 경도도 180도 돌아가야 하는데 **경도는 그대로 둡니다.** `NOTICE`라 에러도 아니고, 로그를 안 보면 지나갑니다.
+
+{/* 🖼️ 이미지: 같은 32바이트 블록 두 줄을 위아래로 나란히 — 바이트가 하나하나 같은 색으로 대응되고, gflags 바이트 한 칸에서만 0x08 비트가 0에서 1로 켜지는 확대 표시. 왼쪽 라벨 Point[S] / Point[GS]. 오른쪽에는 그 비트 하나 때문에 갈라지는 두 갈래 화살표 — 위는 "평면 · 좌표계 단위 · 함수 242개", 아래는 "타원체 · 항상 미터 · 함수 31개". 아래쪽에 면일 때만 붙는 +8바이트(2D 경계상자 4개 → 3D 6개)를 작은 도식으로 — gis/26/one-bit.png */}
+<BlurImage imageURL='https://storage.googleapis.com/leehyeonjun.com/gis/26/one-bit.png' title={metadata.title} />
+
+## 4. 이음매가 없다 — 180도와 지구 반대편
+
+서울 안에서 두 타입의 차이는 0.4m였습니다. 그럼 반대쪽 극단은 어떨까요.
+
+### 서울에서 LA까지, 정확히 반은 어디인가
+
+서울과 로스앤젤레스를 선으로 잇고, **그 선의 정확히 중간 지점**을 물어봅니다. 한 번은 평면으로, 한 번은 geography로요.
+
+```sql
+WITH p AS (SELECT ST_SetSRID(ST_MakePoint(126.9779, 37.5663), 4326) AS s,
+                  ST_SetSRID(ST_MakePoint(-118.2437, 34.0522), 4326) AS l),
+m AS (SELECT ST_LineInterpolatePoint(ST_MakeLine(s,l), 0.5)                        AS plane,
+             ST_LineInterpolatePoint(ST_MakeLine(s,l)::geography, 0.5)::geometry   AS geod
+      FROM p)
+SELECT ST_AsText(plane) AS 평면_중간점,
+       ST_AsText(geod)  AS 측지_중간점,
+       round((ST_Distance(plane::geography, geod::geography)/1000)::numeric, 0) AS 두_점_거리_km
+FROM m;
+```
+
+```text
+            평면_중간점            |                  측지_중간점                  | 두_점_거리_km
+-----------------------------------+-----------------------------------------------+---------------
+ POINT(4.367099999999994 35.80925) | POINT(-173.65822362921904 53.289543468109436) |         10131
+```
+
+**평면이 고른 중간점은 경도 4.4도, 위도 35.8도 — 아프리카, 알제리 북부 내륙입니다.** 재 보면 알제리 도시 M'Sila에서 20km 떨어진 자리예요. 측지 중간점은 경도 −173.7도, 위도 53.3도, **알류샨 열도 북쪽의 베링해**고요. 서울과 LA를 잇는 대권이 태평양 북쪽으로 휘어 지나가는 자리입니다.
+
+**두 점이 10,131km 떨어져 있습니다.** 평면 계산은 경도 `126.98`과 `-118.24`를 그냥 산술평균해서 `4.37`을 냈어요.
+
+**`geometry`는 지도를 한 장의 종이로 봅니다.** 경도는 그냥 가로축 눈금이고, 종이의 왼쪽 끝(−180)과 오른쪽 끝(+180)은 **이어져 있지 않은 낭떠러지**예요. 지구에서 그 둘은 같은 자리인데도요. 그러니 서울(127)에서 LA(−118)로 가는 길은 종이 위에 딱 하나, **왼쪽으로 쭉 가로지르는 길**밖에 없습니다. 태평양으로 가려면 오른쪽 끝에서 떨어졌다가 왼쪽 끝에서 다시 나타나야 하는데, 종이에는 그런 길이 없으니까요. 그래서 중동과 북아프리카를 지나 경도 4.37도에 중간점이 찍혔습니다. 종이 위에서는 맞는 답이에요. 다만 그 종이가 지구가 아니었을 뿐이죠.
+
+거리도 같은 식으로 갈립니다.
+
+```sql
+WITH p AS (SELECT ST_SetSRID(ST_MakePoint(126.9779,37.5663),4326) AS s,
+                  ST_SetSRID(ST_MakePoint(-118.2437,34.0522),4326) AS l)
+SELECT round((ST_Distance(s::geography, l::geography)/1000)::numeric, 1)  AS geography_km,
+       round(ST_Distance(s, l)::numeric, 4)                               AS geometry_도,
+       round((ST_Distance(ST_Transform(s,3857), ST_Transform(l,3857))/1000)::numeric, 1) AS mercator_km
+FROM p;
+```
+
+```text
+ geography_km | geometry_도 | mercator_km
+--------------+-------------+-------------
+       9606.7 |    245.2468 |     27302.2
+```
+
+`245.2468`도라는 숫자는 아무 길이도 아닙니다. 지구 한 바퀴가 360도인데 두 도시가 245도 떨어져 있다는 건 **반대 방향으로 돌았다**는 뜻이에요(짧은 쪽은 114.8도입니다). 웹 메르카토르로 옮기면 그 잘못된 방향이 킬로미터로 번역돼서 **27,302km**가 됩니다. 실제의 2.8배죠.
+
+### 22km인 거리가 40,052km이기도 하다
+
+날짜변경선 바로 양옆에 점을 찍으면 더 선명합니다. 경도 `179.9`와 `-179.9` — 실제로는 0.2도, 적도에서 약 22km 떨어진 두 점입니다.
+
+```sql
+WITH p AS (SELECT ST_SetSRID(ST_MakePoint(179.9, 0), 4326) a,
+                  ST_SetSRID(ST_MakePoint(-179.9, 0), 4326) b)
+SELECT round(ST_Distance(a::geography, b::geography)::numeric, 1)                        AS geography_m,
+       round(ST_Distance(a, b)::numeric, 4)                                              AS geometry_도,
+       round((ST_Distance(ST_Transform(a,3857), ST_Transform(b,3857))/1000)::numeric, 1) AS mercator_km
+FROM p;
+```
+
+```text
+ geography_m | geometry_도 | mercator_km
+-------------+-------------+-------------
+     22263.9 |    359.8000 |     40052.8
+```
+
+**22.3km와 40,052.8km.** 1,799배입니다. 평면은 `179.9 - (-179.9) = 359.8`도를 그대로 믿고 지구를 거의 한 바퀴 돌았어요.
+
+선으로 만들면 길이가 통째로 망가집니다.
+
+```sql
+WITH l AS (SELECT ST_SetSRID(ST_MakeLine(ARRAY[
+             ST_MakePoint( 179.0, 0), ST_MakePoint( 179.9, 0),
+             ST_MakePoint(-179.9, 0), ST_MakePoint(-179.0, 0)]), 4326) AS g)
+SELECT round((ST_Length(g::geography)/1000)::numeric, 1)                 AS geography_km,
+       round((ST_Length(ST_Transform(g,3857))/1000)::numeric, 1)         AS mercator_km,
+       ST_AsText(ST_Envelope(g))                                         AS 경계상자
+FROM l;
+```
+
+```text
+ geography_km | mercator_km |           경계상자
+--------------+-------------+------------------------------
+        222.6 |     40253.1 | LINESTRING(-179.9 0,179.9 0)
+```
+
+geography는 **222.6km**를 냅니다 — 100.2 + 22.3 + 100.2로 검산이 맞아요. 평면은 **40,253.1km**고요. 그리고 경계상자를 보세요. 겨우 222km짜리 선인데 **경도 −179.9부터 179.9까지, 지구 전체를 덮고 있습니다.**
+
+### geography에는 그 낭떠러지가 없다
+
+경계상자가 지구 한 바퀴로 벌어진 건 평면 쪽 이야기입니다. geography에는 **종이의 끝이라는 게 없어서** 이런 일이 생기지 않아요.
+
+geography는 좌표를 종이 위의 x·y로 두지 않습니다. **지구 중심을 원점으로 하는 3차원 좌표로 바꿔서** 저장해요.
+
+```text
+x = cos(위도) × cos(경도)
+y = cos(위도) × sin(경도)
+z = sin(위도)
+```
+
+경도 `179.9`와 `-179.9`를 각각 넣어 보면, 둘 다 x ≈ −1, y ≈ ±0.0017, z = 0입니다. **3차원 공간에서 바로 옆자리예요.** 경도 축을 잘라 펼친 종이에서만 두 점이 지구 반대편이지, 공 위에서는 붙어 있으니까요.
+
+그러니 geography에 날짜변경선 처리 코드가 따로 있는 게 아닙니다. **애초에 자를 데가 없어서 이음매가 생기지 않는 것**이죠. 극지방도 마찬가지고요. 경계상자가 6개 float인 것도 이 때문입니다 — x·y·z 각각의 최소·최대니까요.
+
+{/* 🖼️ 이미지: 왼쪽은 펼친 세계지도(평면) — 경도 179.9와 −179.9 두 점이 지도 양 끝에 멀찍이 떨어져 있고 그 사이를 가로지르는 선에 "40,052.8km" 라벨, 지도 오른쪽 가장자리에 잘린 이음매를 톱니로 강조. 오른쪽은 같은 두 점을 지구본 위에 — 날짜변경선 양옆에 거의 붙어 있고 "22.3km" 라벨, 그 아래 지구 중심 원점의 x·y·z 축과 (−1, ±0.0017, 0) 좌표 표기. 가운데 큰 대비 기호 — gis/26/no-seam.png */}
+<BlurImage imageURL='https://storage.googleapis.com/leehyeonjun.com/gis/26/no-seam.png' title={metadata.title} />
+
+## 5. 편함의 값
+
+여기까지만 보면 geography가 이깁니다. 변환이 필요 없고, 단위가 항상 미터고, 이음매도 없어요. 그럼 왜 기본이 아닐까요.
+
+### 함수를 세어 본다
+
+geography로는 안 되는 함수가 있다는 말은 흔한데, 정작 몇 개인지는 잘 안 나옵니다. 세어 봅니다.
+
+```sql
+WITH f AS (
+  SELECT p.proname,
+         bool_or(pg_get_function_identity_arguments(p.oid) ~ 'geography') AS has_geog,
+         bool_or(pg_get_function_identity_arguments(p.oid) ~ 'geometry')  AS has_geom
+  FROM pg_proc p
+  JOIN pg_depend d    ON d.objid = p.oid AND d.deptype = 'e'
+  JOIN pg_extension e ON e.oid = d.refobjid AND e.extname = 'postgis'
+  WHERE p.proname ~* '^st_' GROUP BY p.proname)
+SELECT count(*) FILTER (WHERE has_geom)                 AS geometry를_받는,
+       count(*) FILTER (WHERE has_geog)                 AS geography를_받는,
+       count(*) FILTER (WHERE has_geom AND NOT has_geog) AS geometry만,
+       count(*)                                          AS ST_이름_전체
+FROM f;
+```
+
+```text
+ geometry를_받는 | geography를_받는 | geometry만 | ST_이름_전체
+-----------------+------------------+------------+--------------
+             242 |               31 |        211 |          309
+```
+
+**242 대 31입니다.** 그리고 31개가 전부라 이름을 다 적을 수 있어요.
+
+```text
+ST_Area              ST_AsBinary          ST_AsEWKT            ST_AsGML
+ST_AsGeoJson         ST_AsKML             ST_AsSVG             ST_AsText
+ST_Azimuth           ST_Buffer            ST_Centroid          ST_ClosestPoint
+ST_CoveredBy         ST_Covers            ST_Distance          ST_DWithin
+ST_GeoHash           ST_Intersection      ST_Intersects        ST_Length
+ST_LineInterpolatePoint(s)                ST_LineLocatePoint   ST_LineSubstring
+ST_Perimeter         ST_Project           ST_Segmentize        ST_SetSRID
+ST_ShortestLine      ST_SRID              ST_Summary
+```
+
+지난 편에서 쓴 함수들을 이 목록에 대보면 뭐가 없는지 바로 보입니다.
+
+```sql
+SELECT ST_Union(ST_Transform(geom,4326)::geography) FROM sgg;
+```
+
+```text
+ERROR:  function st_union(geography) does not exist
+HINT:  No function matches the given name and argument types. You might need to add explicit type casts.
+```
+
+`ST_Union`이 없습니다. 지난 편에서 소방서 버퍼 121개를 하나로 합칠 때 쓴 그 함수요. `ST_Difference`도, `ST_Simplify`도, `ST_Envelope`도, 좌표를 꺼내는 `ST_X`·`ST_Y`도 없습니다. **`ST_Transform`조차 없어요** — geography에는 변환할 다른 좌표계가 없으니 당연하지만, 처음 만나면 당황스럽습니다.
+
+<Link href='/blog/gis-24-de9im'>지난지난 편</Link>을 통째로 차지했던 DE-9IM도 없습니다 — `ST_Relate`도 `ST_Contains`도 `ST_Within`도 전부 같은 에러를 냅니다. 다만 **`ST_Covers`와 `ST_CoveredBy`는 있어요.** 목록에 `ST_Intersects`가 남아 있는 것도 판정을 제대로 해서가 아니라, geography 쪽 `ST_Intersects`는 **거리가 0인지 묻는 `ST_DWithin`** 이기 때문입니다. 경계와 내부를 가르는 9칸 행렬은 여기 없습니다.
+
+> ⚠️ 에러가 `ERROR: function st_union(geography) does not exist`라는 걸 눈여겨보세요. PostGIS가 "geography는 지원 안 합니다"라고 말해주는 게 아니라, **PostgreSQL이 그냥 함수를 못 찾은 것**입니다. 오타를 냈을 때와 똑같은 메시지예요.
+
+### 그 미터는 누가 재주나 — GEOS가 아니다
+
+<Link href='/blog/gis-21-postgis-start'>gis-21</Link>에서 저는 PostGIS의 층위를 그리며 **"도형 계산은 PostGIS가 하지 않습니다"** 라고 적었고, 교차·합집합·버퍼 같은 도형 연산은 GEOS가 맡는다고 했습니다. <Link href='/blog/gis-24-de9im'>gis-24</Link>에서도 DE-9IM 판정을 실제로 하는 건 GEOS라고 했고요.
+
+그런데 GEOS는 **평면 전용** 라이브러리예요. 타원체 위의 거리를 모릅니다. 그래서 `ST_Distance(geography, geography)`는 GEOS로 가지 않습니다. PostGIS 소스를 따라가 보면 부르는 건 **PROJ에 들어 있는 GeographicLib**이고, 알고리즘은 **Karney의 측지선 해법(2013)** 입니다. PROJ 문서는 이 계산의 거리 오차를 15나노미터 이하라고 적고 있어요.
+
+결과로 확인할 방법이 있습니다. PostGIS에는 타원체를 **직접 지정해서** 거리를 재는 함수가 따로 있거든요. gis-21에서 `spheroid` 타입을 설명하며 이름만 대고 넘어갔던 `ST_DistanceSpheroid`요.
+
+```sql
+WITH pts AS (
+  SELECT ST_SetSRID(ST_MakePoint(126.9779,37.5663),4326) AS a,
+         ST_SetSRID(ST_MakePoint(127.0276,37.4979),4326) AS b
+)
+SELECT ST_Distance(a::geography, b::geography)                                  AS geography,
+       ST_DistanceSpheroid(a, b, 'SPHEROID["WGS 84",6378137,298.257223563]')    AS 타원체_직접,
+       ST_DistanceSphere(a, b)                                                  AS 구_직접,
+       ST_Distance(a::geography, b::geography, false)                           AS geography_구
+FROM pts;
+```
+
+```text
+   geography   |  타원체_직접     |    구_직접    | geography_구
+---------------+------------------+---------------+---------------
+ 8770.91427873 | 8770.91427872504 | 8778.01927099 | 8778.01927099
+```
+
+**두 쌍이 각각 같습니다.** `::geography`의 기본 동작은 WGS84 타원체를 넣은 `ST_DistanceSpheroid`와 같은 답이고, `use_spheroid := false`는 `ST_DistanceSphere`와 같은 답이에요. gis-21이 "`spheroid` 타입은 `ST_DistanceSpheroid` 같은 데서 겉으로 드러납니다"라고 미뤄둔 걸 여기서 갚습니다 — 그 타원체가 **`SPHEROID["WGS 84", 6378137, 298.257223563]`**, 장반경과 역편평률 두 숫자입니다.
+
+구 쪽이 끝자리까지 같은 건 우연이 아닙니다. 함수 정의를 카탈로그에서 꺼내 보면 이유가 적혀 있어요.
+
+```sql
+SELECT pg_get_function_identity_arguments(oid) AS 인자, prosrc
+FROM pg_proc WHERE proname = 'st_distancesphere' ORDER BY 1;
+```
+
+```text
+                          인자                           |                                    prosrc
+---------------------------------------------------------+------------------------------------------------------------------------------
+ geom1 geometry, geom2 geometry                          | select public.ST_distance( public.geography($1), public.geography($2),false)
+ geom1 geometry, geom2 geometry, radius double precision | LWGEOM_distance_sphere
+```
+
+인자 두 개짜리 `ST_DistanceSphere`는 **그냥 `ST_Distance(geography, geography, false)`를 부르는 한 줄**입니다. 같은 계산을 이름만 달리 부른 거였죠.
+
+### `ST_Buffer`는 속으로 `ST_Transform`을 한다
+
+목록에 `ST_Buffer`가 있었죠. geography에 버퍼가 된다면, 타원체 위에 그리는 진짜 측지 버퍼일까요.
+
+아닙니다. 방금처럼 정의를 꺼내 보면 C 함수가 아니라 **SQL 한 줄**이에요.
+
+```sql
+SELECT prosrc FROM pg_proc
+WHERE proname = 'st_buffer' AND pg_get_function_identity_arguments(oid) = 'geography, double precision';
+```
+
+```text
+SELECT public.geography(public.ST_Transform(public.ST_Buffer(public.ST_Transform(public.geometry($1), public._ST_BestSRID($1)), $2), public.ST_SRID($1)))
+```
+
+안쪽부터 읽으면 이렇습니다.
+
+```text
+geometry($1)                      geography를 geometry로 되돌리고
+ST_Transform(…, _ST_BestSRID($1)) 적당한 투영좌표계로 옮기고
+ST_Buffer(…, $2)                  평면에서 버퍼를 그리고
+ST_Transform(…, ST_SRID($1))      원래 위경도로 돌아와서
+geography(…)                      다시 geography로 포장한다
+```
+
+**지난 편에서 우리가 손으로 한 그 왕복**입니다. 달라진 건 좌표계를 누가 고르느냐뿐이에요. 어떤 걸 고르는지 물어볼 수 있습니다.
+
+```sql
+SELECT _ST_BestSRID(ST_SetSRID(ST_MakePoint(126.9779,37.5663),4326)::geography) AS 서울_한점,
+       (SELECT _ST_BestSRID(ST_Transform(ST_Collect(geom),4326)::geography) FROM sgg) AS 전국;
+```
+
+```text
+ 서울_한점 |  전국
+-----------+--------
+    999052 | 999249
+```
+
+**999052.** 처음 보는 번호죠. `spatial_ref_sys`를 뒤지면 999000번대는 **한 행도 없습니다.** 그런데 변환은 되고, UTM 52N(EPSG:32652)과 소수점 끝까지 같은 좌표가 나옵니다.
+
+```sql
+SELECT (SELECT count(*) FROM spatial_ref_sys WHERE srid >= 999000) AS 예약번호_행수,
+       ST_AsText(ST_Transform(ST_SetSRID(ST_MakePoint(126.9779,37.5663),4326), 999052)) AS srid_999052,
+       ST_AsText(ST_Transform(ST_SetSRID(ST_MakePoint(126.9779,37.5663),4326),  32652)) AS utm_52n;
+```
+
+```text
+ 예약번호_행수 |                 srid_999052                 |                   utm_52n
+---------------+---------------------------------------------+---------------------------------------------
+             0 | POINT(321414.97589303646 4159618.639180984) | POINT(321414.97589303646 4159618.639180984)
+```
+
+999000번대는 PostGIS가 **내부용으로 예약해 둔 번호**입니다. 좌표계 사전에 행을 만들지 않고 필요할 때 투영을 조립해 쓰죠. 좁은 지역이면 UTM 존을, 넓으면 다른 걸, 극지방이면 또 다른 걸 고릅니다. gis-21에서 PostGIS가 `spatial_ref_sys`라는 좌표계 사전을 8,500개 들고 시작한다고 했는데, **여기가 그 사전을 거치지 않는 길**이에요.
+
+그러니 `ST_Buffer(geography)`가 편한 건 측지 계산을 해주기 때문이 아니라 **좌표계 고르는 일을 대신 해주기 때문**입니다. 지난 편의 교훈이 사라진 게 아니라 함수 안으로 들어간 거예요. `ST_Intersection(geography, geography)`도 정의를 꺼내 보면 똑같이 `_ST_BestSRID`로 옮겨 가서 계산하고 돌아오는 한 줄입니다.
+
+### 그래서 얼마나 느린가
+
+geography가 느리다는 말도 흔하죠. 얼마나 느린지 재 봅니다. 지난 편의 5179 테이블과, 같은 데이터를 geography로 옮긴 테이블을 각각 만들고 같은 조인을 돌립니다.
+
+```sql
+CREATE TABLE conv_g AS SELECT osm_id, ST_Transform(geom,4326)::geography AS geog FROM conv_m;
+CREATE TABLE fire_g AS SELECT osm_id, ST_Transform(geom,4326)::geography AS geog FROM fire_m;
+CREATE INDEX conv_g_gix ON conv_g USING gist(geog);
+CREATE INDEX fire_g_gix ON fire_g USING gist(geog);
+ANALYZE conv_g; ANALYZE fire_g;
+```
+
+먼저 인덱스 크기입니다. 같은 편의점 7,100개에 걸린 GiST 인덱스 둘을 비교합니다.
+
+```sql
+SELECT (SELECT count(*) FROM conv_m)                       AS 점,
+       pg_size_pretty(pg_relation_size('conv_m_geom_idx')) AS 인덱스_5179,
+       pg_size_pretty(pg_relation_size('conv_g_gix'))      AS 인덱스_geography,
+       round(pg_relation_size('conv_g_gix')::numeric
+           / pg_relation_size('conv_m_geom_idx'), 2)       AS 배수;
+```
+
+```text
+  점  | 인덱스_5179 | 인덱스_geography | 배수
+------+-------------+------------------+------
+ 7100 | 304 kB      | 600 kB           | 1.97
+```
+
+**같은 점 7,100개인데 인덱스가 1.97배입니다.** 점 자체는 3절에서 본 대로 32바이트로 같아요. 달라진 건 인덱스 한 칸이 들고 다니는 경계상자입니다 — 2차원 4개(16바이트)가 4절의 3차원 좌표 6개에 길이 헤더까지 붙어 28바이트가 됩니다. 인덱스 내부가 어떻게 생겼는지는 **Phase 9**에서 뜯어봅니다.
+
+조인 시간은 반경 2,000m로 소방서 121곳 × 편의점 7,100곳을 붙여서 쟀습니다. 워밍업 3회 뒤 **15회를 돌려 중앙값**을 썼어요.
+
+```sql
+SELECT count(*) FROM conv_m c JOIN fire_m f ON ST_DWithin(c.geom, f.geom, 2000);        -- 5179 평면
+SELECT count(*) FROM conv_g c JOIN fire_g f ON ST_DWithin(c.geog, f.geog, 2000);        -- 타원체
+SELECT count(*) FROM conv_g c JOIN fire_g f ON ST_DWithin(c.geog, f.geog, 2000, false); -- 구
+```
+
+| 쿼리 | 결과 | 중앙값 | 평면 대비 |
+| --- | --- | --- | --- |
+| `ST_DWithin(geom, geom, 2000)` — 5179 평면 | 15,848쌍 | **8.7 ms** | — |
+| `ST_DWithin(geog, geog, 2000)` — 타원체 | 15,840쌍 | **25.6 ms** | **2.9배** |
+| `ST_DWithin(geog, geog, 2000, false)` — 구 | 15,844쌍 | **14.0 ms** | 1.6배 |
+
+**2.9배입니다.** gis-21의 "느림"은 근거 없이 적은 거였지만, 적어도 방향은 맞았네요. 그리고 `use_spheroid := false`를 주면 절반으로 줄어듭니다 — 측지선 계산이 비용의 대부분이라는 뜻이죠.
+
+결과 개수가 셋 다 다른 것도 보세요. **평면이 제일 많이 찾습니다**(15,848). 2절에서 본 대로 평면이 일정하게 0.04% 짧게 재니까, 2,000m 경계에 걸쳐 있던 쌍 여덟 개가 그만큼 안쪽으로 들어온 거예요. 구는 쌍마다 부호가 갈리는 오차라 넷이 들어오고 말았고요. **같은 질문에 세 자가 세 개의 답을 냅니다.**
+
+> 💡 이 숫자를 일반화하면 안 됩니다. **7,100 × 121은 작은 조인**이고, 인덱스가 잘 듣는 조건이에요. "인덱스를 걸었는데도 왜 어떤 쿼리는 안 빨라지나"는 그 자체로 한 편 분량이라 **Phase 7의 다른 편**에서 따로 다룹니다. 오늘은 같은 조건에서 타입만 바꿨을 때의 값입니다.
+
+## 정리 — 한 문장으로
+
+> **`::geography`는 좌표를 한 개도 바꾸지 않는다. 비트 하나를 켜서 "이 숫자는 평면 위의 x·y가 아니라 지구 위의 경도·위도"라고 표시할 뿐이고, 그때부터 거리는 타원체를 따라 미터로 나온다. 그 대가로 쓸 수 있는 함수가 242개에서 31개로 줄어든다.**
+
+오늘 글에서 가져갈 건 셋입니다.
+
+**① 한국 안에서는 무엇을 쓰든 거의 같습니다.** 편의점 7,100곳에서 두 방법의 차이가 평균 **0.4m**였어요. 비율로 0.04%인데, 그마저 오차가 아니라 5179가 일부러 넣은 축소율이고요. 한국 안이라면 **이미 쓰던 걸 계속 쓰면 됩니다.**
+
+**② 한국을 벗어나는 순간 5179는 조용히 틀립니다.** 서울–두바이가 **1,727km** 부풀었는데 에러도 경고도 없었어요. 투영좌표계에는 저마다 유효 범위가 있고, PostGIS는 그걸 검사하지 않습니다. 한국 밖 좌표가 섞일 수 있으면 **`::geography`** 예요.
+
+**③ geography는 편한 대신 좁습니다.** `ST_Union`·`ST_Relate`·`ST_X`처럼 자주 쓰는 함수가 아예 없고, 같은 조인이 2.9배 느렸습니다. **도형을 만들고 자르고 관계를 따지는 일은 `geometry`** 로 하세요.
+
+한 표로 줄이면 이렇습니다.
+
+| 하려는 일 | 쓸 것 |
+| --- | --- |
+| 한국 안에서 거리·넓이 | `ST_Transform(…, 5179)` — 함수를 다 쓸 수 있고 빠르다 |
+| 한국 밖 · 대륙 횡단 · 경도 180도 근처 | `::geography` — 유효 범위를 안 탄다 |
+| 면을 만들고 자르고 관계 따지기 | `geometry` — geography엔 그 함수가 없다 |
+| 가장 가까운 것 찾기 | `ORDER BY <->`로 인덱스를 태우고, 출력은 `ST_Distance` |
+
+오늘 잰 숫자를 한자리에 모으면 이렇고요.
+
+| | 평면 (`ST_Transform`) | 구 (`use_spheroid := false`) | 타원체 (`::geography` 기본) |
+| --- | --- | --- | --- |
+| 서울시청–강남역 | 8767.615 m | 8778.019 m | **8770.914 m** |
+| 타원체 대비 | −3.300 m | +7.105 m | — |
+| 종로구 면적 | 23,892,610 m² | 23,838,839 m² | **23,892,213 m²** |
+| 서울–두바이 | 8,523.5 km | — | **6,795.7 km** |
+
+오늘은 도형이 전부 멀쩡했습니다. `sgg` 251개도, 서울 OSM 면 283,616개도 `ST_IsValid`로 세어 보면 **망가진 게 0개**예요. 그래서 캐스팅하고 옮기고 재는 동안 도형 자체를 의심할 일이 없었죠.
+
+다음 편은 그 전제가 깨지는 자리입니다. **`ST_MakeValid`** — 실무에서 가장 자주 만나는 `geometry is not valid` 에러요. 점 네 개로 찍은 **나비넥타이 모양 사각형의 넓이를 물으면 `0`이 나옵니다.** 에러가 아니라 0이요. 자기 자신을 가로지른 두 삼각형이 서로를 지워버린 겁니다. `ST_IsValid`로 찾아내고 `ST_IsValidReason`으로 원인을 읽고 `ST_MakeValid`로 고치는 세 단계를 봅니다.
+
+<ReferenceList
+  references={[
+    'https://postgis.net/docs/manual-3.5/using_postgis_dbmanagement.html#PostGIS_Geography',
+    'https://postgis.net/docs/ST_Distance.html',
+    'https://postgis.net/docs/geometry_distance_knn.html',
+    'https://postgis.net/docs/ST_Area.html',
+    'https://postgis.net/docs/ST_Summary.html',
+    'https://postgis.net/docs/ST_Length.html',
+    'https://postgis.net/docs/manual-3.5/PostGIS_Special_Functions_Index.html',
+    'https://postgis.net/docs/ST_Distance_Spheroid.html',
+    'https://postgis.net/docs/ST_DistanceSphere.html',
+    'https://postgis.net/docs/ST_Buffer.html',
+    'https://postgis.net/docs/ST_Intersects.html',
+    'https://postgis.net/documentation/faq/geometry-or-geography/',
+    'https://epsg.io/5179',
+    'https://proj.org/en/stable/geodesic.html',
+    'https://geographiclib.sourceforge.io/geod.html',
+    'https://www.postgresql.org/docs/17/sql-createcast.html',
+  ]}
+/>
